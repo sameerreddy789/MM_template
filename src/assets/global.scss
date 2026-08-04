@@ -1,0 +1,47 @@
+@font-face {
+  font-family: "Japan Ramen";
+  src: url("/fonts/japanRamen.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Ibarra Real Nova SemiBold";
+  src: url("/fonts/IbarraRealNova-SemiBold.ttf");
+}
+@font-face {
+  font-family: "DM Serif Text";
+  src: url("/fonts/DMSerifText-Regular.ttf");
+}
+@font-face {
+  font-family: "Abhaya Libre Extrabold";
+  src: url("/fonts/AbhayaLibre-ExtraBold.ttf");
+}
+@font-face {
+  font-family: "Abhaya Libre";
+  src: url("/fonts/AbhayaLibre-Regular.ttf");
+}
+@font-face {
+  font-family: "Abhaya Libre Bold";
+  src: url("/fonts/AbhayaLibre-Bold.ttf");
+}
+@font-face {
+  font-family: "Shippori Mincho";
+  src: url("/fonts/ShipporiMincho-Regular.ttf");
+}
+@font-face {
+  font-family: "The Last Shuriken";
+  src: url("/fonts/TheLastShuriken.otf");
+}
+@font-face {
+  font-family: "NoyagiDemo";
+  src: url("/fonts/NoyagiDemo.ttf");
+}
+$primaryFont: "Japan Ramen", sans-serif;
+
+$gradient: linear-gradient(#ff6084 0%, #ff9c7b 100%);
+$regFont: "Abhaya Libre Extrabold", sans-serif;
+$abtFont: "Abhaya Libre Bold", sans-serif;
+$abtusHeadFont:"The Last Shuriken",sans-serif;
+$hamFooterFont: "NoyagiDemo", sans-serif;
+
+* {-webkit-tap-highlight-color:  transparent}

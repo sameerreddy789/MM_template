@@ -1,0 +1,140 @@
+@use "/src/assets/global.scss" as *;
+
+.instrback {
+  background: linear-gradient(
+    to bottom,
+    rgb(0, 0, 0) 12%,
+    rgb(120, 120, 120) 100%
+  );
+  height: 100svh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+
+  .backgroundImage {
+    position: absolute;
+    bottom: 0;
+    height: 75svh;
+    left: 7%;
+    transform: translateX(-50%);
+    pointer-events: none;
+    object-fit: cover;
+    object-position: 0 0.5vw;
+    z-index: 1;
+  }
+
+  .sun {
+    position: absolute;
+    bottom: 17vw;
+    left: -5%;
+    height: 20vw;
+    aspect-ratio: 1;
+    z-index: 0;
+    border-radius: 50%;
+    // box-shadow: 0px 0px 10px white;
+    // background-color: white;
+    display: inline-block;
+  }
+
+  .birds {
+    z-index: 2;
+    margin-top: 1.5vw;
+    width: 45vw;
+    background: center / contain no-repeat url("/svgs/registration/birds.svg");
+    background-blend-mode: overlay;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .bannerImage {
+      width: 70%;
+      object-fit: contain;
+    }
+  }
+  .backBtn {
+    outline: none;
+    border: none;
+    cursor: pointer;
+    z-index: 5;
+    position: absolute;
+    top: 2vw;
+    left: 2vw;
+    width: 4vw;
+    height: 4vw;
+    background: transparent;
+    &:focus {
+      outline: none;
+    }
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+  .inActive {
+    display: none;
+  }
+}
+
+@media (max-width: 1200px) and (max-aspect-ratio: 1.45) {
+  .instrback {
+    // height: 100svh;
+    overflow-y: hidden;
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.77);
+      z-index: 1;
+    }
+    .backgroundImage {
+      bottom: 0;
+      left: 0;
+      height: auto;
+      width: 100vw;
+      transform: translateX(0);
+      object-fit: contain;
+      object-position: 0 0;
+    }
+    .sun {
+      position: absolute;
+      bottom: 45vw;
+      left: 50%;
+      transform: translateX(-50%);
+      // transform: translateY(-25%);
+      height: 37vw;
+      z-index: 0;
+    }
+    .birds {
+      width: 85vw;
+    }
+    .backBtn {
+      width: 8vw;
+      height: 8vw;
+    }
+  }
+}
+@media (max-width: 1200px) and (max-aspect-ratio: 0.75) {
+  .instrback {
+    .birds {
+      width: 85vw;
+    }
+    .sun {
+      position: absolute;
+      bottom: 63vw;
+      height: 67vw;
+      filter: blur(1px);
+    }
+    .backBtn {
+      background: #070707;
+      width: 14vw;
+      height: 14vw;
+    }
+  }
+}
