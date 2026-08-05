@@ -13,14 +13,12 @@ const AboutText = ({ isMobile }: AboutTextProps) => (
       style={{ backgroundImage: isMobile ? "none" : `url("${aboutTextBG}")` }}
     >
       <p>
-        Oasis, the annual cultural extravaganza of Birla Institute of
-                Technology and Science, Pilani, has been a vibrant part of
-                India's cultural tapestry since 1971. Managed entirely by
-                students, it's a dazzling showcase of talent in Dance, Drama,
-                Literature, Comedy, Fashion, and Music. It's where dreams come
-                alive, laughter fills the air, and creativity knows no bounds.
-                Step into the world of Oasis, where youth's boundless potential
-                shines.
+        Mohana Mantra is the annual techno-cultural festival of Mohan Babu University
+                — a vibrant celebration of student creativity, talent, and diversity. From
+                music and dance to theatre and art, it brings performances, workshops,
+                masterclasses, and industry talks under one platform. More than a festival,
+                it's a tradition where students connect, collaborate, and create lasting
+                memories showing a true reflection of the university's culture and spirit.
       </p>
     </div>
     <div className={styles.abtus}>

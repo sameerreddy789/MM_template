@@ -51,9 +51,9 @@ const icons = [
 const videos = ["8PE1DLPFuiE", "Ogio7ZJSb9g", "5MtkggVC0w0", "krsrGOqnAN0"];
 const mainVideoMetadata = {
   id: "8PE1DLPFuiE",
-  title: "Official Theme Reveal | Oasis 2025 | Whispers of Edo",
+  title: "MohanaMantra 2K26 | MBU",
   description:
-    'It’s getting closer! Oasis, the cultural festival of BITS Pilani, returns this year with the theme "Whispers of Edo", setting the tone for four unforgettable days. From performances to pro-shows, competitions to experiences—this is where it all begins.',
+    "Mohana Mantra is an annual techno-cultural festival held at Mohan Babu University, celebrating the diversity and creativity of our student body with events showcasing music, dance, theatre, and more.",
   uploadDate: "2025-09-24T14:00:55+05:30",
 };
 const iconImages: HTMLImageElement[] = icons.map((src) => {
