@@ -65,7 +65,7 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
     
     useEffect(() => {
       axios
-        .get("https://bits-oasis.org/2025/main/registrations/get_college/")
+        .get("https://mohanamantra.com/2025/main/registrations/get_college/")
         .then((response) => {
           setCollegeOptions(
             response.data.data.map((college: { id: number; name: string }) => ({

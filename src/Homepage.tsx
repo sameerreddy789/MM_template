@@ -19,7 +19,7 @@ export default function Homepage({
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://www.bits-oasis.org/",
+        item: "https://www.mohanamantra.com/",
       },
     ],
   };
@@ -47,7 +47,7 @@ export default function Homepage({
           name="description"
           content="The official website of MohanaMantra 2K26 | MBU. A grand cultural festival celebrating art, music, and creativity."
         />
-        <link rel="canonical" href="https://www.bits-oasis.org/" />
+        <link rel="canonical" href="https://www.mohanamantra.com/" />
         {/* Open Graph */}
         <meta property="og:title" content="MohanaMantra 2K26 | MBU" />
         <meta
@@ -55,10 +55,10 @@ export default function Homepage({
           content="The official website of MohanaMantra 2K26 | MBU. A grand cultural festival celebrating art, music, and creativity."
         />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.bits-oasis.org/" />
+        <meta property="og:url" content="https://www.mohanamantra.com/" />
         <meta
           property="og:image"
-          content="https://www.bits-oasis.org/logo2.png"
+          content="https://www.mohanamantra.com/logo2.png"
         />
         <meta property="og:site_name" content="MohanaMantra 2K26 | MBU" />
         {/* Twitter Card */}
@@ -70,7 +70,7 @@ export default function Homepage({
         />
         <meta
           name="twitter:image"
-          content="https://www.bits-oasis.org/logo2.png"
+          content="https://www.mohanamantra.com/logo2.png"
         />
       </Helmet>
       <BreadCrumb data={breadcrumbJsonLd} />

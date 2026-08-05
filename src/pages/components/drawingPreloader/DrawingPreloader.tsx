@@ -34,8 +34,7 @@ const imagesToPreload = [
   "/svgs/landing/mobileBackground.svg",
   "/svgs/landing/mobileRegisterBtn.svg",
   "/svgs/landing/registerBtn.svg",
-  // "/images/landing/oasisLogo.png",
-  "/images/landing/logo_final.png",
+  "/images/logo.png",
   "/images/landing/mobileCloud.png",
   "/images/registration/reg-banner.png",
   "/svgs/registration/bg-extended.svg",
@@ -47,14 +46,14 @@ const imagesToPreload = [
   "/images/contact/contact-banner.png",
   // "/images/contact/Aryan.png",
   // "/images/contact/Ahan.png",
-  "/images/contact/Aditya.png",
-  "/images/contact/Arshita.png",
-  "/images/contact/Ayushmaan.png",
-  "/images/contact/Dhruv.png",
-  "/images/contact/Ishita.png",
-  "/images/contact/Pranav.png",
-  "/images/contact/Rahul.png",
-  "/images/contact/SajalY.png",
+  // "/images/contact/Aditya.png",
+  // "/images/contact/Arshita.png",
+  // "/images/contact/Ayushmaan.png",
+  // "/images/contact/Dhruv.png",
+  // "/images/contact/Ishita.png",
+  // "/images/contact/Pranav.png",
+  // "/images/contact/Rahul.png",
+  // "/images/contact/SajalY.png",
   "/images/contact/ContactCard1.png",
   "/images/contact/DoorsCombined.png",
   "/images/contact/DoorsMobile.png",
@@ -131,6 +130,11 @@ export default function DrawingPreloader({
         };
         img.onerror = (err) => {
           console.error("Image failed to load", err, img);
+          loadedAssets++;
+          setProgress(
+            (loadedAssets / (imagesToPreload.length + soundsToPreload.length)) *
+              99
+          );
           resolve(img);
         };
       });
@@ -147,7 +151,12 @@ export default function DrawingPreloader({
           resolve(audio);
         };
         audio.onerror = (err) => {
-          console.error("Image failed to load", err, audio);
+          console.error("Audio failed to load", err, audio);
+          loadedAssets++;
+          setProgress(
+            (loadedAssets / (imagesToPreload.length + soundsToPreload.length)) *
+              99
+          );
           resolve(audio);
         };
       });

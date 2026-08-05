@@ -1,175 +1,146 @@
 import styles from "./Sponsers.module.scss";
 import background from "/images/mediaPartners/bg1.jpg";
 import heading from "/svgs/sponsors/sponsorsHead.svg";
-// import dummy from "/images/logo.png";
+import dummy from "/images/logo.png";
 import Back from "/svgs/registration/back.svg";
 import { useContext } from "react";
 import { navContext } from "../../App";
-
-import abhibusLogo from "/images/sponsors/abhibus.png";
-import easeMyTripLogo from "/images/sponsors/EaseMyTrip.png";
-import nutribs from "/images/sponsors/Nutribs.png";
-import qoneqt from "/images/sponsors/Qoneqt.png";
-import suno from "/images/sponsors/Suno.png";
-import rtc from "/images/sponsors/rtc.jpg";
-import acer from "/images/sponsors/acer_logo.avif";
-import snapchat from "/images/sponsors/Snapchat.png";
-import zebronics from "/images/sponsors/Zebronics.avif";
-import maaKarni from "/images/sponsors/maa-karni.jpg";
-import plumGoodness from "/images/sponsors/plum-goodness.png";
-import posterwa from "/images/sponsors/posterwa.png";
-import travelzada from "/images/sponsors/travelzada.jpeg";
-import hdfcBank from "/images/sponsors/hdfc.png";
-import peeSafe from "/images/sponsors/pee-safe.png";
-import plumBodyLovin from "/images/sponsors/plum-body-lovin.png";
-import pepero from "/images/sponsors/pepero.jpeg";
-import jioSaavn from "/images/sponsors/jio-saavn.png";
-import cocaCola from "/images/sponsors/coke.png";
-import artisbaazi from "/images/sponsors/artisbaazi.png";
-import gustora from "/images/sponsors/gustora.webp";
-import netApp from "/images/sponsors/netApp.png";
 
 //nothing is changed
 
 const sponsors = {
   title: {
     head: "Official Title Sponsor",
-    img: netApp,
-    name: "NetApp",
-    link: "https://www.netapp.com/",
+    img: dummy,
+    name: "Sponsor Name",
+    link: "#",
   },
   otherSponsers: [
-    // {
-    //   head: "Powered-By",
-    //   img: dummy,
-    //   name: "NetApp",
-    //   link: "",
-    // },
     {
       head: "Associate Title Sponsor",
-      img: acer,
-      name: "Acer",
-      link: "https://www.acer.com",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "Diamond Sponsor",
-      img: suno,
-      name: "Suno AI",
-      link: "https://suno.com/",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "Co-Powered By",
-      img: snapchat,
-      name: "Snap Inc.",
-      link: "https://www.snap.com/",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "Official Skincare Partner",
-      img: nutribs,
-      name: "Nutribs",
-      link: "https://nutribs.com/",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "Official Community Partner",
-      img: qoneqt,
-      name: "Qoneqt",
-      link: "https://qoneqt.com/",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "Official Partner",
-      img: zebronics,
-      name: "Zebronics",
-      link: "https://zebronics.com/",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "Official Travel Partner",
-      img: easeMyTripLogo,
-      name: "EaseMyTrip",
-      link: "https://www.easemytrip.com/",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "Official Infrastructure Partner",
-      img: maaKarni,
-      name: "Maa Karni",
-      link: "",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "Official Beauty and Wellness Partner",
-      img: plumGoodness,
-      name: "Plum Goodness",
-      link: "https://plumgoodness.com/",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "Official Commute Partner",
-      img: abhibusLogo,
-      name: "Abhibus",
-      link: "https://www.abhibus.com/",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "",
-      img: posterwa,
-      name: "Posterwa",
-      link: "https://posterwa.com/",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "",
-      img: travelzada,
-      name: "Travelzada",
-      link: "",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "Official Banking Partner",
-      img: hdfcBank,
-      name: "HDFC Bank",
-      link: "https://www.hdfc.bank.in/",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "Pasta Partner",
-      img: gustora,
-      name: "Gustora",
-      link: "https://www.gustorafoods.com/",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "Official Music Streaming Partner",
-      img: jioSaavn,
-      name: "JioSaavn",
-      link: "https://www.jiosaavn.com/",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "Official Beverage Partner",
-      img: cocaCola,
-      name: "Coca-Cola",
-      link: "https://www.coca-colacompany.com/",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "Official Technology Partner",
-      img: rtc,
-      name: "Round The Technologies",
-      link: "https://rtctek.com/",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "Official Hygiene Partner",
-      img: peeSafe,
-      name: "Pee Safe",
-      link: "https://www.peesafe.com/",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "Bath and BodyCare Partner",
-      img: plumBodyLovin,
-      name: "Plum Body Lovin'",
-      link: "",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "Official Snack Partner",
-      img: pepero,
-      name: "Pepero",
-      link: "",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
     {
       head: "",
-      img: artisbaazi,
-      name: "Artisbaazi",
-      link: "",
+      img: dummy,
+      name: "Sponsor Name",
+      link: "#",
     },
   ],
 };

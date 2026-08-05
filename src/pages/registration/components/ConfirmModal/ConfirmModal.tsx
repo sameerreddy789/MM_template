@@ -62,7 +62,7 @@ const Confirmation = (props: PropsType) => {
       access_token: cookies["Access_token"],
     };
     axios
-      .post("https://bits-oasis.org/2025/main/registrations/register/", reqData)
+      .post("https://mohanamantra.com/2025/main/registrations/register/", reqData)
       .then((response) => {
         setIsSubmitting(false);
         if (response.data.message === "User has been registered") {
@@ -234,9 +234,9 @@ const Confirmation = (props: PropsType) => {
                 if (notification.isError) {
                   onCancel();
                 } else {
-                  // window.location.href = `https://bits-oasis.org/2025/main/registrations?token=${access_token}`;
+                  // window.location.href = `https://mohanamantra.com/2025/main/registrations?token=${access_token}`;
                   redirectWithPost(
-                    "https://bits-oasis.org/2025/main/registrations/",
+                    "https://mohanamantra.com/2025/main/registrations/",
                     {
                       token: access_token,
                     }

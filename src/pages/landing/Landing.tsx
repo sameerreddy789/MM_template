@@ -19,7 +19,7 @@ import mobileBackground from "/svgs/landing/mobileBackground.svg";
 import mobileRegisterBtn from "/svgs/landing/mobileRegisterBtn.svg";
 import registerBtn from "/svgs/landing/registerBtn.svg";
 import wire from "/svgs/landing/wire.svg";
-import logo from "/images/landing/oasisLogo.png";
+import logo from "/images/logo.png";
 import mobileCloud from "/images/landing/mobileCloud.png";
 import Ham from "../components/ham/ham";
 // import AboutUs from "../aboutus/AboutUs";

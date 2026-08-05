@@ -47,7 +47,7 @@ export default function mainHam({
       classNameDiv: styles.devDiv,
       classNameText: styles.devText,
       classNameCloud: styles.devCloud,
-      url: "https://rocktaves.bits-oasis.org/",
+      url: "https://rocktaves.mohanamantra.com/",
     },
     {
       title: "GALLERY",

@@ -4,7 +4,7 @@ import phone from "/svgs/landing/phone.svg";
 import homeIcon from "/svgs/landing/homeIcon.svg";
 import aboutusIcon from "/svgs/landing/aboutusIcon.svg";
 import eventIcon from "/svgs/landing/eventsIcon.svg";
-import oasisLogo from "/images/landing/oasisLogo.png";
+import mmLogo from "/images/logo.png";
 import { useHamStore } from "../../../utils/store";
 
 const navItems = [
@@ -30,7 +30,7 @@ export default function Ham({
         <img src={hamX} alt="Close" className={styles.closeIcon} />
       </div>
       <div className={styles.logoContainer}>
-        <img src={oasisLogo} alt="Oasis Logo" className={styles.logo} />
+        <img src={mmLogo} alt="MohanaMantra Logo" className={styles.logo} />
       </div>
       <div className={styles.linkContainer}>
         {navItems.map((item, index) => (
@@ -51,9 +51,7 @@ export default function Ham({
         ))}
       </div>
       <div className={styles.mwd}>
-        {/* <img src={mwd} alt="Made with DVM" />
-         */}
-        Made with ❤️ by DVM
+        Made with ❤️
       </div>
     </div>
   );

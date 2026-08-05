@@ -31,13 +31,13 @@ const Registration = ({ goToPage }: RegistrationProps) => {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://www.bits-oasis.org/",
+        item: "https://www.mohanamantra.com/",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Registration",
-        item: "https://www.bits-oasis.org/register",
+        item: "https://www.mohanamantra.com/register",
       },
     ],
   };
@@ -318,7 +318,7 @@ const Registration = ({ goToPage }: RegistrationProps) => {
     onSuccess: (response) => {
       // console.log(response.access_token);
       axios
-        .post("https://bits-oasis.org/2025/main/registrations/google-reg/", {
+        .post("https://mohanamantra.com/2025/main/registrations/google-reg/", {
           access_token: response.access_token,
         })
         .then((res) => {
@@ -326,9 +326,9 @@ const Registration = ({ goToPage }: RegistrationProps) => {
           if (res.data.exists) {
             setCookies("user-auth", res.data);
             setCookies("Authorization", res.data.tokens.access);
-            // window.location.href = `https://bits-oasis.org/2025/main/registrations?token=${res.data.tokens.access}`;
+            // window.location.href = `https://mohanamantra.com/2025/main/registrations?token=${res.data.tokens.access}`;
             redirectWithPost(
-              "https://bits-oasis.org/2025/main/registrations/",
+              "https://mohanamantra.com/2025/main/registrations/",
               {
                 token: res.data.tokens.access,
               }
@@ -363,7 +363,7 @@ const Registration = ({ goToPage }: RegistrationProps) => {
           name="description"
           content="Register for MohanaMantra 2K26, the annual cultural festival of MBU. Follow our simple instructions to sign up and start participating in events."
         />
-        <link rel="canonical" href="https://www.bits-oasis.org/register" />
+        <link rel="canonical" href="https://www.mohanamantra.com/register" />
         {/* Open Graph */}
         <meta
           property="og:title"
@@ -374,10 +374,10 @@ const Registration = ({ goToPage }: RegistrationProps) => {
           content="Register for MohanaMantra 2K26, the annual cultural festival of MBU."
         />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.bits-oasis.org/register" />
+        <meta property="og:url" content="https://www.mohanamantra.com/register" />
         <meta
           property="og:image"
-          content="https://www.bits-oasis.org/logo2.png"
+          content="https://www.mohanamantra.com/logo2.png"
         />
         <meta property="og:site_name" content="MohanaMantra 2K26 | MBU" />
         {/* Twitter Card */}
@@ -392,7 +392,7 @@ const Registration = ({ goToPage }: RegistrationProps) => {
         />
         <meta
           name="twitter:image"
-          content="https://www.bits-oasis.org/logo2.png"
+          content="https://www.mohanamantra.com/logo2.png"
         />
       </Helmet>
       <BreadCrumb data={breadcrumbJsonLd} />

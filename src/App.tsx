@@ -25,13 +25,13 @@ import MediaPatners from "./pages/mediaPartners/MediaPartners";
 import Gallery from "./pages/gallery/Gallery";
 
 const TRACKING_ID = "G-57YBBH7RXW";
-if (window.location.hostname.search("bits-oasis.org") !== -1) {
+if (window.location.hostname.search("mohanamantra.com") !== -1) {
   ReactGA.initialize(TRACKING_ID);
   console.log("Hey :)");
 }
 
 export default function App() {
-  useCanonicalUrl("https://www.bits-oasis.org");
+  useCanonicalUrl("https://www.mohanamantra.com");
   const navigate = useNavigate();
   const location = useLocation();
 

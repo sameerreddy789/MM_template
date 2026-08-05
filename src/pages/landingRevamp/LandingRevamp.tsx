@@ -20,7 +20,7 @@ import mobileRegisterBtn from "/svgs/landing/mobileRegisterBtn.svg";
 import registerBtn from "/svgs/landing/registerBtn.svg";
 import eventsBtn from "/svgs/landing/mobileEventsBtn.svg";
 import wire from "/svgs/landing/wire.svg";
-import logo from "/images/landing/logo_final.png";
+import logo from "/images/logo.png";
 import mobileCloud from "/images/landing/mobileCloud.png";
 import AboutUs from "../aboutus/AboutUs";
 // import ContactDoors from "../contact/ContactDoors";

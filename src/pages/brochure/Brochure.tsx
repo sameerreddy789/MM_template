@@ -1,7 +1,8 @@
 import BackButton from '../components/backButton/BackButton';
 import styles from './Brochure.module.scss';
-import pdfFile from '../../assets/Oasis_25_Brochure.pdf';
 import { FaDownload } from 'react-icons/fa6';
+
+const pdfFile = "/Brochure.pdf";
 
 export default function Brochure() {
 
@@ -15,7 +16,7 @@ export default function Brochure() {
                         <iframe 
                             src={`${pdfFile}#toolbar=0&scrollbar=0`}
                             className={styles.brochureIframe}
-                            title="Oasis 2025 Brochure"
+                            title="MohanaMantra 2026 Brochure"
                             typeof='application/pdf'
                         />
                         <a href={pdfFile} download>

@@ -5,29 +5,24 @@ import dummy from "/images/logo.png";
 import Back from "/svgs/registration/back.svg";
 import { useContext } from "react";
 import { navContext } from "../../App";
-import bronx from "/images/mediaPartners/Bronx.png";
-import zack from "/images/mediaPartners/Zack.jpeg";
-import kanika from "/images/mediaPartners/Kanika.png";
-import jhoom from "/images/mediaPartners/Jhoom.jpg";
 import captures from "/images/mediaPartners/Captures.png";
-import sarcaster from "/images/mediaPartners/Sarcaaster.png";
 
 let mediaPatners = [
   {
     head: "Official Vlogging Partner",
-    img: jhoom,
+    img: dummy,
     name: "Jhoom Baba",
     link: "https://www.instagram.com/jhoombaba22?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
   },
   {
     head: "Official Vlogging Partner",
-    img: kanika,
+    img: dummy,
     name: "Kanika Devrani",
     link: "https://www.instagram.com/kanika_devrani?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
   },
   {
     head: "Official Vlogging Partner",
-    img: zack,
+    img: dummy,
     name: "Zack Vlogs",
     link: "https://www.instagram.com/zack_vlogs/",
   },
@@ -45,13 +40,13 @@ let mediaPatners = [
   },
   {
     head: "BITS GOT LATENT PANEL",
-    img: sarcaster,
+    img: dummy,
     name: "Sarcaaster",
     link: "https://www.instagram.com/sarcaaster_/",
   },
   {
     head: "Official Media Partners",
-    img: bronx,
+    img: dummy,
     name: "Bronx",
     link: "https://www.instagram.com/rap.bronx?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
   },

@@ -71,13 +71,13 @@ const Events: React.FC = () => {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://www.bits-oasis.org/",
+        item: "https://www.mohanamantra.com/",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Events",
-        item: "https://www.bits-oasis.org/events",
+        item: "https://www.mohanamantra.com/events",
       },
     ],
   };
@@ -280,7 +280,7 @@ const Events: React.FC = () => {
           name="description"
           content="Explore the diverse events at MohanaMantra 2K26 including Drama, Music, Dance, Photography, and more!"
         />
-        <link rel="canonical" href="https://www.bits-oasis.org/events" />
+        <link rel="canonical" href="https://www.mohanamantra.com/events" />
       </Helmet>
       <BreadCrumb data={breadcrumbJsonLd} />
       <div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Logo from "/svgs/events/oasis_logo.svg";
+import Logo from "/images/logo.png";
 interface EventImageProps {
   imageUrl?: string;
   alt?: string;

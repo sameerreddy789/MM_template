@@ -8,60 +8,60 @@ interface Contact {
 
 const contacts: Contact[] = [
     {
-        name: "Ishita Agrawal",
+        name: "Contact 1",
         role: "Registrations and Correspondence",
-        phone: "+91 78040 51996",
-        email: "pcr@bits-oasis.org",
-        imageURL: "/images/contact/Ishita.png"
+        phone: "+91 00000 00000",
+        email: "pcr@mohanamantra.com",
+        imageURL: "/images/logo.png"
     },
     {
-        name: "Rahul Gupta",
+        name: "Contact 2",
         role: "Website, App and Payments",
-        phone: "+91 93510 13052",
-        email: "webmaster@bits-oasis.org",
-        imageURL: "/images/contact/Rahul.png"
+        phone: "+91 00000 00000",
+        email: "webmaster@mohanamantra.com",
+        imageURL: "/images/logo.png"
     },
     {
-        name: "Dhruv Maniar",
+        name: "Contact 3",
         role: "Sponsorships and Company Collaborations",
-        phone: "+91 91675 32053",
-        email: "dhruv@bits-oasis.org",
-        imageURL: "/images/contact/Dhruv.png"
+        phone: "+91 00000 00000",
+        email: "sponsorships@mohanamantra.com",
+        imageURL: "/images/logo.png"
     },
     {
-        name: "Ayushmaan Kumar",
+        name: "Contact 4",
         role: "Logistics and Operations",
-        phone: "+91 91675 32053",
-        email: "controls@bits-oasis.org",
-        imageURL: "/images/contact/Ayushmaan.png"
+        phone: "+91 00000 00000",
+        email: "controls@mohanamantra.com",
+        imageURL: "/images/logo.png"
     },
     {
-        name: "Arshita Mittal",
+        name: "Contact 5",
         role: "Reception and Accommodation",
-        phone: "+91 98777 07867",
-        email: "recnacc@bits-oasis.org",
-        imageURL: "/images/contact/Arshita.png"
+        phone: "+91 00000 00000",
+        email: "recnacc@mohanamantra.com",
+        imageURL: "/images/logo.png"
     },
     {
-        name: "Pranav Deshpande",
+        name: "Contact 6",
         role: "Online Collaborations and Publicity",
-        phone: "+91 86575 33580",
-        email: "adp@bits-oasis.org",
-        imageURL: "/images/contact/Pranav.png"
+        phone: "+91 00000 00000",
+        email: "adp@mohanamantra.com",
+        imageURL: "/images/logo.png"
     },
     {
-        name: "Sajal Yadav",
+        name: "Contact 7",
         role: "President, Students' Union",
-        phone: "+91 99900 67040", //! Phone is of Ahan Bansal
-        email: "president@pilani.bits-pilani.ac.in",
-        imageURL: "/images/contact/SajalY.png"
+        phone: "+91 00000 00000",
+        email: "president@mohanamantra.com",
+        imageURL: "/images/logo.png"
     },
     {
-        name: "Aditya Khandelwal",
+        name: "Contact 8",
         role: "General Secretary Elect, Students' Union",
-        phone: "+91 89556 65800",
-        email: "gensec@pilani.bits-pilani.ac.in",
-        imageURL: "/images/contact/Aditya.png"
+        phone: "+91 00000 00000",
+        email: "gensec@mohanamantra.com",
+        imageURL: "/images/logo.png"
     }
 ]
 

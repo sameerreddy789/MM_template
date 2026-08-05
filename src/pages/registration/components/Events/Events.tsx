@@ -111,7 +111,7 @@ const Events = forwardRef<
   useEffect(() => {
     sessionStorage.removeItem("selectedEvents");
     axios
-      .get("https://bits-oasis.org/2025/main/registrations/events_details/")
+      .get("https://mohanamantra.com/2025/main/registrations/events_details/")
       .then((response) => {
         setEventsOptions(response.data);
       })
