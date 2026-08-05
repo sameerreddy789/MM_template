@@ -208,6 +208,7 @@
         width: 4rem;
         background-size: contain;
         filter: drop-shadow(1px 0px 5px rgb(49, 49, 49));
+        transition: filter 0.3s;
 
         @media (max-width: 786px) {
             height: 3rem;
@@ -216,14 +217,12 @@
             right: 1rem;
         }
 
-        transition: filter 0.3s;
         &:hover {filter: drop-shadow(1px 0px 9px #ff82845e)}
     }
 
     .imageCycleContainer {
         $paddingTop: 6rem;
         $paddingH: 3rem;
-        @media (max-width: 768px) {$paddingH: 1.5rem;}
         position: relative;
         padding: $paddingTop $paddingH 2rem $paddingH;
         height: 100%;
@@ -231,6 +230,10 @@
         display: flex;
         justify-content: space-between;
         gap: 1rem;
+
+        @media (max-width: 768px) {
+            padding: $paddingTop 1.5rem 2rem 1.5rem;
+        }
         .cycleButtonContainer {
             display: flex;
             align-items: center;
