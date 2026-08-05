@@ -48,9 +48,9 @@ const icons = [
   letter8,
 ];
 
-const videos = ["V9LHjddKR_M", "Ogio7ZJSb9g", "5MtkggVC0w0", "krsrGOqnAN0"];
+const videos = ["8PE1DLPFuiE", "Ogio7ZJSb9g", "5MtkggVC0w0", "krsrGOqnAN0"];
 const mainVideoMetadata = {
-  id: "V9LHjddKR_M",
+  id: "8PE1DLPFuiE",
   title: "Official Theme Reveal | Oasis 2025 | Whispers of Edo",
   description:
     'It’s getting closer! Oasis, the cultural festival of BITS Pilani, returns this year with the theme "Whispers of Edo", setting the tone for four unforgettable days. From performances to pro-shows, competitions to experiences—this is where it all begins.',
