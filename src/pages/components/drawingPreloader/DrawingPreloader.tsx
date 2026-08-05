@@ -628,8 +628,8 @@ export default function DrawingPreloader({
             </button>
           </div>
           <div className={styles.infoText}>
-            A new era of tech and culture awaits. Enter the unforgettable
-            world of Mohanamantra 2K26
+            United By Art. Inspired by Culture. Enter the world of Mohanamantra
+            2K26
           </div>
         </div>
       )}

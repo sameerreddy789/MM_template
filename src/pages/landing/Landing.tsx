@@ -19,8 +19,6 @@ import mobileBackground from "/svgs/landing/mobileBackground.svg";
 import mobileRegisterBtn from "/svgs/landing/mobileRegisterBtn.svg";
 import registerBtn from "/svgs/landing/registerBtn.svg";
 import wire from "/svgs/landing/wire.svg";
-import x from "/svgs/landing/x.svg";
-import xLamp from "/svgs/landing/xLamp.svg";
 import logo from "/images/landing/oasisLogo.png";
 import mobileCloud from "/images/landing/mobileCloud.png";
 import Ham from "../components/ham/ham";
@@ -35,14 +33,6 @@ gsap.registerPlugin(ScrollTrigger);
 const TARGET_DATE = new Date("2026-10-30T00:00:00Z");
 
 const socialLinks = [
-  {
-    icon: x,
-    lamp: xLamp,
-    classNameDiv: styles.xDiv,
-    classNameLamp: styles.xLamp,
-    classNameIcon: styles.xIcon,
-    url: "https://x.com/Mohana_Mantra",
-  },
   {
     icon: youtube,
     lamp: youtubeLamp,
