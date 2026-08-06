@@ -167,13 +167,13 @@ body {
 
     li {
       font-family: $primaryFont;
-      font-size: 1.25rem;
+      font-size: 1.65rem;
       color: var(--navlink-color); //#ffdfd0;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 150px;
+      width: 170px;
       height: 40px;
       .navLink {
         color: inherit;

@@ -48,7 +48,7 @@ const icons = [
   letter8,
 ];
 
-const videos = ["8PE1DLPFuiE", "Ogio7ZJSb9g", "5MtkggVC0w0", "krsrGOqnAN0"];
+const videos = ["8PE1DLPFuiE"];
 const mainVideoMetadata = {
   id: "8PE1DLPFuiE",
   title: "MohanaMantra 2K26 | MBU",
