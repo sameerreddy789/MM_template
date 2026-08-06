@@ -7,8 +7,6 @@ $numberOfArrows: 4;
 }
 
 .scrollLabel {
-    @media (max-width: 768px) {$numberOfArrows: 2;}
-
     position: fixed;
     bottom: 0.3rem;
     width: 100%;

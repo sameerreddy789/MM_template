@@ -3,7 +3,7 @@ import background from "/images/mediaPartners/bg1.jpg";
 import heading from "/svgs/sponsors/sponsorsHead.svg";
 import dummy from "/images/logo.png";
 import Back from "/svgs/registration/back.svg";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { navContext } from "../../App";
 
 //nothing is changed
@@ -148,6 +148,14 @@ const sponsors = {
 const Sponsors = () => {
   const { goToPage } = useContext(navContext);
 
+  useEffect(() => {
+    document.body.classList.remove("scroll-locked");
+    document.body.style.position = "";
+    document.body.style.overflow = "";
+    document.body.style.height = "";
+    document.documentElement.style.overflow = "";
+  }, []);
+
   const backButtonHandler = () => {
     goToPage?.("/");
   };
@@ -159,6 +167,15 @@ const Sponsors = () => {
         style={{
           opacity: 1,
           transition: "opacity 0.8s ease-in-out",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          minHeight: "100vh",
+          overflowY: "auto",
+          overflowX: "hidden",
+          WebkitOverflowScrolling: "touch",
+          zIndex: 1,
         }}
       >
         <button onClick={backButtonHandler} className={styles.backBtn}>

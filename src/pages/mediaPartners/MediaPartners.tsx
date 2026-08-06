@@ -3,57 +3,58 @@ import background from "/images/mediaPartners/bg1.jpg";
 import heading from "/svgs/mediaPartners/mediaHead.svg";
 import dummy from "/images/logo.png";
 import Back from "/svgs/registration/back.svg";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { navContext } from "../../App";
-import captures from "/images/mediaPartners/Captures.png";
 
 let mediaPatners = [
   {
     head: "Official Vlogging Partner",
     img: dummy,
-    name: "Jhoom Baba",
-    link: "https://www.instagram.com/jhoombaba22?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
+    name: "",
+    link: "#",
   },
   {
     head: "Official Vlogging Partner",
     img: dummy,
-    name: "Kanika Devrani",
-    link: "https://www.instagram.com/kanika_devrani?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
+    name: "",
+    link: "#",
   },
   {
     head: "Official Vlogging Partner",
     img: dummy,
-    name: "Zack Vlogs",
-    link: "https://www.instagram.com/zack_vlogs/",
+    name: "",
+    link: "#",
   },
   {
     head: "Official Coverage Partner",
-    img: captures,
-    name: "Captures",
-    link: "https://www.instagram.com/captures.inc?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
+    img: dummy,
+    name: "",
+    link: "#",
   },
   {
     head: "Official Outreach Partners",
     img: dummy,
-    name: "Inglu",
-    link: "https://www.instagram.com/inglu_events/",
-  },
-  {
-    head: "BITS GOT LATENT PANEL",
-    img: dummy,
-    name: "Sarcaaster",
-    link: "https://www.instagram.com/sarcaaster_/",
+    name: "",
+    link: "#",
   },
   {
     head: "Official Media Partners",
     img: dummy,
-    name: "Bronx",
-    link: "https://www.instagram.com/rap.bronx?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
+    name: "",
+    link: "#",
   },
 ];
 
 const MediaPatners = () => {
   const { goToPage } = useContext(navContext);
+
+  useEffect(() => {
+    document.body.classList.remove("scroll-locked");
+    document.body.style.position = "";
+    document.body.style.overflow = "";
+    document.body.style.height = "";
+    document.documentElement.style.overflow = "";
+  }, []);
 
   const backButtonHandler = () => {
     goToPage?.("/");
@@ -66,6 +67,15 @@ const MediaPatners = () => {
         style={{
           opacity: 1,
           transition: "opacity 0.8s ease-in-out",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          minHeight: "100vh",
+          overflowY: "auto",
+          overflowX: "hidden",
+          WebkitOverflowScrolling: "touch",
+          zIndex: 1,
         }}
       >
         <button onClick={backButtonHandler} className={styles.backBtn}>
@@ -94,11 +104,13 @@ const MediaPatners = () => {
                   <div className={styles.patnersImage}>
                     <img
                       src={mediaPatner.img}
-                      alt={mediaPatner.name}
+                      alt={mediaPatner.head}
                       draggable={false}
                     />
                   </div>
-                  <div className={styles.patnersName}>{mediaPatner.name}</div>
+                  {mediaPatner.name != "" && (
+                    <div className={styles.patnersName}>{mediaPatner.name}</div>
+                  )}
                 </div>
               </a>
             ))}

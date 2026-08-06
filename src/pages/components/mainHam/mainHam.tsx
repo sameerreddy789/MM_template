@@ -19,23 +19,9 @@ export default function mainHam({
   useEffect(() => {
     if (dragonRef.current) {
       if (isMainHamOpen) {
-        const timestamp = new Date().getTime();
-        const element = dragonRef.current;
-
-        element.classList.add(styles.hamOpen);
-
-        element.style.setProperty(
-          "mask-image",
-          `url("/videos/dragon-reveal.gif?${timestamp}")`
-        );
-        element.style.setProperty(
-          "-webkit-mask-image",
-          `url("/videos/dragon-reveal.gif?${timestamp}")`
-        );
+        dragonRef.current.classList.add(styles.hamOpen);
       } else {
         dragonRef.current.classList.remove(styles.hamOpen);
-        dragonRef.current.style.removeProperty("mask-image");
-        dragonRef.current.style.removeProperty("-webkit-mask-image");
       }
     }
   }, [isMainHamOpen]);
@@ -267,7 +253,7 @@ export default function mainHam({
                 window.open(item.url, "_blank");
               } else {
                 goToPage(item.url);
-                // setMainHamOpen(false);
+                setMainHamOpen(false);
               }
             }}
           >
@@ -282,18 +268,6 @@ export default function mainHam({
         alt="Dragon"
         className={styles.bottomLeftDragon}
       />
-
-      <div className={styles.mwd}>
-        Made with{" "}
-        <span>
-          <img
-            style={{ width: "1em", height: "0.8em" }}
-            src={heartIcon}
-            alt="Heart Icon"
-          />
-        </span>{" "}
-        by DVM
-      </div>
     </div>
   );
 }

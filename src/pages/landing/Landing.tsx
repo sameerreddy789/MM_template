@@ -249,6 +249,14 @@ export default function Landing({
     }
   }, [removeGif]);
 
+  // Cleanup: always reset body when this component unmounts
+  useEffect(() => {
+    return () => {
+      document.body.style.position = "";
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,

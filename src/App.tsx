@@ -131,11 +131,9 @@ export default function App() {
   const handlePreloaderEnter = () => {
     setIsPreloading(false);
 
-    if (location.pathname === "/register") {
-      setTimeout(() => {
-        setDoorPhase("opening");
-      }, 300);
-    }
+    setTimeout(() => {
+      setDoorPhase("opening");
+    }, 300);
   };
 
   const loadAssets = async (page: keyof typeof assetList) => {

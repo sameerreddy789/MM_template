@@ -147,6 +147,16 @@ export default function LandingRevamp({
     }
   }, [removeGif]);
 
+  // Cleanup: always unlock scroll when this component unmounts (user navigates away)
+  useEffect(() => {
+    return () => {
+      document.body.classList.remove("scroll-locked");
+      document.body.style.position = "";
+      document.body.style.overflow = "";
+      document.body.style.height = "";
+    };
+  }, []);
+
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -194,23 +204,14 @@ export default function LandingRevamp({
     lenis.on("scroll", ScrollTrigger.update);
 
     // Use GSAP ticker for better sync with ScrollTrigger
-    gsap.ticker.add((time) => {
+    const raf = (time: number) => {
       lenis.raf(time * 1000);
-    });
+    };
 
-    // const breakPointDetector = gsap.to("#aboutUsBottom", {
-    //   scrollTrigger: {
-    //     trigger: "#aboutUsBottom",
-    //     start: "top bottom",
-    //     // onEnter: () => {lenis.stop(), console.log("Here")},
-    //   }
-    // })
+    gsap.ticker.add(raf);
 
     return () => {
-      // breakPointDetector.kill()
-      gsap.ticker.remove((time) => {
-        lenis.raf(time);
-      });
+      gsap.ticker.remove(raf);
       lenis.destroy();
     };
   }, []);

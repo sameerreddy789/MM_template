@@ -54,6 +54,14 @@ export default function DoorTransition({
     openSoundRef.current = openAudio;
   }, []);
 
+  const onClosedRef = useRef(onClosed);
+  const onOpenedRef = useRef(onOpened);
+
+  useEffect(() => {
+    onClosedRef.current = onClosed;
+    onOpenedRef.current = onOpened;
+  }, [onClosed, onOpened]);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -86,20 +94,13 @@ export default function DoorTransition({
           transition: { duration: 0.9, ease: "easeInOut" },
         }),
       ]);
-      // if (page ==="/register")
-      // {
-      //   const run = async () => {
-      //  await Promise.all([<Preloader onEnter={()=>console.log("Hii")}/>])
-      // }}
-      if (cancelled) return;
 
-      if (!cancelled) onClosed?.();
+      if (!cancelled) onClosedRef.current?.();
     };
 
     const runOpening = async () => {
       setTimeout(async () => {
         openSoundRef.current?.play();
-        // await Promise.all([ setTimeout(()=>{     console.log("Hi")},10000) ])
         await Promise.all([
           c2.start({
             "--dx": START.innerLeft,
@@ -120,7 +121,7 @@ export default function DoorTransition({
           }),
         ]);
 
-        if (!cancelled) onOpened?.();
+        if (!cancelled) onOpenedRef.current?.();
       }, 500);
     };
 
@@ -130,7 +131,7 @@ export default function DoorTransition({
     return () => {
       cancelled = true;
     };
-  }, [phase, c1, c2, c3, c4, onClosed, onOpened]);
+  }, [phase, c1, c2, c3, c4]);
 
   if (phase === "idle") return null;
 
