@@ -36,6 +36,7 @@ import ScrollLabel from "./components/ScrollLabel";
 gsap.registerPlugin(ScrollTrigger);
 
 const TARGET_DATE = new Date("2026-10-30T00:00:00+05:30");
+const DESKTOP_SCROLLER_SHIFT = 0.2;
 
 const socialLinks = [
   {
@@ -93,32 +94,40 @@ export default function LandingRevamp({
   const [scrollHeight, setScrollHeight] = useState(
     (scrollerRef.current?.scrollHeight ?? 0) - window.innerHeight * 1.4
   );
+  const [heroOverlap, setHeroOverlap] = useState(0);
+
   useEffect(() => {
-    if (removeGif) {
-      setScrollHeight(
-        (scrollerRef.current?.scrollHeight ?? 0) - window.innerHeight * 1.4
+    const updateScrollerMetrics = () => {
+      const scrollerHeight = scrollerRef.current?.scrollHeight ?? 0;
+      const isDesktop = window.matchMedia(
+        "(min-width: 730px) and (aspect-ratio > 8/12)"
+      ).matches;
+
+      setScrollHeight(Math.max(0, scrollerHeight - window.innerHeight * 1.4));
+      setHeroOverlap(
+        isDesktop ? scrollerHeight * DESKTOP_SCROLLER_SHIFT : 0
       );
-    }
-    const handleResize = () => {
-      if (scrollerRef.current) {
-        setScrollHeight(
-          (scrollerRef.current.scrollHeight ?? 0) - window.innerHeight * 1.4
-        );
-      }
-      // if (window.innerWidth <= 730) {
-      //   document.scrollingElement?.scrollTo({ top: 0, behavior: "instant" });
-      //   document.body.style.position = "fixed";
-      // } else {
-      //   document.body.style.position = "static";
-      // }
     };
 
-    handleResize();
-    window.addEventListener("resize", handleResize);
+    updateScrollerMetrics();
+
+    const resizeObserver = new ResizeObserver(updateScrollerMetrics);
+    if (scrollerRef.current) resizeObserver.observe(scrollerRef.current);
+    window.addEventListener("resize", updateScrollerMetrics);
+
     return () => {
-      window.removeEventListener("resize", handleResize);
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateScrollerMetrics);
     };
   }, [removeGif]);
+
+  useEffect(() => {
+    const refreshFrame = window.requestAnimationFrame(() => {
+      ScrollTrigger.refresh();
+    });
+
+    return () => window.cancelAnimationFrame(refreshFrame);
+  }, [heroOverlap]);
 
   useEffect(() => {
     setstyleTag([
@@ -380,7 +389,7 @@ export default function LandingRevamp({
         .to(
           scrollerRef.current,
           {
-            y: "-20%",
+            yPercent: -DESKTOP_SCROLLER_SHIFT * 100,
             duration: 16,
             // ease: "sine.in",
           },
@@ -717,7 +726,10 @@ export default function LandingRevamp({
             </div>
           </div>
         </div>
-        <div className={styles.bottomContainer}>
+        <div
+          className={styles.bottomContainer}
+          style={{ marginTop: -heroOverlap }}
+        >
           <div className={styles.bottomOverlay} />
           <div className={styles.aboutUsContainer} ref={aboutUsContRef}>
             <div className={styles.aboutUsWrapper} ref={aboutUsWrapperRef}>
