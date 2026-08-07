@@ -32,11 +32,9 @@ import { useMainHamStore } from "../../utils/store";
 import ContactDoors from "../contact/ContactDoors";
 import { Helmet } from "react-helmet";
 import ScrollLabel from "./components/ScrollLabel";
-
 gsap.registerPlugin(ScrollTrigger);
 
 const TARGET_DATE = new Date("2026-10-30T00:00:00+05:30");
-const DESKTOP_SCROLLER_SHIFT = 0.2;
 
 const socialLinks = [
   {
@@ -99,9 +97,6 @@ export default function LandingRevamp({
   useEffect(() => {
     const updateScrollerMetrics = () => {
       const scrollerHeight = scrollerRef.current?.scrollHeight ?? 0;
-      const isDesktop = window.matchMedia(
-        "(min-width: 730px) and (aspect-ratio > 8/12)"
-      ).matches;
 
       setScrollHeight(Math.max(0, scrollerHeight - window.innerHeight * 1.4));
       setHeroOverlap(0);
