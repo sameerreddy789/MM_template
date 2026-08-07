@@ -4,8 +4,13 @@ import useOverlayStore from "./utils/store";
 import LandingRevamp from "./pages/landingRevamp/LandingRevamp";
 import { Helmet } from "react-helmet";
 import BreadCrumb from "./pages/components/breadCrumb/BreadCrumb";
-import bgMusic from "/sounds/FUNK DESTRAVADO slowed.mp3";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+const PLAYLIST = [
+  "/sounds/Shape of U x Carnatic.mp3",
+  "/sounds/FUNK DESTRAVADO slowed.mp3",
+  "/sounds/bg-music.mp3",
+  "/sounds/bg-music2.mp3"
+];
 export default function Homepage({
   goToPage,
 }: {
@@ -25,6 +30,8 @@ export default function Homepage({
   };
   const removeGif = useOverlayStore((state) => state.removeGif);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+
   const toggleMusic = () => {
     if (!audioRef.current) return;
 
@@ -34,11 +41,29 @@ export default function Homepage({
       audioRef.current.pause();
     }
   };
+
   const playMusic = () => {
     if (audioRef.current) {
       audioRef.current.play();
     }
   };
+
+  const nextMusic = () => {
+    const wasPlaying = audioRef.current && !audioRef.current.paused;
+    setCurrentTrackIndex((prev) => (prev + 1) % PLAYLIST.length);
+    if (wasPlaying) {
+      setTimeout(() => audioRef.current?.play(), 50);
+    }
+  };
+
+  const prevMusic = () => {
+    const wasPlaying = audioRef.current && !audioRef.current.paused;
+    setCurrentTrackIndex((prev) => (prev - 1 + PLAYLIST.length) % PLAYLIST.length);
+    if (wasPlaying) {
+      setTimeout(() => audioRef.current?.play(), 50);
+    }
+  };
+
   return (
     <div>
       <Helmet>
@@ -82,7 +107,7 @@ export default function Homepage({
         <DrawingPreloader onEnter={playMusic} />
       </div>
       <audio
-        src={bgMusic}
+        src={PLAYLIST[currentTrackIndex]}
         loop
         ref={(el) => {
           audioRef.current = el;
@@ -93,6 +118,8 @@ export default function Homepage({
         <LandingRevamp
           goToPage={goToPage}
           onToggle={toggleMusic}
+          onNext={nextMusic}
+          onPrev={prevMusic}
           audioRef={audioRef}
         />
       </div>

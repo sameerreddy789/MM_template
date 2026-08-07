@@ -59,10 +59,14 @@ const socialLinks = [
 export default function LandingRevamp({
   goToPage,
   onToggle,
+  onNext,
+  onPrev,
   audioRef,
 }: {
   goToPage: (path: string) => void;
   onToggle: () => void;
+  onNext: () => void;
+  onPrev: () => void;
   audioRef: React.RefObject<HTMLAudioElement | null>;
 }) {
   const [styleTag, setstyleTag] = useState([
@@ -559,21 +563,49 @@ export default function LandingRevamp({
           </div>
         </div>
         <ScrollLabel />
-        <div
-          className={styles.sounds}
-          onClick={() => {
-            if (styleTag[0] === styles.soundLine2)
-              setstyleTag([styles.soundLine, styles.soundCross]);
-            else setstyleTag([styles.soundLine2, styles.soundCross2]);
-            onToggle();
-          }}
-        >
-          <span className={styleTag[0]}></span>
-          <span className={styleTag[0]}></span>
-          <span className={styleTag[0]}></span>
-          <span className={styleTag[0]}></span>
-          <span className={styleTag[0]}></span>
-          <span className={styleTag[1]}></span>
+        <div className={styles.customMusicControls}>
+          <div className={styles.sideLines}>
+            <span /><span /><span /><span />
+          </div>
+          <div className={styles.playerMain}>
+            <button className={styles.playBtn} onClick={onPrev}>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <rect x="7" y="6" width="2" height="12" />
+                <polygon points="17,6 9,12 17,18" />
+              </svg>
+            </button>
+            <div className={styles.verticalDivider} />
+            <button 
+              className={styles.playBtn} 
+              onClick={() => {
+                if (styleTag[0] === styles.soundLine2)
+                  setstyleTag([styles.soundLine, styles.soundCross]);
+                else setstyleTag([styles.soundLine2, styles.soundCross2]);
+                onToggle();
+              }}
+            >
+              {styleTag[0] === styles.soundLine2 ? (
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="6" y="5" width="4" height="14" />
+                  <rect x="14" y="5" width="4" height="14" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="8,5 19,12 8,19" />
+                </svg>
+              )}
+            </button>
+            <div className={styles.verticalDivider} />
+            <button className={styles.playBtn} onClick={onNext}>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="7,6 15,12 7,18" />
+                <rect x="15" y="6" width="2" height="12" />
+              </svg>
+            </button>
+          </div>
+          <div className={`${styles.sideLines} ${styles.rightLines}`}>
+            <span /><span /><span /><span />
+          </div>
         </div>
         <div className={styles.scrollerWrapper}>
           <div className={styles.scroller} ref={scrollerRef}>

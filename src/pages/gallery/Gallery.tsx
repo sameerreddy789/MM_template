@@ -5,7 +5,6 @@ import GalleryItem from './GalleryItem';
 import { useRef, useState } from 'react';
 import ImagePopup from './ImagePopup';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import photogLogo from '/images/gallery/photog white logo.png'
 
 function Gallery() {
 

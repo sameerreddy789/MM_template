@@ -252,7 +252,7 @@ body {
   .logoContainer {
     position: fixed;
     left: 2svw;
-    bottom: 2svw;
+    bottom: 8svw;
     width: 23svw;
     will-change: auto;
     z-index: 300;
@@ -338,8 +338,9 @@ body {
     user-select: none;
     position: fixed;
     z-index: 200;
-    right: calc(var(--counterSmallFontSize) * 2.4 + 1.5svw);
-    top: 45px;
+    left: 50%;
+    top: 35px;
+    transform: translateX(-50%);
     width: 15svw;
     min-width: fit-content;
     display: flex;
@@ -347,7 +348,8 @@ body {
     gap: 0.5svw;
     will-change: auto;
     font-family: $primaryFont;
-    color: #ffdfd0;
+    color: #ffaa00;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
     font-size: 2rem;
     text-align: center;
     background-color: none;
@@ -373,149 +375,86 @@ body {
     }
   }
 
-  .sounds {
+  .customMusicControls {
     position: fixed;
     z-index: 1001;
-    right: 1svw;
+    right: 3vw;
     top: 45px;
-    will-change: auto;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 3px;
-    width: calc(var(--counterSmallFontSize) * 2.4);
-    height: calc(var(--counterSmallFontSize) * 2.4);
-    cursor: pointer;
-    border-radius: 50%;
-    border: 2px solid #ffdfd0;
-    transform: translateY(6%);
-
-    @media screen and (max-width: 1350px) {
-      width: calc(var(--counterBigFontSize) * 1.1);
-      height: calc(var(--counterBigFontSize) * 1.1);
-    }
+    gap: 10px;
 
     @media screen and (max-width: 730px) {
-      // display: none;
       bottom: 30px;
       right: 20px;
       top: unset;
-      position: absolute;
     }
 
-    .soundLine {
-      height: calc(var(--counterSmallFontSize) * 1.1);
-      width: 2.5px;
-      border-radius: 50000px;
-      background: #ffdfd0;
-      animation: scaler infinite;
-      transition: height 0.3s ease-in-out;
+    .sideLines {
+      display: flex;
+      gap: 3px;
+      height: 30px;
+      align-items: center;
 
-      @media screen and (max-width: 1350px) {
-        height: calc(var(--counterBigFontSize) * 0.5);
+      span {
+        width: 2px;
+        background: #ffd700;
+        display: block;
+        box-shadow: 0 0 8px #ffd700;
       }
 
-      &:nth-child(1) {
-        animation: scaler2 2s ease-in-out infinite;
-        // animation-delay: -0.2s;
-        animation-duration: 1.7s;
-      }
-
-      &:nth-child(2) {
-        animation-delay: -0.675s;
-        animation-duration: 2.7s;
-      }
-
-      &:nth-child(3) {
-        // animation-delay: -0.8s;
-        animation-duration: 2.7s;
-      }
-
-      &:nth-child(4) {
-        animation-delay: -0.675s;
-        animation-duration: 2.7s;
-      }
-
-      &:nth-child(5) {
-        animation: scaler2 2s ease-in-out infinite;
-        // animation-delay: -0.6s;
-        animation-duration: 1.7s;
-      }
+      span:nth-child(1) { height: 10px; }
+      span:nth-child(2) { height: 16px; }
+      span:nth-child(3) { height: 22px; }
+      span:nth-child(4) { height: 30px; }
     }
 
-    @keyframes scaler {
-      0% {
-        transform: scaleY(0.8);
-      }
-
-      25% {
-        transform: scaleY(1.7);
-      }
-
-      50% {
-        transform: scaleY(0.9);
-      }
-
-      75% {
-        transform: scaleY(1.5);
-      }
-
-      100% {
-        transform: scaleY(0.8);
-      }
+    .rightLines {
+      span:nth-child(1) { height: 30px; }
+      span:nth-child(2) { height: 22px; }
+      span:nth-child(3) { height: 16px; }
+      span:nth-child(4) { height: 10px; }
     }
 
-    @keyframes scaler2 {
-      0% {
-        transform: scaleY(0.8);
+    .playerMain {
+      display: flex;
+      border: 2px solid #ffd700;
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.6), inset 0 0 12px rgba(255, 215, 0, 0.4);
+      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+      background: rgba(0, 0, 0, 0.7);
+      padding: 0 5px;
+      align-items: center;
+      height: 40px;
+
+      .verticalDivider {
+        width: 2px;
+        height: 25px;
+        background: #ffd700;
+        margin: 0 5px;
+        box-shadow: 0 0 8px #ffd700;
       }
 
-      25% {
-        transform: scaleY(1.1);
-      }
+      .playBtn {
+        background: none;
+        border: none;
+        color: #ffd700;
+        cursor: pointer;
+        padding: 5px 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s, filter 0.2s;
 
-      50% {
-        transform: scaleY(0.9);
-      }
+        svg {
+          width: 20px;
+          height: 20px;
+          filter: drop-shadow(0 0 5px #ffd700);
+        }
 
-      75% {
-        transform: scaleY(1.1);
-      }
-
-      100% {
-        transform: scaleY(0.8);
-      }
-    }
-
-    .soundLine2 {
-      height: 3px;
-      width: 3px;
-      border-radius: 50000px;
-      background: #ffdfd0;
-      transition: all 0.3s ease-in-out;
-    }
-
-    .soundCross {
-      position: absolute;
-      height: 0px;
-      width: 2.5px;
-      border-radius: 50000px;
-      background: #ffdfd0;
-      transform: rotate(65deg);
-      transition: height 0.3s ease-in-out;
-    }
-
-    .soundCross2 {
-      position: absolute;
-      width: 2.5px;
-      height: calc(var(--counterSmallFontSize) * 1.8);
-      border-radius: 50000px;
-      background: #ffdfd0;
-      transform: rotate(65deg);
-      transition: height 0.3s ease-in-out;
-
-      @media screen and (max-width: 1350px) {
-        height: calc(var(--counterBigFontSize) * 1.1);
+        &:hover {
+          transform: scale(1.1);
+          filter: brightness(1.3);
+        }
       }
     }
   }
@@ -541,7 +480,7 @@ body {
     .logoContainer {
       left: 50%;
       transform: translateX(-50%);
-      top: 150px;
+      top: 90px;
       width: 300px;
     }
 
@@ -594,9 +533,9 @@ body {
       .registerBtnContainer {
         text-decoration: none;
         position: absolute;
-        right: 3svw;
-        top: calc(100svh - 3svw);
-        transform: translateY(-100%);
+        left: 50%;
+        top: calc(100svh - 8svw);
+        transform: translate(-50%, -100%);
         z-index: 1000;
         width: 22svw;
         will-change: auto;
@@ -610,7 +549,7 @@ body {
         transition: filter 0.3s;
 
         @media (max-width: 730px) {
-          top: calc(100svh - 3svw - 1.8rem);
+          top: calc(100svh - 8svw - 1.8rem);
         }
 
         &:hover {
@@ -750,11 +689,11 @@ body {
                     grid-column: 1/2;
                     z-index: 99;
                     width: 80%;
-                    filter: brightness(1) drop-shadow(0px 0px 3px rgba(255, 213, 3, 0.823));
+                    filter: brightness(1.5) drop-shadow(0px 0px 8px rgba(255, 213, 3, 1));
                     transition: filter 0.3s ease-out;
 
                     &:hover {
-                      filter: brightness(1.1) drop-shadow(0px 0px 18px rgba(255, 213, 3, 0.848));
+                      filter: brightness(1.8) drop-shadow(0px 0px 24px rgba(255, 213, 3, 1));
                     }
                   }
 
