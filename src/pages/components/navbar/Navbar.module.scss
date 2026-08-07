@@ -167,7 +167,7 @@ body {
 
     li {
       font-family: $primaryFont;
-      font-size: 1.65rem;
+      font-size: 2.25rem;
       color: var(--navlink-color); //#ffdfd0;
       cursor: pointer;
       display: flex;
@@ -183,32 +183,18 @@ body {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        transition: line-height 0.3s ease-in-out;
+        transition: transform 0.3s ease-in-out;
         .actualLabel {
           filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.25));
-          transition: font-size 0.3s ease-in-out, filter 0.3s ease-in-out,
+          transition: filter 0.3s ease-in-out,
             opacity 0.3s ease-in-out;
-        }
-        .katakana {
-          font-weight: bold;
-          font-size: 0rem;
-          height: fit-content;
-          filter: drop-shadow(0 5px 1px rgba(0, 0, 0, 0.25));
-
-          transition: font-size 0.3s ease-in-out;
         }
       }
       &:hover {
         .navLink {
-          line-height: 16px;
-
+          transform: scale(1.1);
           .actualLabel {
-            font-size: 0.75rem;
-            // opacity: 0.5;
-            filter: drop-shadow(0 0px 0px rgba(0, 0, 0, 0));
-          }
-          .katakana {
-            font-size: 1rem;
+            filter: drop-shadow(0 7px 7px rgba(0, 0, 0, 0.35));
           }
         }
       }

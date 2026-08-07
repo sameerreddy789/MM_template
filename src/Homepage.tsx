@@ -4,7 +4,7 @@ import useOverlayStore from "./utils/store";
 import LandingRevamp from "./pages/landingRevamp/LandingRevamp";
 import { Helmet } from "react-helmet";
 import BreadCrumb from "./pages/components/breadCrumb/BreadCrumb";
-import bgMusic from "/sounds/bg-music2.mp3";
+import bgMusic from "/sounds/FUNK DESTRAVADO slowed.mp3";
 import { useRef } from "react";
 export default function Homepage({
   goToPage,

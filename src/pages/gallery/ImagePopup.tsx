@@ -23,10 +23,36 @@ export default function ImagePopup({ index, onClose }: ImagePopupProps) {
                     ><FaLeftLong className={styles.cycleButtonIcon} /></div>
                 </div>
                 <div className={styles.imagePopupImageContainer}>
-                    <img 
-                        className={styles.imagePopupImage} 
-                        src={galleryItemList[currentImageIndex].src}
-                    />
+                    {galleryItemList[currentImageIndex].type === 'streamable' ? (
+                        <iframe 
+                            className={styles.imagePopupImage}
+                            src={`https://streamable.com/e/${galleryItemList[currentImageIndex].src}?autoplay=1`}
+                            frameBorder="0"
+                            allow="autoplay"
+                            allowFullScreen
+                        />
+                    ) : galleryItemList[currentImageIndex].type === 'youtube' ? (
+                        <iframe 
+                            className={styles.imagePopupImage}
+                            src={`https://www.youtube.com/embed/${galleryItemList[currentImageIndex].src}?autoplay=1`}
+                            title="YouTube video player"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                        />
+                    ) : galleryItemList[currentImageIndex].type === 'video' ? (
+                        <video
+                            className={styles.imagePopupImage}
+                            src={galleryItemList[currentImageIndex].src}
+                            autoPlay loop controls
+                        />
+                    ) : (
+                        <img 
+                            className={styles.imagePopupImage} 
+                            src={galleryItemList[currentImageIndex].src} 
+                            alt={`image-popup-${currentImageIndex}`} 
+                        />
+                    )}
                 </div>
                 <div className={styles.cycleButtonContainer}>
                     <div 

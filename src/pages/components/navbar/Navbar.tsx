@@ -19,10 +19,10 @@ import { motion } from "framer-motion";
 gsap.registerPlugin(ScrollTrigger);
 
 const navItems = [
-  { label: "Home", katakana: "ホーム", links: "/" },
-  { label: "About Us", katakana: "アバウト・アス", links: "/aboutus" },
-  { label: "Events", katakana: "イベンツ", links: "/events" },
-  { label: "Contact", katakana: "コンタクト", links: "/contact" },
+  { label: "Home", links: "/" },
+  { label: "About Us", links: "/aboutus" },
+  { label: "Events", links: "/events" },
+  { label: "Contact", links: "/contact" },
 ];
 
 export default function Navbar({
@@ -104,7 +104,7 @@ export default function Navbar({
 
     const timer = setTimeout(() => {
       const targets = navRef.current?.querySelectorAll(
-        `.${styles.actualLabel}, .${styles.katakana}`
+        `.${styles.actualLabel}`
       );
 
       if (!targets || targets.length === 0) {
@@ -218,7 +218,6 @@ export default function Navbar({
           >
             <div className={styles.navLink}>
               <div className={styles.actualLabel}>{item.label}</div>
-              <div className={styles.katakana}>{item.katakana}</div>
             </div>
           </li>
         ))}

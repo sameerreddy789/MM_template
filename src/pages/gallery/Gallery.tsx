@@ -36,9 +36,7 @@ function Gallery() {
                     )
                 }
             </div>
-            <footer>
-                <img className={styles.footerImage} src={photogLogo} />
-            </footer>
+
             {isPopupOpen && <ImagePopup index={activeImageIndex.current} onClose={() => setIsPopupOpen(false)} />}
         </div>
     )

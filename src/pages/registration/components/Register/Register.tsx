@@ -56,26 +56,12 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
     const [availableCities, setAvailableCities] = useState<
       { value: string; label: string }[]
     >([]);
-    const [collegeOptions, setCollegeOptions] = useState<
-      { value: string; label: string }[]
-    >([]);
+
     const [inputValue, setInputValue] = useState("");
 
     const dropDownRef = useRef<(HTMLImageElement | null)[]>([]);
     
-    useEffect(() => {
-      axios
-        .get("https://mohanamantra.com/2025/main/registrations/get_college/")
-        .then((response) => {
-          setCollegeOptions(
-            response.data.data.map((college: { id: number; name: string }) => ({
-              value: String(college.id),
-              label: college.name,
-            }))
-          );
-        })
-        .catch((error) => console.error("Error fetching colleges:", error));
-    }, []);
+
 
     const getAvailableCities = (stateName: string) =>
       (statesData.find((item) => item.state === stateName)?.cities ?? []).map(
@@ -393,50 +379,7 @@ useEffect(() => {
                 </div>
                 <div className={styles.clouds}>
                   <img src={Field} alt="Field" className={styles.fieldImg} />
-                  <Controller
-                    name="college_id"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        {...field}
-                        menuPortalTarget={document.body}
-                        options={collegeOptions}
-                        styles={customStyle}
-                        onChange={(val) => field.onChange(val?.value || "")}
-                        value={
-                          field.value
-                            ? collegeOptions.find(
-                                (c) => c.value === field.value
-                              ) || null
-                            : null
-                        }
-                        unstyled
-                        placeholder="--SELECT--"
-                        className={styles["react-select-container"]}
-                        classNamePrefix="react-select"
-                        onMenuOpen={() => {
-                          setTimeout(() => {
-                            dropDownRef.current[1]!.classList.add(
-                              styles.rotateDropDown
-                            );
-                          }, 100);
-                        }}
-                        onMenuClose={() => {
-                          dropDownRef.current[1]!.classList.remove(
-                            styles.rotateDropDown
-                          );
-                        }}
-                      />
-                    )}
-                  />
-                  <img
-                    src={DropDown}
-                    alt="dropDown"
-                    className={styles.dropDown}
-                    ref={(el) => {
-                      dropDownRef.current[1] = el;
-                    }}
-                  />
+                  <input {...register("college_id")} />
                 </div>
                 <p className={styles.error}>{errors.college_id?.message}</p>
               </div>

@@ -7,10 +7,10 @@ import styles from "./LandingRevamp.module.scss";
 
 import { useGSAP } from "@gsap/react";
 import Navbar from "../components/navbar/Navbar";
-import landingImage from "/images/landing/background1.png";
-import mobileMountains from "/images/landing/mobileMountains.png";
-import tree from "/images/landing/tree1.png";
-import treeMob from "/images/landing/treeMob.png";
+import landingImage from "/images/hero_hills.png";
+import mobileMountains from "/images/hero_hills.png";
+import tree from "/images/landing/Tree_new_transparent.png";
+import treeMob from "/images/landing/Tree_new_transparent.png";
 import insta from "/svgs/landing/insta.svg";
 import instaLamp from "/svgs/landing/instaLamp.svg";
 import youtube from "/svgs/landing/youtube.svg";
@@ -104,9 +104,7 @@ export default function LandingRevamp({
       ).matches;
 
       setScrollHeight(Math.max(0, scrollerHeight - window.innerHeight * 1.4));
-      setHeroOverlap(
-        isDesktop ? scrollerHeight * DESKTOP_SCROLLER_SHIFT : 0
-      );
+      setHeroOverlap(0);
     };
 
     updateScrollerMetrics();
@@ -231,21 +229,21 @@ export default function LandingRevamp({
         // autoAlpha: 1,
         // scale: 1,
         // y: 0,
-        force3D: true,
+        force3D: false,
       });
 
       gsap.set(landingRef.current, {
         // autoAlpha: 1,
         // scale: 1,
         // y: 0,
-        force3D: true,
+        force3D: false,
       });
 
       gsap.set(scrollerRef.current, {
         // autoAlpha: 1,
         // scale: 1,
         // y: 0,
-        force3D: true,
+        force3D: false,
       });
     }
 
@@ -314,6 +312,7 @@ export default function LandingRevamp({
         {
           scale: 1.15,
           ease: "power2.inOut",
+          force3D: false,
           scrollTrigger: {
             trigger: wrapperRef.current,
             start: "top top",
@@ -331,6 +330,7 @@ export default function LandingRevamp({
           scale: 1.08,
           // y: "8%",
           ease: "power2.inOut",
+          force3D: false,
           scrollTrigger: {
             trigger: wrapperRef.current,
             start: "top top",
@@ -342,18 +342,7 @@ export default function LandingRevamp({
         // 0
       );
 
-      gsap.to(landingMobileRef.current, {
-        y: "-10%",
-        // duration: 20,
-        ease: "sine.inOut",
-        scrollTrigger: {
-          trigger: wrapperRef.current,
-          start: "top top",
-          end: `+=300vh`,
-          scrub: true,
-          invalidateOnRefresh: true,
-        },
-      });
+
     });
     mm.add("(min-width: 730px) and (aspect-ratio > 8/12)", () => {
       const masterTimeline = gsap.timeline({
@@ -373,6 +362,7 @@ export default function LandingRevamp({
             scale: 1.2,
             // y: "14%",
             duration: 2,
+            force3D: false,
           },
           0
         )
@@ -382,29 +372,14 @@ export default function LandingRevamp({
             scale: 1.1,
             // y: "8%",
             duration: 2,
+            force3D: false,
           },
           0
         )
 
-        .to(
-          scrollerRef.current,
-          {
-            yPercent: -DESKTOP_SCROLLER_SHIFT * 100,
-            duration: 16,
-            // ease: "sine.in",
-          },
-          1
-        )
 
-        .to(
-          landingRef.current,
-          {
-            y: "-30%",
-            duration: 12,
-            ease: "power1.in",
-          },
-          0.5
-        )
+
+
 
         .to(
           dateCountdownRef.current,
@@ -461,9 +436,8 @@ export default function LandingRevamp({
   return (
     <>
       <main
-        className={`${styles.wrapper} ${
-          !removeGif ? styles.pointerNoneEvent : ""
-        } ${overlayIsActive ? styles.mask : ""}`}
+        className={`${styles.wrapper} ${!removeGif ? styles.pointerNoneEvent : ""
+          } ${overlayIsActive ? styles.mask : ""}`}
         ref={wrapperRef}
       >
         <Navbar />
@@ -512,7 +486,7 @@ export default function LandingRevamp({
               src={mobileMountains}
               className={styles.mobileMountains}
               alt="Mountains"
-              // ref={landingMobileRef}
+            // ref={landingMobileRef}
             />
             <img
               src={mobileBackground}

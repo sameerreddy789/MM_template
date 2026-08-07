@@ -13,9 +13,6 @@ import Back from "/svgs/registration/back.svg";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef, useState, useEffect } from "react";
-import { useCookies } from "react-cookie";
-import { useGoogleLogin } from "@react-oauth/google";
-import axios from "axios";
 import BreadCrumb from "../components/breadCrumb/BreadCrumb";
 interface RegistrationProps {
   startAnimation: boolean;
@@ -43,14 +40,9 @@ const Registration = ({ goToPage }: RegistrationProps) => {
   };
   const { contextSafe } = useGSAP();
   const [currentPage, setCurrentPage] = useState(1);
-  const [userEmail, setUserEmail] = useState("");
+  const [userEmail] = useState("");
   const [isAnim, setIsAnim] = useState(false);
   const [userData, setUserData] = useState<any>(null);
-  const [_cookies, setCookies] = useCookies([
-    "Authorization",
-    "user-auth",
-    "Access_token",
-  ]);
 
   const bgRef = useRef<HTMLImageElement>(null);
   const elemRef1 = useRef<HTMLDivElement>(null);
@@ -123,25 +115,7 @@ const Registration = ({ goToPage }: RegistrationProps) => {
     );
   };
 
-  function redirectWithPost(url: string, data: { [key: string]: string }) {
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = url;
 
-    // Add each key-value pair to the form
-    for (const key in data) {
-      if (data.hasOwnProperty(key)) {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = key;
-        input.value = data[key];
-        form.appendChild(input);
-      }
-    }
-
-    document.body.appendChild(form);
-    form.submit();
-  }
 
   const toRegPage = (back: boolean) => {
     const mm = gsap.matchMedia();
@@ -314,44 +288,9 @@ const Registration = ({ goToPage }: RegistrationProps) => {
     }
   };
 
-  const onGoogleSignIn = useGoogleLogin({
-    onSuccess: (response) => {
-      // console.log(response.access_token);
-      axios
-        .post("https://mohanamantra.com/2025/main/registrations/google-reg/", {
-          access_token: response.access_token,
-        })
-        .then((res) => {
-          setCookies("Access_token", response.access_token);
-          if (res.data.exists) {
-            setCookies("user-auth", res.data);
-            setCookies("Authorization", res.data.tokens.access);
-            // window.location.href = `https://mohanamantra.com/2025/main/registrations?token=${res.data.tokens.access}`;
-            redirectWithPost(
-              "https://mohanamantra.com/2025/main/registrations/",
-              {
-                token: res.data.tokens.access,
-              }
-            );
-            setUserEmail(res.data.email);
-          } else {
-            setCookies("user-auth", res.data);
-            // setUserState({
-            //   ...res.data,
-            //   access_token: response.access_token,
-            // });
-            setUserEmail(res.data.email);
-            if (res.data.email) toRegPage(false);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
-    // onFailure: () => {
-    //   console.error("Login failed");
-    // },
-  });
+  const onGoogleSignIn = () => {
+    toRegPage(false);
+  };
 
   return (
     <div className={styles.instrback}>

@@ -39,18 +39,48 @@ function GalleryItem({ galleryItem, index, onClick }: GalleryItemProps) {
 
     return (
         <div className={styles.galleryImageContainer} onClick={onClick}>
-            <div className={isLoading ? styles.overlayVisible : styles.overlayHidden}>
-                <p className={styles.overlayText}>{!isError ? "Loading" : "Could not load image"}</p>
-            </div>
-            <img 
-                className={styles.galleryImage} 
-                style={galleryItem.modifiers}
-                src={galleryItem.src} 
-                onLoad={handleLoad}
-                onError={handleError}
-                loading='lazy'
-                id={`gallery-image-${index}`}
-            />
+            {galleryItem.type === 'streamable' ? (
+                <iframe 
+                    className={styles.galleryImage}
+                    src={`https://streamable.com/e/${galleryItem.src}?autoplay=1&loop=1`}
+                    frameBorder="0"
+                    allow="autoplay"
+                    style={galleryItem.modifiers}
+                />
+            ) : galleryItem.type === 'youtube' ? (
+                <iframe 
+                    className={styles.galleryImage}
+                    src={`https://www.youtube.com/embed/${galleryItem.src}?autoplay=1&mute=1&loop=1&playlist=${galleryItem.src}&controls=0&showinfo=0&rel=0`}
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    style={{ pointerEvents: 'none', ...galleryItem.modifiers }}
+                />
+            ) : galleryItem.type === 'video' ? (
+                <video 
+                    className={styles.galleryImage} 
+                    style={galleryItem.modifiers}
+                    src={galleryItem.src} 
+                    id={`gallery-image-${index}`}
+                    autoPlay muted loop playsInline
+                />
+            ) : (
+                <>
+                    <div className={isLoading ? styles.overlayVisible : styles.overlayHidden}>
+                        <p className={styles.overlayText}>{!isError ? "Loading" : "Could not load image"}</p>
+                    </div>
+                    <img 
+                        className={styles.galleryImage} 
+                        style={galleryItem.modifiers}
+                        src={galleryItem.src} 
+                        onLoad={handleLoad}
+                        onError={handleError}
+                        loading='lazy'
+                        id={`gallery-image-${index}`}
+                        alt={`gallery-image-${index}`}
+                    />
+                </>
+            )}
         </div>
     )
 }
