@@ -565,9 +565,13 @@ body {
       .registerBtnContainer {
         text-decoration: none;
         position: absolute;
-        left: 50%;
+        right: 3svw;
         top: calc(100svh - 8svw);
-        transform: translate(-50%, -100%);
+        // Keep a transform here even though only Y is offset: .registerBtn is
+        // position: fixed, so this transform is what makes this element its
+        // containing block. Without it that child resolves width: 100% against
+        // the viewport and blows out to full screen width.
+        transform: translateY(-100%);
         z-index: 1000;
         width: 22svw;
         will-change: auto;
