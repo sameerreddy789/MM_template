@@ -69,10 +69,7 @@ export default function LandingRevamp({
   onPrev: () => void;
   audioRef: React.RefObject<HTMLAudioElement | null>;
 }) {
-  const [styleTag, setstyleTag] = useState([
-    audioRef.current?.paused ? styles.soundLine2 : styles.soundLine,
-    audioRef.current?.paused ? styles.soundCross2 : styles.soundCross,
-  ]);
+  const [isPlaying, setIsPlaying] = useState(false);
   const overlayIsActive = useOverlayStore((state) => state.isActive);
   const removeGif = useOverlayStore((state) => state.removeGif);
   const setRemoveGif = useOverlayStore((state) => state.setRemoveGif);
@@ -135,12 +132,27 @@ export default function LandingRevamp({
     return () => window.cancelAnimationFrame(refreshFrame);
   }, [heroOverlap]);
 
+  // Mirror the audio element's real state. Reading `audioRef.current?.paused` as
+  // an effect dependency never worked: a ref mutation doesn't re-render, so the
+  // icon went stale whenever playback changed from anywhere other than a click
+  // (autoplay on Enter, track changes, the track finishing).
   useEffect(() => {
-    setstyleTag([
-      audioRef.current?.paused ? styles.soundLine2 : styles.soundLine,
-      audioRef.current?.paused ? styles.soundCross2 : styles.soundCross,
-    ]);
-  }, [audioRef.current?.paused]);
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const sync = () => setIsPlaying(!audio.paused);
+    sync();
+
+    audio.addEventListener("play", sync);
+    audio.addEventListener("pause", sync);
+    audio.addEventListener("ended", sync);
+
+    return () => {
+      audio.removeEventListener("play", sync);
+      audio.removeEventListener("pause", sync);
+      audio.removeEventListener("ended", sync);
+    };
+  }, [audioRef]);
 
   useEffect(() => {
     if (overlayIsActive) {
@@ -575,16 +587,13 @@ export default function LandingRevamp({
               </svg>
             </button>
             <div className={styles.verticalDivider} />
-            <button 
-              className={styles.playBtn} 
-              onClick={() => {
-                if (styleTag[0] === styles.soundLine2)
-                  setstyleTag([styles.soundLine, styles.soundCross]);
-                else setstyleTag([styles.soundLine2, styles.soundCross2]);
-                onToggle();
-              }}
+            <button
+              className={styles.playBtn}
+              onClick={onToggle}
+              aria-label={isPlaying ? "Pause music" : "Play music"}
+              aria-pressed={isPlaying}
             >
-              {styleTag[0] === styles.soundLine2 ? (
+              {isPlaying ? (
                 <svg viewBox="0 0 24 24" fill="currentColor">
                   <rect x="6" y="5" width="4" height="14" />
                   <rect x="14" y="5" width="4" height="14" />

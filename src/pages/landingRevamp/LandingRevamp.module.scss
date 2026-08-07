@@ -338,13 +338,33 @@ body {
     user-select: none;
     position: fixed;
     z-index: 200;
-    left: 50%;
     top: 35px;
-    transform: translateX(-50%);
-    width: 15svw;
-    min-width: fit-content;
+    // Centred in the gap between the navbar and the music player, not in the
+    // viewport. Viewport-centring sat on top of the "contact" nav item on
+    // narrower desktops, because the navbar's width is driven by fixed-size text
+    // while the centre point moves with the viewport.
+    //
+    // The bounds track the two elements it has to stay clear of:
+    //   --nav-safe-right   right edge of the navbar (fixed text + 5vw padding)
+    //   --player-safe-left width of the music player plus its 3vw offset
+    // Auto margins then centre the box inside that band, so it drifts right as
+    // the viewport widens instead of colliding with the nav.
+    --nav-safe-right: calc(5vw + 588px);
+    --player-safe-left: calc(3vw + 212px);
+
+    // Nudge back toward the left, ~26% of the counter's own width. Shifting both
+    // bounds by the same amount translates the band without narrowing it, so the
+    // counter moves as a whole. The taper matters: at ~1100px the navbar-to-player
+    // gap is barely wider than the counter itself, so the nudge eases in from
+    // there and caps out rather than pushing it back under the "contact" nav item.
+    --counter-nudge-left: min(58px, max(0px, (100vw - 1100px) * 0.45));
+
+    left: calc(var(--nav-safe-right) - var(--counter-nudge-left));
+    right: calc(var(--player-safe-left) + var(--counter-nudge-left));
+    margin-inline: auto;
+    width: fit-content;
     display: flex;
-    justify-content: end;
+    justify-content: center;
     gap: 0.5svw;
     will-change: auto;
     font-family: $primaryFont;
@@ -369,9 +389,20 @@ body {
     div:nth-of-type(even) {
       font-size: 3rem;
 
+      // The separators are the widest part of the counter. On narrower desktops
+      // the navbar-to-player gap is only just wider than the counter itself, so
+      // trimming them here buys real clearance instead of a hairline miss.
+      @media (max-width: 1350px) {
+        font-size: 2rem;
+      }
+
       @media (max-width: 800px) {
         font-size: 2.4rem;
       }
+    }
+
+    @media (max-width: 1350px) {
+      gap: 0.3svw;
     }
   }
 
@@ -489,8 +520,9 @@ body {
       display: flex;
       position: fixed;
       top: 309px;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 0;
+      right: 0;
+      margin-inline: auto;
       width: fit-content;
       font-size: 1.5rem;
       padding: 0.5svw;

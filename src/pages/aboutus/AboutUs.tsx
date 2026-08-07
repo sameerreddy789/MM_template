@@ -48,13 +48,20 @@ const icons = [
   letter8,
 ];
 
-const videos = ["8PE1DLPFuiE"];
+// Playlist order drives the prev/next buttons, which wrap around:
+// 1. Mohana Mantra's #aftermovie 2023
+// 2. Curtain Raiser Event at Mohan Babu University
+// 3. Mohana Mantra 2K23 | Flashmob | MGB Felicity Mall
+const videos = ["6cVU9EKoMgs", "0BfL50EqmS4", "RE1WSzLeQVo"];
+
+// Structured data has to describe the video actually embedded first, otherwise
+// the VideoObject points at something that isn't on the page.
 const mainVideoMetadata = {
-  id: "8PE1DLPFuiE",
-  title: "MohanaMantra 2K26 | MBU",
+  id: videos[0],
+  title: "Mohana Mantra's #aftermovie 2023",
   description:
     "Mohana Mantra is an annual techno-cultural festival held at Mohan Babu University, celebrating the diversity and creativity of our student body with events showcasing music, dance, theatre, and more.",
-  uploadDate: "2025-09-24T14:00:55+05:30",
+  uploadDate: "2024-08-06T05:25:38-07:00",
 };
 const iconImages: HTMLImageElement[] = icons.map((src) => {
   const img = new Image();
