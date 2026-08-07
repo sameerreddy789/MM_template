@@ -19,9 +19,9 @@ import { motion } from "framer-motion";
 gsap.registerPlugin(ScrollTrigger);
 
 const navItems = [
-  { label: "About Us", links: "/aboutus" },
   { label: "Events", links: "/events" },
-  { label: "Contact", links: "/contact" },
+  { label: "Gallery", links: "/gallery" },
+  { label: "Sponsors", links: "/sponsors" },
 ];
 
 export default function Navbar({
