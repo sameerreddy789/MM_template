@@ -1,9 +1,9 @@
 @use 'sass:math';
 
-@font-face {
-    font-family: 'Averia Serif Libre';
-    src: url('/fonts/AveriaSerifLibre-Regular.ttf') format('truetype');
-}
+// The Averia Serif Libre file was never added to public/fonts, so this
+// @font-face only ever downloaded the dev-server HTML fallback and failed to
+// parse. Usages already declare `serif` as the fallback, which is what has been
+// rendering. Drop the font file into public/fonts and restore this block to use it.
 
 .contactContent {
     position: relative;

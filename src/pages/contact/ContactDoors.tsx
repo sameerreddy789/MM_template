@@ -80,7 +80,9 @@ export default function ContactDoors({
 
   useGSAP(() => {
     gsap.registerPlugin(ScrollTrigger);
-    ScrollTrigger.normalizeScroll(true);
+    // normalizeScroll would take over wheel/touch input, but the landing page
+    // already drives scrolling through Lenis. Running both means neither owns
+    // the scroll position and the door timeline never scrubs.
 
     const animateContactBanner = (animation: gsap.TimelineVars) =>
       gsap.to(contactBannerRef.current, { ...animation, duration: 0.3 });
@@ -107,10 +109,10 @@ export default function ContactDoors({
           animateContactBanner({ y: "-100%", autoAlpha: 0 });
           gsap.set(`.${styles.contactSection}`, { pointerEvents: "none" });
         },
-        snap: {
-          snapTo: [0, 1],
-          directional: false,
-        },
+        // No snap: it tweens the scroll position after scrolling stops, which
+        // Lenis immediately fights back to its own target. With snapTo [0, 1]
+        // and directional off, anything under half progress got pulled back to
+        // 0, so the doors slid straight back out of view.
         onUpdate: (self) => {
           const scrollVelocity = self.getVelocity();
           const swingSensitivity = 0.003;
@@ -135,6 +137,20 @@ export default function ContactDoors({
 
     // if (contactSectionRef.current) contactSectionRef.current.style.transform = "translateY(-100vh)"//`translateY(${-((pinElemRef.current?.clientHeight || 0) - (contactSectionRef.current?.clientHeight || 0))})`
   });
+
+  // The door trigger is measured off the about section. If that section is still
+  // pulling in images when this mounts, start/end land on a stale scroll
+  // position. One refresh once everything has loaded corrects it.
+  useEffect(() => {
+    if (document.readyState === "complete") {
+      ScrollTrigger.refresh();
+      return;
+    }
+
+    const handleLoad = () => ScrollTrigger.refresh();
+    window.addEventListener("load", handleLoad, { once: true });
+    return () => window.removeEventListener("load", handleLoad);
+  }, []);
 
   useEffect(() => {
     const contactItems = document.getElementsByClassName(styles.contactItem);
@@ -211,8 +227,8 @@ export default function ContactDoors({
                   >
                     {Array(2)
                       .fill(null)
-                      .map(() => (
-                        <div />
+                      .map((_, barIndex) => (
+                        <div key={barIndex} />
                       ))}
                   </div>
                 ))}
@@ -279,8 +295,8 @@ export default function ContactDoors({
                   >
                     {Array(2)
                       .fill(null)
-                      .map(() => (
-                        <div />
+                      .map((_, barIndex) => (
+                        <div key={barIndex} />
                       ))}
                   </div>
                 ))}

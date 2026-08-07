@@ -79,6 +79,7 @@ export default function LandingRevamp({
   const landingRef = useRef<HTMLImageElement>(null);
   const landingMobileRef = useRef<HTMLImageElement>(null);
   const treeContainerRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLDivElement>(null);
   // const isHamOpen = useHamStore((state) => state.isHamOpen);
   const isMainHamOpen = useMainHamStore((state) => state.isMainHamOpen);
   // const setIsHamOpen = useHamStore((state) => state.setHamOpen);
@@ -90,16 +91,23 @@ export default function LandingRevamp({
   const aboutUsContRef = useRef<HTMLDivElement>(null);
   const aboutUsWrapperRef = useRef<HTMLDivElement>(null);
 
-  const [scrollHeight, setScrollHeight] = useState(
-    (scrollerRef.current?.scrollHeight ?? 0) - window.innerHeight * 1.4
-  );
+  const [scrollHeight, setScrollHeight] = useState(window.innerHeight);
   const [heroOverlap, setHeroOverlap] = useState(0);
 
   useEffect(() => {
     const updateScrollerMetrics = () => {
       const scrollerHeight = scrollerRef.current?.scrollHeight ?? 0;
 
-      setScrollHeight(Math.max(0, scrollerHeight - window.innerHeight * 1.4));
+      // The hero is only about one viewport tall, so subtracting 1.4 viewports
+      // used to floor this at 0 and give the hero timeline zero length: the tree
+      // zoom, background scale and countdown exit never ran. Keep at least one
+      // viewport of travel so the timeline always has somewhere to go.
+      setScrollHeight(
+        Math.max(
+          window.innerHeight,
+          scrollerHeight - window.innerHeight * 1.4
+        )
+      );
       setHeroOverlap(0);
     };
 
@@ -268,6 +276,23 @@ export default function LandingRevamp({
           trigger: wrapperRef.current,
           start: "50vh",
           end: "+=145vh",
+          scrub: true,
+        },
+      }
+    );
+
+    // The logo sits above the tree now, so it also has to leave with the hero,
+    // otherwise it stays parked over the about and contact sections.
+    gsap.fromTo(
+      logoRef.current,
+      { autoAlpha: 1 },
+      {
+        autoAlpha: 0,
+        ease: "power2.inOut",
+        scrollTrigger: {
+          trigger: wrapperRef.current,
+          start: "30vh",
+          end: "+=70vh",
           scrub: true,
         },
       }
@@ -461,11 +486,11 @@ export default function LandingRevamp({
             <MainHam goToPage={goToPage} />
           </div>
         </div>
-        <div className={styles.backgroundContainer}>
-          <div className={styles.logoContainer}>
-            <img src={logo} className={styles.logo} alt="Logo" />
-          </div>
+        <div className={styles.logoContainer} ref={logoRef}>
+          <img src={logo} className={styles.logo} alt="Logo" />
+        </div>
 
+        <div className={styles.backgroundContainer}>
           <div className={styles.desktopBackground} ref={landingRef}>
             <img
               src={landingImage}

@@ -246,6 +246,22 @@ body {
     }
   }
 
+  // Kept outside .backgroundContainer on purpose: that element is a
+  // z-index: -1 stacking context, so a logo nested inside it can never paint
+  // above the tree/foreground no matter how high its own z-index is.
+  .logoContainer {
+    position: fixed;
+    left: 2svw;
+    bottom: 2svw;
+    width: 23svw;
+    will-change: auto;
+    z-index: 300;
+
+    .logo {
+      width: 100%;
+    }
+  }
+
   .backgroundContainer {
     z-index: -1;
     height: 100svh;
@@ -254,19 +270,6 @@ body {
     grid-column: 1/2;
     grid-row: 1/2;
     translate: 0;
-
-    .logoContainer {
-      position: fixed;
-      left: 2svw;
-      bottom: 2svw;
-      width: 23svw;
-      will-change: auto;
-      z-index: 100;
-
-      .logo {
-        width: 100%;
-      }
-    }
 
     .desktopBackground {
       position: fixed;
@@ -533,13 +536,13 @@ body {
       .desktopBackground {
         display: none;
       }
+    }
 
-      .logoContainer {
-        left: 50%;
-        transform: translateX(-50%);
-        top: 150px;
-        width: 300px;
-      }
+    .logoContainer {
+      left: 50%;
+      transform: translateX(-50%);
+      top: 150px;
+      width: 300px;
     }
 
     .dateCountdown {
@@ -560,22 +563,10 @@ body {
   }
 
   @media (aspect-ratio > 1/1) and (max-width: 730px) {
-    .backgroundContainer {
-      .logoContainer {
-        top: 30px;
-        left: 20px;
-        transform: none;
-      }
-    }
-  }
-
-  @media (aspect-ratio > 1/1) and (max-width: 730px) {
-    .backgroundContainer {
-      .logoContainer {
-        top: 30px;
-        left: 20px;
-        transform: none;
-      }
+    .logoContainer {
+      top: 30px;
+      left: 20px;
+      transform: none;
     }
 
     .dateCountdown {

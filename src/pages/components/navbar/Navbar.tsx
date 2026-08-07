@@ -19,7 +19,6 @@ import { motion } from "framer-motion";
 gsap.registerPlugin(ScrollTrigger);
 
 const navItems = [
-  { label: "Home", links: "/" },
   { label: "About Us", links: "/aboutus" },
   { label: "Events", links: "/events" },
   { label: "Contact", links: "/contact" },
