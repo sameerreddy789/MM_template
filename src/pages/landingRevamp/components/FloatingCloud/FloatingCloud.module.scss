@@ -1,0 +1,48 @@
+.cloudWrapper {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5; /* This should place it above the hills (usually 1 or 2) and behind tree (usually 100) */
+  will-change: transform;
+  
+  /* X-axis drifting */
+  animation: driftX var(--duration) ease-in-out infinite alternate var(--delay);
+  
+  &.reverse {
+    animation-direction: alternate-reverse;
+  }
+  
+  .cloudImage {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    will-change: transform, opacity;
+    /* Y-axis floating and slight scaling */
+    animation: driftY calc(var(--duration) * 0.65) ease-in-out infinite alternate var(--delay);
+  }
+}
+
+@keyframes driftX {
+  0% {
+    transform: translate3d(-6vw, 0, 0);
+  }
+  100% {
+    transform: translate3d(6vw, 0, 0);
+  }
+}
+
+@keyframes driftY {
+  0% {
+    transform: translate3d(0, 6px, 0) scale(0.98);
+  }
+  100% {
+    transform: translate3d(0, -6px, 0) scale(1.02);
+  }
+}
+
+@media (max-width: 1024px) {
+  .hideOnTablet { display: none !important; }
+}
+
+@media (max-width: 768px) {
+  .hideOnMobile { display: none !important; }
+}

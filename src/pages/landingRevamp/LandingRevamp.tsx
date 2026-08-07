@@ -23,6 +23,7 @@ import wire from "/svgs/landing/wire.svg";
 import logo from "/images/logo.png";
 import mobileCloud from "/images/landing/mobileCloud.png";
 import AboutUs from "../aboutus/AboutUs";
+import FloatingCloud from "./components/FloatingCloud/FloatingCloud";
 // import ContactDoors from "../contact/ContactDoors";
 // import Ham from "../components/ham/ham";
 import MainHam from "../components/mainHam/mainHam";
@@ -471,6 +472,12 @@ export default function LandingRevamp({
               className={styles.landingImage}
               alt="Landing Image"
             />
+            
+            <FloatingCloud cloudId={1} top="12%" left="-5%" width="22vw" opacity={0.55} duration={38} delay={0} />
+            <FloatingCloud cloudId={2} top="25%" right="-5%" width="18vw" opacity={0.45} duration={48} delay={8} direction="reverse" />
+            <FloatingCloud cloudId={3} top="5%" left="38%" width="15vw" opacity={0.35} duration={55} delay={15} hideOnMobile />
+            <FloatingCloud cloudId={4} top="32%" left="20%" width="25vw" opacity={0.5} duration={45} delay={5} hideOnTablet />
+            <FloatingCloud cloudId={2} top="15%" right="25%" width="16vw" opacity={0.4} duration={60} delay={12} direction="reverse" hideOnTablet />
           </div>
 
           <div
