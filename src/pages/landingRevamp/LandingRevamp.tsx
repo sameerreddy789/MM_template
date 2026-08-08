@@ -8,6 +8,7 @@ import styles from "./LandingRevamp.module.scss";
 import { useGSAP } from "@gsap/react";
 import Navbar from "../components/navbar/Navbar";
 import landingImage from "/images/hero_hills.png";
+import TirumalaHills from "../components/TirumalaHills/TirumalaHills";
 import mobileMountains from "/images/hero_hills.png";
 import tree from "/images/landing/new tree.png";
 import treeMob from "/images/landing/new tree.png";
@@ -508,11 +509,7 @@ export default function LandingRevamp({
 
         <div className={styles.backgroundContainer}>
           <div className={styles.desktopBackground} ref={landingRef}>
-            <img
-              src={landingImage}
-              className={styles.landingImage}
-              alt="Landing Image"
-            />
+            <TirumalaHills animated />
             
             <FloatingCloud cloudId={1} top="12%" left="-5%" width="22vw" opacity={0.55} duration={38} delay={0} />
             <FloatingCloud cloudId={2} top="25%" right="-5%" width="18vw" opacity={0.45} duration={48} delay={8} direction="reverse" />
