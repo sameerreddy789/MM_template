@@ -25,7 +25,7 @@ const imagesToPreload = [
   // Match what LandingRevamp actually renders. The old background1.png/tree1.png
   // entries no longer exist on disk and only produced failed requests.
   "/images/hero_hills.png",
-  "/images/landing/Tree_new_transparent.png",
+  "/images/landing/new tree.png",
   "/svgs/landing/insta.svg",
   "/svgs/landing/x.svg",
   "/svgs/landing/linkden.svg",

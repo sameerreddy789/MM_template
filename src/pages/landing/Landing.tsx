@@ -10,7 +10,7 @@ import { i } from "framer-motion/client";
 import Navbar from "../components/navbar/Navbar";
 import landingImage from "/images/landing/background1.png";
 import mobileMountains from "/images/landing/mobileMountains.png";
-import tree from "/images/landing/Tree_new_transparent.png";
+import tree from "/images/landing/new tree.png";
 import insta from "/svgs/landing/insta.svg";
 import instaLamp from "/svgs/landing/instaLamp.svg";
 import youtube from "/svgs/landing/youtube.svg";
