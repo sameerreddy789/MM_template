@@ -12,6 +12,10 @@ import TirumalaHills from "../components/TirumalaHills/TirumalaHills";
 import mobileMountains from "/images/hero_hills.png";
 import tree from "/images/landing/new tree.png";
 import treeMob from "/images/landing/new tree.png";
+import djImg from "/images/landing/DJ.png";
+import techImg from "/images/landing/Tech.png";
+import esportsImg from "/images/landing/esports.png";
+import singingImg from "/images/landing/singing_dancing.png";
 import insta from "/svgs/landing/insta.svg";
 import instaLamp from "/svgs/landing/instaLamp.svg";
 import youtube from "/svgs/landing/youtube.svg";
@@ -293,6 +297,23 @@ export default function LandingRevamp({
           trigger: wrapperRef.current,
           start: "50vh",
           end: "+=145vh",
+          scrub: true,
+        },
+      }
+    );
+
+    gsap.fromTo(
+      ".parallaxChar",
+      { autoAlpha: 0, y: "30vh" },
+      {
+        autoAlpha: 1,
+        y: "0vh",
+        stagger: 0.1,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: wrapperRef.current,
+          start: "10vh",
+          end: "+=100vh",
           scrub: true,
         },
       }
@@ -635,6 +656,14 @@ export default function LandingRevamp({
               </div>
 
               <div className={styles.foregroundContainer}>
+                {/* Parallax Characters */}
+                <div className={styles.parallaxContainer}>
+                  <img src={techImg} className={`${styles.techFg} parallaxChar`} alt="Tech" />
+                  <img src={esportsImg} className={`${styles.esportsFg} parallaxChar`} alt="Esports" />
+                  <img src={djImg} className={`${styles.djFg} parallaxChar`} alt="DJ" />
+                  <img src={singingImg} className={`${styles.singingFg} parallaxChar`} alt="Singing" />
+                </div>
+
                 <div className={styles.treeContainer} ref={treeContainerRef}>
                   <div className={styles.tree} ref={treeImageRef}>
                     <div className={styles.socialLinksContainer}>
@@ -742,6 +771,7 @@ export default function LandingRevamp({
                         />
                       </svg> */}
                     </div>
+
                     <img
                       src={tree}
                       // className={styles.tree}
