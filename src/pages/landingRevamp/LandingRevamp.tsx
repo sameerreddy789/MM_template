@@ -302,22 +302,7 @@ export default function LandingRevamp({
       }
     );
 
-    gsap.fromTo(
-      ".parallaxChar",
-      { autoAlpha: 0, y: "30vh" },
-      {
-        autoAlpha: 1,
-        y: "0vh",
-        stagger: 0.1,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: wrapperRef.current,
-          start: "10vh",
-          end: "+=100vh",
-          scrub: true,
-        },
-      }
-    );
+
 
     // The logo sits above the tree now, so it also has to leave with the hero,
     // otherwise it stays parked over the about and contact sections.
@@ -656,14 +641,6 @@ export default function LandingRevamp({
               </div>
 
               <div className={styles.foregroundContainer}>
-                {/* Parallax Characters */}
-                <div className={styles.parallaxContainer}>
-                  <img src={techImg} className={`${styles.techFg} parallaxChar`} alt="Tech" />
-                  <img src={esportsImg} className={`${styles.esportsFg} parallaxChar`} alt="Esports" />
-                  <img src={djImg} className={`${styles.djFg} parallaxChar`} alt="DJ" />
-                  <img src={singingImg} className={`${styles.singingFg} parallaxChar`} alt="Singing" />
-                </div>
-
                 <div className={styles.treeContainer} ref={treeContainerRef}>
                   <div className={styles.tree} ref={treeImageRef}>
                     <div className={styles.socialLinksContainer}>
