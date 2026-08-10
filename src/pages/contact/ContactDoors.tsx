@@ -136,20 +136,25 @@ export default function ContactDoors({
     // .from(galleryContentRef.current, {autoAlpha: 0})
 
     // if (contactSectionRef.current) contactSectionRef.current.style.transform = "translateY(-100vh)"//`translateY(${-((pinElemRef.current?.clientHeight || 0) - (contactSectionRef.current?.clientHeight || 0))})`
-  });
+  }, { dependencies: [pinElemRef, triggerElemRef], revertOnUpdate: true });
 
   // The door trigger is measured off the about section. If that section is still
   // pulling in images when this mounts, start/end land on a stale scroll
-  // position. One refresh once everything has loaded corrects it.
   useEffect(() => {
-    if (document.readyState === "complete") {
+    const timeoutId = setTimeout(() => {
       ScrollTrigger.refresh();
-      return;
-    }
+    }, 200);
 
     const handleLoad = () => ScrollTrigger.refresh();
-    window.addEventListener("load", handleLoad, { once: true });
-    return () => window.removeEventListener("load", handleLoad);
+
+    if (document.readyState !== "complete") {
+      window.addEventListener("load", handleLoad);
+    }
+
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("load", handleLoad);
+    };
   }, []);
 
   useEffect(() => {
