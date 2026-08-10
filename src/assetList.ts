@@ -2,7 +2,7 @@ const assetList = {
     "register": {
         "images": [
             "./images/registration/bg-extended.png",
-            "./svgs/registration/reg-banner.svg",
+            "./images/registration/reg-banner.png",
             "./svgs/registration/bg-mobile.svg",
             "./svgs/registration/leftarr.svg",
             "./svgs/registration/rightarr.svg",
