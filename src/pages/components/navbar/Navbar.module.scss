@@ -1,25 +1,25 @@
 @use "../../../assets/global.scss" as *;
 
 body {
-  --navlink-color: #ffdfd0; //will be changed via gsap later
+  --navlink-color: #f2f2f2; //will be changed via gsap later
 }
 
 .nav {
   user-select: none;
   position: fixed;
-  top: 0;
+  top: 25px;
   left: 0;
   width: 100%;
 
   height: fit-content;
   display: flex;
   align-items: center;
-  height: 100px;
+  height: 70px;
 
   gap: 1svw;
 
   padding-left: 30px;
-  padding-top: 45px;
+  padding-top: 5px;
   z-index: 1000;
 
   .hamMenuBtn {
@@ -147,34 +147,39 @@ body {
     }
   }
 
-  ul {
+  .navItemsContainer {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
-    flex-direction: row !important;
     align-items: center;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    gap: 2svw;
-    @media (max-width:800px)
-    {
-      // display: none;
-      gap:0;
-      li{
-        width: 140px!important;
-      }
-    
-    }
+    justify-content: space-between;
+    width: 90vw; // Utilize full page space
 
-    li {
+    ul {
+      display: flex;
+      flex-direction: row !important;
+      align-items: center;
+      justify-content: space-between;
+      width: 35%; // Spread items out inside each ul
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      
+      @media (max-width: 800px) {
+        display: none; // the original was effectively hidden or collapsed
+      }
+
+      li {
       font-family: $primaryFont;
-      font-size: 2.25rem;
+      font-size: 3.2rem; // Increased font size
       color: var(--navlink-color); //#ffdfd0;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 170px;
-      height: 40px;
+      width: fit-content; // Allow width to scale with font
+      height: auto;
       .navLink {
         color: inherit;
         text-decoration: none;
@@ -199,6 +204,7 @@ body {
         }
       }
     }
+  }
   }
 }
 .aboutVariant {

@@ -8,7 +8,7 @@ import styles from "./Landing.module.scss";
 import { useGSAP } from "@gsap/react";
 import { i } from "framer-motion/client";
 import Navbar from "../components/navbar/Navbar";
-import landingImage from "/images/landing/background1.png";
+import landingImage from "/images/landing/v.png";
 import mobileMountains from "/images/landing/mobileMountains.png";
 import tree from "/images/landing/new tree.png";
 import insta from "/svgs/landing/insta.svg";

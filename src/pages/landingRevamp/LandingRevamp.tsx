@@ -26,7 +26,7 @@ import registerBtn from "/svgs/landing/registerBtn.svg";
 import eventsBtn from "/svgs/landing/mobileEventsBtn.svg";
 import wire from "/svgs/landing/wire.svg";
 import logo from "/images/logo.png";
-import mobileCloud from "/images/landing/mobileCloud.png";
+import mobileCloud from "/images/landing/cloud_1.png";
 import AboutUs from "../aboutus/AboutUs";
 import FloatingCloud from "./components/FloatingCloud/FloatingCloud";
 // import ContactDoors from "../contact/ContactDoors";
@@ -578,46 +578,51 @@ export default function LandingRevamp({
           </div>
         </div>
         <ScrollLabel />
-        <div className={styles.customMusicControls}>
-          <div className={styles.sideLines}>
-            <span /><span /><span /><span />
-          </div>
-          <div className={styles.playerMain}>
-            <button className={styles.playBtn} onClick={onPrev}>
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <rect x="7" y="6" width="2" height="12" />
-                <polygon points="17,6 9,12 17,18" />
-              </svg>
-            </button>
-            <div className={styles.verticalDivider} />
-            <button
-              className={styles.playBtn}
-              onClick={onToggle}
-              aria-label={isPlaying ? "Pause music" : "Play music"}
-              aria-pressed={isPlaying}
-            >
-              {isPlaying ? (
+        <div className={styles.musicControlsContainer}>
+          <div className={styles.customMusicControls}>
+            <div className={styles.sideLines}>
+              <span /><span /><span /><span />
+            </div>
+            <div className={styles.playerMain}>
+              <button className={styles.playBtn} onClick={onPrev}>
                 <svg viewBox="0 0 24 24" fill="currentColor">
-                  <rect x="6" y="5" width="4" height="14" />
-                  <rect x="14" y="5" width="4" height="14" />
+                  <rect x="7" y="6" width="2" height="12" />
+                  <polygon points="17,6 9,12 17,18" />
                 </svg>
-              ) : (
+              </button>
+              <div className={styles.verticalDivider} />
+              <button
+                className={styles.playBtn}
+                onClick={onToggle}
+                aria-label={isPlaying ? "Pause music" : "Play music"}
+                aria-pressed={isPlaying}
+              >
+                {isPlaying ? (
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="6" y="5" width="4" height="14" />
+                    <rect x="14" y="5" width="4" height="14" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="8,5 19,12 8,19" />
+                  </svg>
+                )}
+              </button>
+              <div className={styles.verticalDivider} />
+              <button className={styles.playBtn} onClick={onNext}>
                 <svg viewBox="0 0 24 24" fill="currentColor">
-                  <polygon points="8,5 19,12 8,19" />
+                  <polygon points="7,6 15,12 7,18" />
+                  <rect x="15" y="6" width="2" height="12" />
                 </svg>
-              )}
-            </button>
-            <div className={styles.verticalDivider} />
-            <button className={styles.playBtn} onClick={onNext}>
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="7,6 15,12 7,18" />
-                <rect x="15" y="6" width="2" height="12" />
-              </svg>
-            </button>
+              </button>
+            </div>
+            <div className={`${styles.sideLines} ${styles.rightLines}`}>
+              <span /><span /><span /><span />
+            </div>
           </div>
-          <div className={`${styles.sideLines} ${styles.rightLines}`}>
-            <span /><span /><span /><span />
-          </div>
+          <button className={`${styles.waveBtn} ${isPlaying ? styles.playing : ''}`} onClick={onToggle}>
+            <span /><span /><span /><span /><span />
+          </button>
         </div>
         <div className={styles.scrollerWrapper}>
           <div className={styles.scroller} ref={scrollerRef}>

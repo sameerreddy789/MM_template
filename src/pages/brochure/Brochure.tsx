@@ -8,6 +8,7 @@ export default function Brochure() {
 
     return (
         <div className={styles.brochurePageBg}>
+            <div className={styles.backgroundImage}></div>
             <div className={styles.brochurePage}>
                 <BackButton />
                 <div className={styles.title}>Brochure</div>

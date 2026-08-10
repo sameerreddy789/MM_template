@@ -1,5 +1,4 @@
 import styles from "./Sponsers.module.scss";
-import background from "/images/mediaPartners/bg1.jpg";
 import heading from "/svgs/sponsors/sponsorsHead.svg";
 import dummy from "/images/logo.png";
 import Back from "/svgs/registration/back.svg";
@@ -183,9 +182,7 @@ const Sponsors = () => {
         </button>
         <div className={styles.buttonWrapper}></div>
 
-        <div className={styles.backgroundImage}>
-          <img src={background} alt="background image" draggable={false} />
-        </div>
+        <div className={styles.backgroundImage}></div>
 
         <div className={styles.heading}>
           <img src={heading} alt="heading" draggable={false} />

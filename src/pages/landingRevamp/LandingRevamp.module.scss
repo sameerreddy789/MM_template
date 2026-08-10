@@ -2,8 +2,8 @@
 
 html {
   --registerFontSize: 2rem;
-  --counterBigFontSize: 2.4em;
-  --counterSmallFontSize: 1.2rem;
+  --counterBigFontSize: 2.76em;
+  --counterSmallFontSize: 1.38rem;
   scrollbar-width: none;
 
   img {
@@ -20,8 +20,8 @@ html {
 @media (max-width: 1350px) {
   html {
     --registerFontSize: 1.5rem;
-    --counterBigFontSize: 1.5rem;
-    --counterSmallFontSize: 1.25rem;
+    --counterBigFontSize: 1.725rem;
+    --counterSmallFontSize: 1.4375rem;
   }
 }
 
@@ -40,8 +40,8 @@ html {
 @media (max-width: 800px) {
   html {
     --registerFontSize: 1rem;
-    --counterBigFontSize: 2.4rem;
-    --counterSmallFontSize: 0.9rem;
+    --counterBigFontSize: 2.76rem;
+    --counterSmallFontSize: 1.035rem;
   }
 }
 
@@ -338,7 +338,7 @@ body {
     user-select: none;
     position: fixed;
     z-index: 200;
-    top: 35px;
+    top: 25px;
     left: 50%;
     transform: translateX(-50%);
     width: fit-content;
@@ -347,9 +347,9 @@ body {
     gap: 0.5svw;
     will-change: auto;
     font-family: $primaryFont;
-    color: #ffaa00;
+    color: #ffd703;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
-    font-size: 2rem;
+    font-size: 2.3rem;
     text-align: center;
     background-color: none;
 
@@ -366,13 +366,13 @@ body {
     }
 
     div:nth-of-type(even) {
-      font-size: 3rem;
+      font-size: 3.45rem;
 
       // The separators are the widest part of the counter. On narrower desktops
       // the navbar-to-player gap is only just wider than the counter itself, so
       // trimming them here buys real clearance instead of a hairline miss.
       @media (max-width: 1350px) {
-        font-size: 2rem;
+        font-size: 2.3rem;
       }
 
       @media (max-width: 800px) {
@@ -385,20 +385,71 @@ body {
     }
   }
 
-  .customMusicControls {
+  .musicControlsContainer {
     position: fixed;
     z-index: 1001;
     right: 3vw;
-    top: 45px;
+    top: 90px;
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 15px;
 
     @media screen and (max-width: 730px) {
       bottom: 30px;
       right: 20px;
       top: unset;
     }
+  }
+
+  .waveBtn {
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #ffd700;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.6), inset 0 0 12px rgba(255, 215, 0, 0.4);
+    border-radius: 20px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    height: 36px;
+    transition: transform 0.2s, filter 0.2s;
+
+    &:hover {
+      transform: scale(1.05);
+      filter: brightness(1.2);
+    }
+
+    span {
+      display: block;
+      width: 4px;
+      height: 6px;
+      background: #ffd700;
+      border-radius: 2px;
+      box-shadow: 0 0 5px #ffd700;
+      transition: height 0.2s ease;
+    }
+
+    &.playing span {
+      animation: waveAnimation 0.8s ease-in-out infinite alternate;
+    }
+    
+    &.playing span:nth-child(1) { animation-delay: 0.0s; }
+    &.playing span:nth-child(2) { animation-delay: 0.2s; }
+    &.playing span:nth-child(3) { animation-delay: 0.4s; }
+    &.playing span:nth-child(4) { animation-delay: 0.2s; }
+    &.playing span:nth-child(5) { animation-delay: 0.0s; }
+  }
+
+  @keyframes waveAnimation {
+    0% { height: 6px; }
+    100% { height: 20px; }
+  }
+
+  .customMusicControls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 
     .sideLines {
       display: flex;

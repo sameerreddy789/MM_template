@@ -1,5 +1,4 @@
 import styles from "./Events.module.scss";
-import EventBack from "/svgs/events/eventsback.svg";
 import Text from "/images/events/text.png";
 import dance from "/images/events/dance.png";
 import drama from "/images/events/drama.png";
@@ -272,8 +271,8 @@ const Events: React.FC = () => {
     <div
       className={styles.eventsmaincontainer}
       ref={EventRef}
-      style={{ backgroundImage: `url("${EventBack}")` }}
     >
+      <div className={styles.background}></div>
       <Helmet>
         <title>Events | MohanaMantra 2K26 | MBU</title>
         <meta

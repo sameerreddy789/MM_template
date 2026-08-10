@@ -22,19 +22,17 @@ const navItems = [
   { label: "Events", links: "/events" },
   { label: "Gallery", links: "/gallery" },
   { label: "Sponsors", links: "/sponsors" },
+  { label: "Brochure", links: "/brochure" },
 ];
 
 export default function Navbar({
-  hideHam = false,
   variant = "default",
 }: {
-  hideHam?: boolean;
   variant?: "default" | "about";
 }) {
   const { goToPage } = useContext(navContext);
 
   // const setHamOpen = useHamStore((state) => state.setHamOpen);
-  const setMainHamOpen = useMainHamStore((state) => state.setMainHamOpen);
   const navRef = useRef<HTMLElement>(null);
   const [navShow, setNavShow] = useState<number>(1);
   const lastScrollY = useRef<number>(0);
@@ -118,7 +116,7 @@ export default function Navbar({
       const colorAnimation = gsap.fromTo(
         document.body,
         {
-          "--navlink-color": "#ffdfd0",
+          "--navlink-color": "#f2f2f2",
         },
         {
           scrollTrigger: {
@@ -157,9 +155,6 @@ export default function Navbar({
     };
   }, []);
 
-  const handleHamClick = () => {
-    setMainHamOpen(true);
-  };
   return (
     <motion.nav
       initial={{ y: 0 }}
@@ -170,57 +165,34 @@ export default function Navbar({
         variant === "about" ? styles.aboutVariant : ""
       }`}
     >
-      {!hideHam && (
-        <div className={styles.hamMenuBtn} onClick={handleHamClick}>
-          <img src={moon} alt="moon" className={styles.moon} />
-          <img src={moonHam} alt="moonHam" className={styles.moonHam} />
-          <div className={styles.clouds}>
-            <img
-              src={cloud1}
-              alt="Cloud1"
-              className={`${styles.cloud1} ${styles.cloud}`}
-            />
-            <img
-              src={cloud2}
-              alt="Cloud2"
-              className={`${styles.cloud2} ${styles.cloud}`}
-            />
-            <img
-              src={cloud3}
-              alt="Cloud3"
-              className={`${styles.cloud3} ${styles.cloud}`}
-            />
-            <img
-              src={cloud4}
-              alt="Cloud4"
-              className={`${styles.cloud4} ${styles.cloud}`}
-            />
-            <img
-              src={cloud5}
-              alt="Cloud5"
-              className={`${styles.cloud5} ${styles.cloud}`}
-            />
-            <img
-              src={cloud6}
-              alt="Cloud6"
-              className={`${styles.cloud6} ${styles.cloud}`}
-            />
-          </div>
-        </div>
-      )}
-      <ul className={styles.navList}>
-        {navItems.map((item) => (
-          <li
-            key={item.label}
-            className={styles.navItem}
-            onClick={() => goToPage?.(item.links)}
-          >
-            <div className={styles.navLink}>
-              <div className={styles.actualLabel}>{item.label}</div>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div className={styles.navItemsContainer}>
+        <ul>
+          {navItems.slice(0, 2).map((item) => (
+            <li
+              key={item.label}
+              className={styles.navItem}
+              onClick={() => goToPage?.(item.links)}
+            >
+              <div className={styles.navLink}>
+                <div className={styles.actualLabel}>{item.label}</div>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <ul>
+          {navItems.slice(2).map((item) => (
+            <li
+              key={item.label}
+              className={styles.navItem}
+              onClick={() => goToPage?.(item.links)}
+            >
+              <div className={styles.navLink}>
+                <div className={styles.actualLabel}>{item.label}</div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
     </motion.nav>
   );
 }
