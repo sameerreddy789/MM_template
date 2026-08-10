@@ -7,7 +7,6 @@ import styles from "./LandingRevamp.module.scss";
 
 import { useGSAP } from "@gsap/react";
 import Navbar from "../components/navbar/Navbar";
-import landingImage from "/images/hero_hills.png";
 import TirumalaHills from "../components/TirumalaHills/TirumalaHills";
 import mobileMountains from "/images/hero_hills.png";
 import tree from "/images/landing/new tree.png";
@@ -231,37 +230,29 @@ export default function LandingRevamp({
   useGSAP(() => {
     if (treeImageRef.current && landingRef.current) {
       gsap.set(treeImageRef.current, {
-        // autoAlpha: 1,
-        // scale: 1,
-        // y: 0,
         force3D: false,
       });
 
       gsap.set(landingRef.current, {
-        // autoAlpha: 1,
-        // scale: 1,
-        // y: 0,
         force3D: false,
       });
 
       gsap.set(scrollerRef.current, {
-        // autoAlpha: 1,
-        // scale: 1,
-        // y: 0,
         force3D: false,
       });
     }
 
     gsap.fromTo(
       registerButtonRef.current,
-      { autoAlpha: 1 },
+      { autoAlpha: 1, scale: 1 },
       {
         autoAlpha: 0,
+        scale: 1.15,
         ease: "power2.inOut",
         scrollTrigger: {
           trigger: wrapperRef.current,
-          start: "50vh",
-          end: "+=145vh",
+          start: "20vh",
+          end: "+=100vh",
           scrub: true,
         },
       }
@@ -269,57 +260,70 @@ export default function LandingRevamp({
 
     gsap.fromTo(
       eventsButtonRef.current,
-      { autoAlpha: 1 },
+      { autoAlpha: 1, scale: 1 },
       {
         autoAlpha: 0,
+        scale: 1.15,
         ease: "power2.inOut",
         scrollTrigger: {
           trigger: wrapperRef.current,
-          start: "50vh",
-          end: "+=145vh",
+          start: "20vh",
+          end: "+=100vh",
           scrub: true,
         },
       }
     );
 
-
-
-    // The logo sits above the tree now, so it also has to leave with the hero,
-    // otherwise it stays parked over the about and contact sections.
+    // The logo zooms up and fades out as user scrolls
     gsap.fromTo(
       logoRef.current,
-      { autoAlpha: 1 },
+      { autoAlpha: 1, scale: 1 },
       {
         autoAlpha: 0,
+        scale: 1.35,
         ease: "power2.inOut",
         scrollTrigger: {
           trigger: wrapperRef.current,
-          start: "30vh",
-          end: "+=70vh",
+          start: "15vh",
+          end: "+=85vh",
           scrub: true,
         },
       }
     );
+
+    // Second Page (About Us) Pop & Zoom entrance
+    if (aboutUsWrapperRef.current) {
+      gsap.fromTo(
+        aboutUsWrapperRef.current,
+        {
+          scale: 0.72,
+          opacity: 0,
+          y: 150,
+          transformOrigin: "center top",
+        },
+        {
+          scale: 1,
+          opacity: 1,
+          y: 0,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: aboutUsContRef.current || aboutUsWrapperRef.current,
+            start: "top 95%",
+            end: "top 35%",
+            scrub: 1.2,
+            invalidateOnRefresh: true,
+          },
+        }
+      );
+    }
 
     const mm = gsap.matchMedia();
 
     mm.add("(max-width: 730px) or (aspect-ratio < 8/12)", () => {
-      // const masterTimeline = gsap.timeline({
-      //   scrollTrigger: {
-      //     trigger: wrapperRef.current,
-      //     start: "top top",
-      //     end: `+=300vh`,
-      //     scrub: true,
-      //     invalidateOnRefresh: true,
-      //   },
-      // });
-
-      // masterTimeline
-
       gsap.to(
         treeImageRef.current,
         {
-          scale: 1.15,
+          scale: 1.6,
           ease: "power2.inOut",
           force3D: false,
           scrollTrigger: {
@@ -330,14 +334,12 @@ export default function LandingRevamp({
             invalidateOnRefresh: true,
           },
         }
-        // 0
       );
 
       gsap.to(
         landingMobileRef.current,
         {
-          scale: 1.08,
-          // y: "8%",
+          scale: 1.45,
           ease: "power2.inOut",
           force3D: false,
           scrollTrigger: {
@@ -348,28 +350,25 @@ export default function LandingRevamp({
             invalidateOnRefresh: true,
           },
         }
-        // 0
       );
-
-
     });
+
     mm.add("(min-width: 730px) and (aspect-ratio > 8/12)", () => {
       const masterTimeline = gsap.timeline({
         scrollTrigger: {
           trigger: wrapperRef.current,
           start: "top top",
           end: `+=${scrollHeight}px`,
-          scrub: 1.5,
+          scrub: 1.2,
           invalidateOnRefresh: true,
         },
       });
       masterTimeline
-
         .to(
           treeImageRef.current,
           {
-            scale: 1.2,
-            // y: "14%",
+            scale: 1.8,
+            y: "8%",
             duration: 2,
             force3D: false,
           },
@@ -378,19 +377,14 @@ export default function LandingRevamp({
         .to(
           landingRef.current,
           {
-            scale: 1.1,
-            // y: "8%",
+            scale: 1.5,
             duration: 2,
             force3D: false,
           },
           0
         );
-
-
-
-
-
     });
+
     return () => {
       mm.revert();
     };

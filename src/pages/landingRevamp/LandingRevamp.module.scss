@@ -921,6 +921,8 @@ body {
       .aboutUsWrapper {
         min-height: 100vh;
         position: relative;
+        will-change: transform, opacity;
+        transform-origin: center top;
       }
 
       .aboutUsBottom {
