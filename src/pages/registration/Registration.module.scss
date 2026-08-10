@@ -54,6 +54,17 @@
       object-fit: contain;
     }
   }
+  // Absolutely positioned on purpose: Instructions / Register / Events are
+  // in-flow flex children of .instrback, so adding the countdown to the flow
+  // would push the animated panels out of place.
+  .regCountdown {
+    position: absolute;
+    bottom: 3vh;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 4;
+    pointer-events: none;
+  }
   .backBtn {
     outline: none;
     border: none;
