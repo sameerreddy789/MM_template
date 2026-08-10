@@ -42,6 +42,17 @@ gsap.registerPlugin(ScrollTrigger);
 
 const TARGET_DATE = new Date("2026-10-30T00:00:00+05:30");
 
+// Bars for the music player's background visualiser. Many thin bars rather than a
+// few thick ones is what keeps it slim instead of blocky. Timings are derived from
+// the index rather than Math.random() so the pattern stays identical across
+// renders - a random one would reshuffle every second when the countdown ticks and
+// make the wave stutter. The long, spread-out durations give the slow travelling
+// ripple you get in a Spotify-style equaliser rather than a frantic flicker.
+const WAVE_BARS = Array.from({ length: 26 }, (_, i) => ({
+  duration: 1.15 + ((i * 37) % 17) / 20, // 1.15s - 1.95s
+  delay: -(((i * 53) % 23) / 20), // negative: bars start mid-cycle, already staggered
+}));
+
 const socialLinks = [
   {
     icon: youtube,
@@ -580,9 +591,6 @@ export default function LandingRevamp({
         <ScrollLabel />
         <div className={styles.musicControlsContainer}>
           <div className={styles.customMusicControls}>
-            <div className={styles.sideLines}>
-              <span /><span /><span /><span />
-            </div>
             <div className={styles.playerMain}>
               <button className={styles.playBtn} onClick={onPrev}>
                 <svg viewBox="0 0 24 24" fill="currentColor">
@@ -615,24 +623,26 @@ export default function LandingRevamp({
                   <rect x="15" y="6" width="2" height="12" />
                 </svg>
               </button>
-              <div className={styles.verticalDivider} />
-              {/* Playback indicator, not a control: the play/pause button above
-                  already toggles, so this is decorative and hidden from AT. */}
+
+              {/* Ambient visualiser layered behind the transport controls, so it
+                  fills the whole frame rather than occupying a slot in the row.
+                  Decorative only - the play/pause button is the actual control. */}
               <div
                 className={`${styles.songWave} ${
                   isPlaying ? styles.playing : ""
                 }`}
                 aria-hidden="true"
               >
-                <span />
-                <span />
-                <span />
-                <span />
-                <span />
+                {WAVE_BARS.map((bar, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      animationDuration: `${bar.duration}s`,
+                      animationDelay: `${bar.delay}s`,
+                    }}
+                  />
+                ))}
               </div>
-            </div>
-            <div className={`${styles.sideLines} ${styles.rightLines}`}>
-              <span /><span /><span /><span />
             </div>
           </div>
         </div>

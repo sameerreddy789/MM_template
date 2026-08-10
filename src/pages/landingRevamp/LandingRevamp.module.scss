@@ -407,48 +407,41 @@ body {
   // `height`. Height animation relayouts the flex row every frame and fought the
   // `transition: height` that used to sit on the same property; scaleY runs on
   // the compositor and leaves the player's width alone.
-  @keyframes songWaveBounce {
-    from {
-      transform: scaleY(0.18);
+  //
+  // Several waypoints on one continuous loop, rather than a two-point
+  // `alternate` bounce. A bounce visibly stalls at both ends and all bars share
+  // that rhythm, which is what made the old version feel mechanical and heavy.
+  // Matching the 0% and 100% values keeps the loop seamless.
+  @keyframes songWave {
+    0%,
+    100% {
+      transform: scaleY(0.22);
     }
-    to {
+    18% {
+      transform: scaleY(0.82);
+    }
+    34% {
+      transform: scaleY(0.38);
+    }
+    52% {
       transform: scaleY(1);
+    }
+    68% {
+      transform: scaleY(0.44);
+    }
+    84% {
+      transform: scaleY(0.66);
     }
   }
 
   .customMusicControls {
     display: flex;
     align-items: center;
-    gap: 10px;
-
-    .sideLines {
-      display: flex;
-      gap: 3px;
-      height: 30px;
-      align-items: center;
-
-      span {
-        width: 2px;
-        background: #ffd700;
-        display: block;
-        box-shadow: 0 0 8px #ffd700;
-      }
-
-      span:nth-child(1) { height: 10px; }
-      span:nth-child(2) { height: 16px; }
-      span:nth-child(3) { height: 22px; }
-      span:nth-child(4) { height: 30px; }
-    }
-
-    .rightLines {
-      span:nth-child(1) { height: 30px; }
-      span:nth-child(2) { height: 22px; }
-      span:nth-child(3) { height: 16px; }
-      span:nth-child(4) { height: 10px; }
-    }
 
     .playerMain {
       display: flex;
+      // Anchors the absolutely positioned .songWave behind the controls.
+      position: relative;
       border: 2px solid #ffd700;
       box-shadow: 0 0 12px rgba(255, 215, 0, 0.6), inset 0 0 12px rgba(255, 215, 0, 0.4);
       clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
@@ -463,6 +456,9 @@ body {
         background: #ffd700;
         margin: 0 5px;
         box-shadow: 0 0 8px #ffd700;
+        // Above the visualiser layer
+        position: relative;
+        z-index: 1;
       }
 
       .playBtn {
@@ -475,6 +471,9 @@ body {
         align-items: center;
         justify-content: center;
         transition: transform 0.2s, filter 0.2s;
+        // Above the visualiser layer
+        position: relative;
+        z-index: 1;
 
         svg {
           width: 20px;
@@ -488,58 +487,52 @@ body {
         }
       }
 
-      // Sits inside the player frame, so it carries no border or background of
-      // its own: the surrounding .playerMain already provides those.
+      // Background visualiser: fills the frame behind the transport controls
+      // rather than sitting in the flex row. .playerMain's clip-path trims it to
+      // the bevelled frame shape, so no extra masking is needed.
       .songWave {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
         display: flex;
-        align-items: center;
-        gap: 3px;
-        height: 20px;
-        padding-right: 6px;
+        // Bars grow up off a shared baseline the way an equaliser does, rather
+        // than expanding from the middle in both directions.
+        align-items: flex-end;
+        justify-content: space-between;
+        padding: 0 6px 6px;
+        pointer-events: none;
+        // Low enough to sit under the icons as texture rather than competing.
+        opacity: 0.3;
 
         span {
           display: block;
-          width: 3px;
-          height: 100%;
+          // Fixed hairline width: space-between then spreads them edge to edge,
+          // so the wave spans the frame whatever its width without the bars
+          // fattening up to fill it.
+          flex: 0 0 2px;
+          height: 58%;
           background: #ffd700;
-          border-radius: 2px;
-          box-shadow: 0 0 5px #ffd700;
-          transform: scaleY(0.18);
-          transform-origin: center;
-          // When playback stops the animation is removed and the bar eases back
+          border-radius: 1px;
+          box-shadow: 0 0 4px rgba(255, 215, 0, 0.7);
+          transform: scaleY(0.22);
+          transform-origin: bottom;
+          // When playback stops the animation is removed and each bar eases back
           // down to the flat idle state instead of snapping.
-          transition: transform 0.35s ease;
+          transition: transform 0.4s ease;
         }
 
-        // Each bar runs on its own clock so the wave reads as audio rather than
-        // five bars blinking in unison.
+        // Per-bar duration and delay come from inline styles (see WAVE_BARS) so
+        // the bars drift out of phase and read as audio rather than one block.
         &.playing span {
-          animation: songWaveBounce 0.9s ease-in-out infinite alternate;
-        }
-        &.playing span:nth-child(1) {
-          animation-duration: 0.72s;
-        }
-        &.playing span:nth-child(2) {
-          animation-duration: 1.04s;
-          animation-delay: 0.13s;
-        }
-        &.playing span:nth-child(3) {
-          animation-duration: 0.84s;
-          animation-delay: 0.06s;
-        }
-        &.playing span:nth-child(4) {
-          animation-duration: 1.16s;
-          animation-delay: 0.2s;
-        }
-        &.playing span:nth-child(5) {
-          animation-duration: 0.94s;
-          animation-delay: 0.1s;
+          animation-name: songWave;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
         }
 
         @media (prefers-reduced-motion: reduce) {
           &.playing span {
             animation: none;
-            transform: scaleY(0.6);
+            transform: scaleY(0.45);
           }
         }
       }
