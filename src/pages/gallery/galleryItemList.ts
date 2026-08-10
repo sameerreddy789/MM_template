@@ -12,14 +12,14 @@ const galleryImageProperties: ImageProperty[] = [
         type: 'streamable',
         modifiers: { objectFit: 'cover' }
     },
-    { src: '/images/gallery/DSC07093.JPG', type: 'image', modifiers: { objectFit: 'cover' } },
-    { src: '/images/gallery/GETH0373.JPG', type: 'image', modifiers: { objectFit: 'cover' } },
-    { src: '/images/events/music.png', type: 'image', modifiers: { objectFit: 'cover' } },
-    { src: '/images/events/photography.png', type: 'image', modifiers: { objectFit: 'cover' } },
-    { src: '/images/events/dance.png', type: 'image', modifiers: { objectFit: 'cover' } },
-    { src: '/images/gallery/DSC07093.JPG', type: 'image', modifiers: { objectFit: 'cover' } },
-    { src: '/images/events/drama.png', type: 'image', modifiers: { objectFit: 'cover' } },
-    { src: '/images/events/music.png', type: 'image', modifiers: { objectFit: 'cover' } }
+    { src: '/images/gallery/top1.png', type: 'image', modifiers: { objectFit: 'cover' } },
+    { src: '/images/gallery/top2.png', type: 'image', modifiers: { objectFit: 'cover' } },
+    { src: '/images/gallery/left-up.png', type: 'image', modifiers: { objectFit: 'cover' } },
+    { src: '/images/gallery/left-bottom.png', type: 'image', modifiers: { objectFit: 'cover' } },
+    { src: '/images/gallery/right-up.png', type: 'image', modifiers: { objectFit: 'cover' } },
+    { src: '/images/gallery/right-bottom.png', type: 'image', modifiers: { objectFit: 'cover' } },
+    { src: '/images/gallery/bottom1.png', type: 'image', modifiers: { objectFit: 'cover' } },
+    { src: '/images/gallery/bottom2.png', type: 'image', modifiers: { objectFit: 'cover' } }
 ]
 
 export default galleryImageProperties;

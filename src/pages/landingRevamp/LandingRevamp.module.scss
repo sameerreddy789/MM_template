@@ -253,7 +253,8 @@ body {
     position: fixed;
     left: 2svw;
     bottom: 8svw;
-    width: 23svw;
+    // 23svw + 20%
+    width: 27.6svw;
     will-change: auto;
     z-index: 300;
 
@@ -542,7 +543,8 @@ body {
       left: 50%;
       transform: translateX(-50%);
       top: 90px;
-      width: 300px;
+      // 300px + 20%
+      width: 360px;
     }
 
     .dateCountdown {
