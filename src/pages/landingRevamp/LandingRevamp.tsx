@@ -34,7 +34,8 @@ import FloatingCloud from "./components/FloatingCloud/FloatingCloud";
 import MainHam from "../components/mainHam/mainHam";
 import Lenis from "@studio-freight/lenis";
 
-import { useMainHamStore } from "../../utils/store";
+import { useMainHamStore, useNavVisibilityStore } from "../../utils/store";
+import { motion } from "framer-motion";
 import ContactDoors from "../contact/ContactDoors";
 import { Helmet } from "react-helmet";
 import ScrollLabel from "./components/ScrollLabel";
@@ -86,6 +87,8 @@ export default function LandingRevamp({
   audioRef: React.RefObject<HTMLAudioElement | null>;
 }) {
   const [isPlaying, setIsPlaying] = useState(false);
+  // Written by the navbar's scroll listener; the player mirrors it.
+  const isNavVisible = useNavVisibilityStore((state) => state.isNavVisible);
   const overlayIsActive = useOverlayStore((state) => state.isActive);
   const removeGif = useOverlayStore((state) => state.removeGif);
   const setRemoveGif = useOverlayStore((state) => state.setRemoveGif);
@@ -590,7 +593,23 @@ export default function LandingRevamp({
         </div>
         <ScrollLabel />
         <div className={styles.musicControlsContainer}>
-          <div className={styles.customMusicControls}>
+          <motion.div
+            className={styles.customMusicControls}
+            // Same target offset and spring as the navbar in Navbar.tsx, driven off
+            // the shared store, so the two slide away and return together rather
+            // than the player staying pinned over about us / contact.
+            initial={{ y: 0, opacity: 1 }}
+            // Travels further than the navbar's -120 because it sits lower in the
+            // viewport: -120 left a sliver of the frame on screen. Fading as well
+            // guarantees it is gone regardless of where the frame ends up.
+            animate={{
+              y: isNavVisible ? 0 : -180,
+              opacity: isNavVisible ? 1 : 0,
+            }}
+            transition={{ type: "spring", stiffness: 80, damping: 20 }}
+            // Not clickable once hidden.
+            style={{ pointerEvents: isNavVisible ? "auto" : "none" }}
+          >
             <div className={styles.playerMain}>
               <button className={styles.playBtn} onClick={onPrev}>
                 <svg viewBox="0 0 24 24" fill="currentColor">
@@ -644,7 +663,7 @@ export default function LandingRevamp({
                 ))}
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
         <div className={styles.scrollerWrapper}>
           <div className={styles.scroller} ref={scrollerRef}>

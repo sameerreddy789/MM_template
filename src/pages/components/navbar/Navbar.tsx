@@ -7,8 +7,8 @@ import cloud3 from "/svgs/landing/hamClouds/cloud3.min.svg";
 import cloud4 from "/svgs/landing/hamClouds/cloud4.min.svg";
 import cloud5 from "/svgs/landing/hamClouds/cloud5.min.svg";
 import cloud6 from "/svgs/landing/hamClouds/cloud6.min.svg";
-import { useEffect, useContext, useRef, useState } from "react";
-import { useMainHamStore } from "../../../utils/store";
+import { useEffect, useContext, useRef } from "react";
+import { useMainHamStore, useNavVisibilityStore } from "../../../utils/store";
 import { navContext } from "../../../App";
 import { gsap } from "gsap";
 import _ScrollTrigger, { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -34,7 +34,9 @@ export default function Navbar({
 
   // const setHamOpen = useHamStore((state) => state.setHamOpen);
   const navRef = useRef<HTMLElement>(null);
-  const [navShow, setNavShow] = useState<number>(1);
+  // Published to the store so the music player can hide alongside the header.
+  const navShow = useNavVisibilityStore((state) => state.isNavVisible);
+  const setNavShow = useNavVisibilityStore((state) => state.setNavVisible);
   const lastScrollY = useRef<number>(0);
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export default function Navbar({
 
     const handleScroll = () => {
       if (isPhone()) {
-        setNavShow(1);
+        setNavShow(true);
         return;
       }
 
@@ -57,9 +59,9 @@ export default function Navbar({
           const diff = currentY - lastScrollY.current;
 
           if (diff > threshold && currentY > 80) {
-            setNavShow(0);
+            setNavShow(false);
           } else if (diff < 9 - threshold) {
-            setNavShow(1);
+            setNavShow(true);
           }
 
           lastScrollY.current = currentY;
@@ -72,7 +74,7 @@ export default function Navbar({
     window.addEventListener("scroll", handleScroll);
     const handleResize = () => {
       if (isPhone()) {
-        setNavShow(1);
+        setNavShow(true);
       }
     };
     window.addEventListener("resize", handleResize);
