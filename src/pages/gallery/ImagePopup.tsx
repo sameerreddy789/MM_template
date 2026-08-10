@@ -45,6 +45,14 @@ export default function ImagePopup({ index, onClose }: ImagePopupProps) {
                             className={styles.imagePopupImage}
                             src={galleryItemList[currentImageIndex].src}
                             autoPlay loop controls
+                            onClick={(e) => {
+                                const video = e.currentTarget;
+                                if (video.paused) {
+                                    video.play();
+                                } else {
+                                    video.pause();
+                                }
+                            }}
                         />
                     ) : (
                         <img 

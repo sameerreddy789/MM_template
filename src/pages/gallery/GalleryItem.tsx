@@ -62,7 +62,16 @@ function GalleryItem({ galleryItem, index, onClick }: GalleryItemProps) {
                     style={galleryItem.modifiers}
                     src={galleryItem.src} 
                     id={`gallery-image-${index}`}
-                    autoPlay muted loop playsInline
+                    autoPlay loop playsInline
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        const video = e.currentTarget;
+                        if (video.paused) {
+                            video.play();
+                        } else {
+                            video.pause();
+                        }
+                    }}
                 />
             ) : (
                 <>

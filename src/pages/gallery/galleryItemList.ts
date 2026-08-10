@@ -8,12 +8,11 @@ interface ImageProperty {
 
 const galleryImageProperties: ImageProperty[] = [
     {
-        src: 'w82a8m',
-        type: 'streamable',
-        modifiers: { objectFit: 'cover' }
+        src: '/videos/1_Glimpse_of_MM2k23.mp4',
+        type: 'video',
+        modifiers: { objectFit: 'contain' }
     },
-    { src: '/images/gallery/top1.png', type: 'image', modifiers: { objectFit: 'cover' } },
-    { src: '/images/gallery/top2.png', type: 'image', modifiers: { objectFit: 'cover' } },
+    { src: '/images/gallery/top1.png', type: 'image', modifiers: { objectFit: 'cover', objectPosition: 'center' } },
     { src: '/images/gallery/left-up.png', type: 'image', modifiers: { objectFit: 'cover' } },
     { src: '/images/gallery/left-bottom.png', type: 'image', modifiers: { objectFit: 'cover' } },
     { src: '/images/gallery/right-up.png', type: 'image', modifiers: { objectFit: 'cover' } },
