@@ -91,17 +91,17 @@
     padding: 30px 0 20px;
     flex-shrink: 0;
     img {
-      height: 125px;
+      height: 100px;
     }
 
     @media screen and (max-width: 900px) {
       img {
-        height: 100px;
+        height: 80px;
       }
     }
     @media screen and (max-width: 500px) {
       img {
-        height: 75px;
+        height: 60px;
       }
     }
   }
