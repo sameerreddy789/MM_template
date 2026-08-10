@@ -1,9 +1,5 @@
 import BackButton from '../components/backButton/BackButton';
 import styles from './Brochure.module.scss';
-import { FaDownload } from 'react-icons/fa6';
-
-const pdfFile = "/Brochure.pdf";
-
 export default function Brochure() {
 
     return (

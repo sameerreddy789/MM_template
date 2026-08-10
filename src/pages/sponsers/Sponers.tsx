@@ -1,9 +1,8 @@
 import styles from "./Sponsers.module.scss";
 import heading from "/svgs/sponsors/sponsorsHead.svg";
 import dummy from "/images/logo.png";
-import Back from "/svgs/registration/back.svg";
-import { useContext, useEffect } from "react";
-import { navContext } from "../../App";
+import BackButton from "../components/backButton/BackButton";
+import { useEffect } from "react";
 
 //nothing is changed
 
@@ -145,8 +144,6 @@ const sponsors = {
 };
 
 const Sponsors = () => {
-  const { goToPage } = useContext(navContext);
-
   useEffect(() => {
     document.body.classList.remove("scroll-locked");
     document.body.style.position = "";
@@ -155,9 +152,6 @@ const Sponsors = () => {
     document.documentElement.style.overflow = "";
   }, []);
 
-  const backButtonHandler = () => {
-    goToPage?.("/");
-  };
 
   return (
     <>
@@ -177,9 +171,7 @@ const Sponsors = () => {
           zIndex: 1,
         }}
       >
-        <button onClick={backButtonHandler} className={styles.backBtn}>
-          <img src={Back} alt="Back Button" />
-        </button>
+        <BackButton />
         <div className={styles.buttonWrapper}></div>
 
         <div className={styles.backgroundImage}></div>

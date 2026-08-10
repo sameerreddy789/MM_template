@@ -8,7 +8,7 @@ import Events from "../../pages/registration/components/Events/Events";
 import bgExtend from "/images/registration/bg-extended.png";
 import banner from "/svgs/registration/reg-banner.svg";
 import bgMobile from "/svgs/registration/bg-mobile.svg";
-import Back from "/svgs/registration/back.svg";
+import BackButton from "../components/backButton/BackButton";
 
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
@@ -275,6 +275,7 @@ const Registration = ({ goToPage }: RegistrationProps) => {
   };
 
   const backButtonHandler = () => {
+    if (isAnim) return;
     switch (currentPage) {
       case 1:
         goToPage("/");
@@ -349,13 +350,7 @@ const Registration = ({ goToPage }: RegistrationProps) => {
       <div className={styles.birds}>
         <img src={banner} alt="banner" className={styles.bannerImage} />
       </div>
-      <button
-        disabled={isAnim}
-        onClick={backButtonHandler}
-        className={styles.backBtn}
-      >
-        <img src={Back} alt="Back Button" />
-      </button>
+      <BackButton onClick={backButtonHandler} />
 
       <Instructions onGoogleSignIn={onGoogleSignIn} ref={elemRef1} />
       <Register
