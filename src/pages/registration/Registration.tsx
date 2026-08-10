@@ -6,7 +6,7 @@ import Register from "../../pages/registration/components/Register/Register";
 import Events from "../../pages/registration/components/Events/Events";
 
 import bgExtend from "/images/registration/bg-extended.png";
-import banner from "/svgs/registration/reg-banner.svg";
+import banner from "/images/registration/reg-banner.png";
 import bgMobile from "/svgs/registration/bg-mobile.svg";
 import BackButton from "../components/backButton/BackButton";
 
