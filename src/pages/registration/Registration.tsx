@@ -351,18 +351,8 @@ const Registration = ({ goToPage }: RegistrationProps) => {
       <div className={styles.birds}>
         <img src={banner} alt="banner" className={styles.bannerImage} />
       </div>
-<<<<<<< HEAD
-      <BackButton onClick={backButtonHandler} />
-=======
       <Countdown className={styles.regCountdown} />
-      <button
-        disabled={isAnim}
-        onClick={backButtonHandler}
-        className={styles.backBtn}
-      >
-        <img src={Back} alt="Back Button" />
-      </button>
->>>>>>> 85e20cf (Changed the Countdown Place to Registrations &  Placed Music Player)
+      <BackButton onClick={backButtonHandler} />
 
       <Instructions onGoogleSignIn={onGoogleSignIn} ref={elemRef1} />
       <Register
