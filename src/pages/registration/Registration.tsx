@@ -14,7 +14,6 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef, useState, useEffect } from "react";
 import BreadCrumb from "../components/breadCrumb/BreadCrumb";
-import Countdown from "../components/countdown/Countdown";
 interface RegistrationProps {
   startAnimation: boolean;
   goToPage: (path: string) => void;
@@ -351,18 +350,7 @@ const Registration = ({ goToPage }: RegistrationProps) => {
       <div className={styles.birds}>
         <img src={banner} alt="banner" className={styles.bannerImage} />
       </div>
-<<<<<<< HEAD
       <BackButton onClick={backButtonHandler} />
-=======
-      <Countdown className={styles.regCountdown} />
-      <button
-        disabled={isAnim}
-        onClick={backButtonHandler}
-        className={styles.backBtn}
-      >
-        <img src={Back} alt="Back Button" />
-      </button>
->>>>>>> 85e20cf (Changed the Countdown Place to Registrations &  Placed Music Player)
 
       <Instructions onGoogleSignIn={onGoogleSignIn} ref={elemRef1} />
       <Register

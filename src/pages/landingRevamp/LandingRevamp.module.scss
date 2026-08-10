@@ -335,29 +335,70 @@ body {
     }
   }
 
+  .dateCountdown {
+    user-select: none;
+    position: fixed;
+    z-index: 200;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: fit-content;
+    display: flex;
+    justify-content: center;
+    gap: 0.5svw;
+    will-change: auto;
+    font-family: $primaryFont;
+    color: #ffd703;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+    font-size: 2.3rem;
+    text-align: center;
+    background-color: none;
+
+    .timeLeft {
+      font-size: var(--counterSmallFontSize);
+
+      .days,
+      .hours,
+      .minutes,
+      .seconds {
+        font-size: var(--counterBigFontSize);
+        font-weight: bold;
+      }
+    }
+
+    div:nth-of-type(even) {
+      font-size: 3.45rem;
+
+      // The separators are the widest part of the counter. On narrower desktops
+      // the navbar-to-player gap is only just wider than the counter itself, so
+      // trimming them here buys real clearance instead of a hairline miss.
+      @media (max-width: 1350px) {
+        font-size: 2.3rem;
+      }
+
+      @media (max-width: 800px) {
+        font-size: 2.4rem;
+      }
+    }
+
+    @media (max-width: 1350px) {
+      gap: 0.3svw;
+    }
+  }
 
   .musicControlsContainer {
     position: fixed;
     z-index: 1001;
-    // Takes over the slot the countdown used to occupy. Centred with auto margins
-    // rather than translateX(-50%) because the inner .customMusicControls is a
-    // motion element that owns `transform` for its hide/show slide.
-    top: 35px;
-    left: 0;
-    right: 0;
-    margin-inline: auto;
-    width: fit-content;
+    right: 3vw;
+    top: 90px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-end;
     gap: 15px;
 
     @media screen and (max-width: 730px) {
-      // Back to the corner on mobile, where the header collapses to a hamburger.
       bottom: 30px;
       right: 20px;
-      left: auto;
-      margin-inline: 0;
       top: unset;
     }
   }
@@ -499,6 +540,9 @@ body {
   }
 
   @media (max-width: 1100px) {
+    .dateCountdown {
+      display: none;
+    }
   }
 
   @media (aspect-ratio < 8/12),
@@ -521,6 +565,22 @@ body {
       width: 360px;
     }
 
+    .dateCountdown {
+      z-index: 50;
+      display: flex;
+      position: fixed;
+      top: 309px;
+      left: 0;
+      right: 0;
+      margin-inline: auto;
+      width: fit-content;
+      font-size: 1.5rem;
+      padding: 0.5svw;
+      text-align: center;
+      gap: 1.5svw;
+      color: #535353;
+      mix-blend-mode: difference;
+    }
   }
 
   @media (aspect-ratio > 1/1) and (max-width: 730px) {
@@ -530,6 +590,10 @@ body {
       transform: none;
     }
 
+    .dateCountdown {
+      top: 130px;
+      transform: none;
+    }
   }
 
   .scrollerWrapper {
