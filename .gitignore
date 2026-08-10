@@ -105,3 +105,7 @@ vite.config.ts.timestamp-*
 
 # Python virtual environment
 .venv/
+
+# Strix security scan outputs
+strix_runs/
+testing/.env
