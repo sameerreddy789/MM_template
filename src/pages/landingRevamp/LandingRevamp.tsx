@@ -7,6 +7,7 @@ import styles from "./LandingRevamp.module.scss";
 
 import { useGSAP } from "@gsap/react";
 import Navbar from "../components/navbar/Navbar";
+import landingImage from "/images/hero_hills.png";
 import TirumalaHills from "../components/TirumalaHills/TirumalaHills";
 import mobileMountains from "/images/hero_hills.png";
 import tree from "/images/landing/new tree.png";
@@ -104,6 +105,10 @@ export default function LandingRevamp({
 
   const aboutUsContRef = useRef<HTMLDivElement>(null);
   const aboutUsWrapperRef = useRef<HTMLDivElement>(null);
+
+  // Refs for the hero-to-darkness zoom transition
+  const heroFadeOverlayRef = useRef<HTMLDivElement>(null);
+  const bottomContainerRef = useRef<HTMLDivElement>(null);
 
   const [scrollHeight, setScrollHeight] = useState(window.innerHeight);
   const [heroOverlap, setHeroOverlap] = useState(0);
@@ -230,29 +235,37 @@ export default function LandingRevamp({
   useGSAP(() => {
     if (treeImageRef.current && landingRef.current) {
       gsap.set(treeImageRef.current, {
+        // autoAlpha: 1,
+        // scale: 1,
+        // y: 0,
         force3D: false,
       });
 
       gsap.set(landingRef.current, {
+        // autoAlpha: 1,
+        // scale: 1,
+        // y: 0,
         force3D: false,
       });
 
       gsap.set(scrollerRef.current, {
+        // autoAlpha: 1,
+        // scale: 1,
+        // y: 0,
         force3D: false,
       });
     }
 
     gsap.fromTo(
       registerButtonRef.current,
-      { autoAlpha: 1, scale: 1 },
+      { autoAlpha: 1 },
       {
         autoAlpha: 0,
-        scale: 1.15,
         ease: "power2.inOut",
         scrollTrigger: {
           trigger: wrapperRef.current,
-          start: "20vh",
-          end: "+=100vh",
+          start: "50vh",
+          end: "+=145vh",
           scrub: true,
         },
       }
@@ -260,70 +273,57 @@ export default function LandingRevamp({
 
     gsap.fromTo(
       eventsButtonRef.current,
-      { autoAlpha: 1, scale: 1 },
+      { autoAlpha: 1 },
       {
         autoAlpha: 0,
-        scale: 1.15,
         ease: "power2.inOut",
         scrollTrigger: {
           trigger: wrapperRef.current,
-          start: "20vh",
-          end: "+=100vh",
+          start: "50vh",
+          end: "+=145vh",
           scrub: true,
         },
       }
     );
 
-    // The logo zooms up and fades out as user scrolls
+
+
+    // The logo sits above the tree now, so it also has to leave with the hero,
+    // otherwise it stays parked over the about and contact sections.
     gsap.fromTo(
       logoRef.current,
-      { autoAlpha: 1, scale: 1 },
+      { autoAlpha: 1 },
       {
         autoAlpha: 0,
-        scale: 1.35,
         ease: "power2.inOut",
         scrollTrigger: {
           trigger: wrapperRef.current,
-          start: "15vh",
-          end: "+=85vh",
+          start: "30vh",
+          end: "+=70vh",
           scrub: true,
         },
       }
     );
-
-    // Second Page (About Us) Pop & Zoom entrance
-    if (aboutUsWrapperRef.current) {
-      gsap.fromTo(
-        aboutUsWrapperRef.current,
-        {
-          scale: 0.72,
-          opacity: 0,
-          y: 150,
-          transformOrigin: "center top",
-        },
-        {
-          scale: 1,
-          opacity: 1,
-          y: 0,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: aboutUsContRef.current || aboutUsWrapperRef.current,
-            start: "top 95%",
-            end: "top 35%",
-            scrub: 1.2,
-            invalidateOnRefresh: true,
-          },
-        }
-      );
-    }
 
     const mm = gsap.matchMedia();
 
     mm.add("(max-width: 730px) or (aspect-ratio < 8/12)", () => {
+      // const masterTimeline = gsap.timeline({
+      //   scrollTrigger: {
+      //     trigger: wrapperRef.current,
+      //     start: "top top",
+      //     end: `+=300vh`,
+      //     scrub: true,
+      //     invalidateOnRefresh: true,
+      //   },
+      // });
+
+      // masterTimeline
+
       gsap.to(
         treeImageRef.current,
         {
-          scale: 1.6,
+          scale: 1.15,
           ease: "power2.inOut",
           force3D: false,
           scrollTrigger: {
@@ -334,12 +334,14 @@ export default function LandingRevamp({
             invalidateOnRefresh: true,
           },
         }
+        // 0
       );
 
       gsap.to(
         landingMobileRef.current,
         {
-          scale: 1.45,
+          scale: 1.08,
+          // y: "8%",
           ease: "power2.inOut",
           force3D: false,
           scrollTrigger: {
@@ -350,25 +352,28 @@ export default function LandingRevamp({
             invalidateOnRefresh: true,
           },
         }
+        // 0
       );
-    });
 
+
+    });
     mm.add("(min-width: 730px) and (aspect-ratio > 8/12)", () => {
       const masterTimeline = gsap.timeline({
         scrollTrigger: {
           trigger: wrapperRef.current,
           start: "top top",
           end: `+=${scrollHeight}px`,
-          scrub: 1.2,
+          scrub: 1.5,
           invalidateOnRefresh: true,
         },
       });
       masterTimeline
+
         .to(
           treeImageRef.current,
           {
-            scale: 1.8,
-            y: "8%",
+            scale: 1.2,
+            // y: "14%",
             duration: 2,
             force3D: false,
           },
@@ -377,13 +382,79 @@ export default function LandingRevamp({
         .to(
           landingRef.current,
           {
-            scale: 1.5,
+            scale: 1.1,
+            // y: "8%",
             duration: 2,
             force3D: false,
           },
           0
         );
+
+
+
+
+
     });
+
+    // ── Hero-to-Darkness Zoom Transition ──
+    // Phase 1: Overlay fades IN while hero content zooms, covering it in black.
+    // Phase 2: Overlay fades back OUT as the About Us section enters the
+    // viewport, revealing the "second page" with a pop-in scale effect.
+    if (heroFadeOverlayRef.current) {
+      // Phase 1 - Fade to black as the hero scrolls away
+      gsap.fromTo(
+        heroFadeOverlayRef.current,
+        { opacity: 0 },
+        {
+          opacity: 1,
+          ease: "power2.in",
+          scrollTrigger: {
+            trigger: wrapperRef.current,
+            // Start fading to black once the hero has scrolled a bit
+            start: "60vh",
+            end: "+=100vh",
+            scrub: 1.2,
+          },
+        }
+      );
+
+      // Phase 2 - Fade the overlay back out so the About Us section shows through
+      gsap.to(heroFadeOverlayRef.current, {
+        opacity: 0,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: bottomContainerRef.current,
+          start: "top 80%",
+          end: "top 20%",
+          scrub: 1.2,
+        },
+      });
+    }
+
+    // ── Second Page Pop-In Reveal ──
+    // The About Us section starts slightly scaled down and transparent, then
+    // pops into full view with an ease-in motion as the darkness lifts.
+    if (bottomContainerRef.current) {
+      gsap.fromTo(
+        bottomContainerRef.current,
+        {
+          scale: 0.88,
+          opacity: 0,
+          transformOrigin: "center top",
+        },
+        {
+          scale: 1,
+          opacity: 1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: bottomContainerRef.current,
+            start: "top 90%",
+            end: "top 30%",
+            scrub: 1.2,
+          },
+        }
+      );
+    }
 
     return () => {
       mm.revert();
@@ -720,8 +791,18 @@ export default function LandingRevamp({
             </div>
           </div>
         </div>
+        {/* Full-screen black overlay that fades in on scroll to create
+            the "hero falls into darkness" transition. Sits above the hero
+            layers but below the bottom content so the About Us section
+            renders on top once revealed. */}
+        <div
+          className={styles.heroFadeOverlay}
+          ref={heroFadeOverlayRef}
+          aria-hidden="true"
+        />
         <div
           className={styles.bottomContainer}
+          ref={bottomContainerRef}
           style={{ marginTop: -heroOverlap }}
         >
           <div className={styles.bottomOverlay} />
