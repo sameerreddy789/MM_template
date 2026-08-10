@@ -14,6 +14,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef, useState, useEffect } from "react";
 import BreadCrumb from "../components/breadCrumb/BreadCrumb";
+import Countdown from "../components/countdown/Countdown";
 interface RegistrationProps {
   startAnimation: boolean;
   goToPage: (path: string) => void;
@@ -350,6 +351,7 @@ const Registration = ({ goToPage }: RegistrationProps) => {
       <div className={styles.birds}>
         <img src={banner} alt="banner" className={styles.bannerImage} />
       </div>
+      <Countdown className={styles.regCountdown} />
       <BackButton onClick={backButtonHandler} />
 
       <Instructions onGoogleSignIn={onGoogleSignIn} ref={elemRef1} />

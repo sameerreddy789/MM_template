@@ -37,7 +37,6 @@ import { Helmet } from "react-helmet";
 import ScrollLabel from "./components/ScrollLabel";
 gsap.registerPlugin(ScrollTrigger);
 
-const TARGET_DATE = new Date("2026-10-30T00:00:00+05:30");
 
 // Bars for the music player's background visualiser. Many thin bars rather than a
 // few thick ones is what keeps it slim instead of blocky. Timings are derived from
@@ -90,7 +89,6 @@ export default function LandingRevamp({
   const setRemoveGif = useOverlayStore((state) => state.setRemoveGif);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const registerButtonRef = useRef<HTMLDivElement>(null);
-  const dateCountdownRef = useRef<HTMLDivElement>(null);
   const eventsButtonRef = useRef<HTMLDivElement>(null);
   const landingRef = useRef<HTMLImageElement>(null);
   const landingMobileRef = useRef<HTMLImageElement>(null);
@@ -199,39 +197,10 @@ export default function LandingRevamp({
     };
   }, []);
 
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
-
+  // The countdown moved to the registration page; this keeps only the
+  // scroll-to-top that used to ride along with its timer effect.
   useEffect(() => {
-    const calculateTimeLeft = () => {
-      const now = new Date();
-      const difference = TARGET_DATE.getTime() - now.getTime();
-
-      if (difference <= 0) {
-        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-        return;
-      }
-
-      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor(
-        (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-      );
-      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
-      setTimeLeft({ days, hours, minutes, seconds });
-    };
-
     document.scrollingElement?.scrollTo({ top: 0 });
-
-    calculateTimeLeft();
-    const timerId = setInterval(calculateTimeLeft, 1000);
-
-    return () => clearInterval(timerId);
   }, []);
 
   useEffect(() => {
@@ -343,21 +312,6 @@ export default function LandingRevamp({
       //     invalidateOnRefresh: true,
       //   },
       // });
-      gsap.fromTo(
-        dateCountdownRef.current,
-        { autoAlpha: 1 },
-        {
-          autoAlpha: 0,
-          ease: "power2.inOut",
-          scrollTrigger: {
-            trigger: wrapperRef.current,
-            start: "00vh",
-            end: "+=120vh",
-            scrub: true,
-            invalidateOnRefresh: true,
-          },
-        }
-      );
 
       // masterTimeline
 
@@ -429,21 +383,12 @@ export default function LandingRevamp({
             force3D: false,
           },
           0
-        )
-
-
-
-
-
-        .to(
-          dateCountdownRef.current,
-          {
-            y: "-300%",
-            duration: 1,
-            ease: "sine.in",
-          },
-          0
         );
+
+
+
+
+
     });
     return () => {
       mm.revert();
@@ -551,40 +496,6 @@ export default function LandingRevamp({
             />
 
             <img src={mobileCloud} className={styles.mobileCloud} alt="cloud" />
-          </div>
-        </div>
-        <div className={styles.dateCountdown} ref={dateCountdownRef}>
-          <div className={`${styles.daysLeft} ${styles.timeLeft}`}>
-            <div className={styles.days}>
-              {timeLeft.days >= 10 ? (
-                <span>{timeLeft.days}</span>
-              ) : (
-                <span>0{timeLeft.days}</span>
-              )}
-            </div>
-            DAYS
-          </div>
-          <div>:</div>
-          <div className={`${styles.hoursLeft} ${styles.timeLeft}`}>
-            <div className={styles.hours}>
-              {timeLeft.hours >= 10 ? (
-                <span>{timeLeft.hours}</span>
-              ) : (
-                <span>0{timeLeft.hours}</span>
-              )}
-            </div>
-            HOURS
-          </div>
-          <div>:</div>
-          <div className={`${styles.minutesLeft} ${styles.timeLeft}`}>
-            <div className={styles.minutes}>
-              {timeLeft.minutes >= 10 ? (
-                <span>{timeLeft.minutes}</span>
-              ) : (
-                <span>0{timeLeft.minutes}</span>
-              )}
-            </div>
-            MINUTES
           </div>
         </div>
         <ScrollLabel />
