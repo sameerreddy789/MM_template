@@ -19,17 +19,11 @@ import TextMobile from "/images/events/TextMobile.png";
 import BackButton from "../components/backButton/BackButton";
 import { Helmet } from "react-helmet";
 import BreadCrumb from "../components/breadCrumb/BreadCrumb";
-import EventFrame from "./components/EventFrame/EventFrame";
-
 interface FanImage {
   src: string;
   mobileSrc?: string;
   alt: string;
   className: string;
-  shape: "quizzes" | "music" | "photography" | "dance" | "misc";
-  innerImageSrc?: string;
-  objectPosition?: string;
-  scale?: number;
 }
 
 const fanImages: FanImage[] = [
@@ -38,18 +32,16 @@ const fanImages: FanImage[] = [
     mobileSrc: dramaMobile,
     alt: "Drama & Theatre",
     className: styles.quizzes,
-    shape: "quizzes"
   },
-  { src: music, mobileSrc: musicMobile, alt: "Music", className: styles.music, shape: "music" },
+  { src: music, mobileSrc: musicMobile, alt: "Music", className: styles.music },
   {
     src: photography,
     mobileSrc: photographyMobile,
     alt: "Photography",
     className: styles.photography,
-    shape: "photography"
   },
-  { src: dance, mobileSrc: danceMobile, alt: "Dance", className: styles.dance, shape: "dance" },
-  { src: misc, mobileSrc: miscMobile, alt: "Misc", className: styles.misc, shape: "misc" },
+  { src: dance, mobileSrc: danceMobile, alt: "Dance", className: styles.dance },
+  { src: misc, mobileSrc: miscMobile, alt: "Misc", className: styles.misc },
 ];
 // const speed = 500; // constant speed in pixels/second
 // delay factor per degree
@@ -117,7 +109,7 @@ const Events: React.FC = () => {
   // const [delays, setDelays] = useState<number[]>([]);
 
   const EventRef = useRef<HTMLDivElement>(null);
-  const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const imageRefs = useRef<(HTMLImageElement | null)[]>([]);
   useEffect(() => {
     if (!canHover) return; // skip for mobile/touch
 
@@ -302,15 +294,11 @@ const Events: React.FC = () => {
           </h2>
           {fanImages.map((img, i) => {
             return (
-              <EventFrame
+              <img
                 key={i}
-                shape={img.shape}
-                frameSrc={isMobile && img.mobileSrc ? img.mobileSrc : img.src}
-                innerImageSrc={img.innerImageSrc}
-                objectPosition={img.objectPosition}
-                scale={img.scale}
+                src={isMobile && img.mobileSrc ? img.mobileSrc : img.src}
                 alt={img.alt}
-                data-nosnippet
+                data-nosnippet   
                 ref={(el) => {
                   imageRefs.current[i] = el;
                 }}

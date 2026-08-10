@@ -900,24 +900,9 @@ body {
     }
   }
 
-  // Full-screen black overlay that fades in on scroll, covering the hero
-  // as it "falls into darkness." Driven by GSAP ScrollTrigger (opacity 0→1).
-  // pointer-events: none so it never blocks interaction with underlying elements.
-  .heroFadeOverlay {
-    position: fixed;
-    inset: 0;
-    background-color: #000000;
-    opacity: 0;
-    z-index: 500;
-    pointer-events: none;
-    will-change: opacity;
-  }
-
   .bottomContainer {
     overflow: hidden;
     position: relative;
-    // GPU-accelerated for the pop-in scale+opacity reveal
-    will-change: transform, opacity;
 
     .bottomOverlay {
       position: absolute;
