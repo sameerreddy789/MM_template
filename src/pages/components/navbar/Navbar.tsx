@@ -20,9 +20,9 @@ gsap.registerPlugin(ScrollTrigger);
 
 const navItems = [
   { label: "Events", links: "/events" },
-  { label: "Gallery", links: "/gallery" },
-  { label: "Sponsors", links: "/sponsors" },
   { label: "Brochure", links: "/brochure" },
+  { label: "Sponsors", links: "/sponsors" },
+  { label: "Gallery", links: "/gallery" },
 ];
 
 export default function Navbar({
