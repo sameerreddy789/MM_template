@@ -1,143 +1,51 @@
 import styles from "./Sponsers.module.scss";
 import heading from "/svgs/sponsors/sponsorsHead.svg";
-import dummy from "/images/logo.png";
 import BackButton from "../components/backButton/BackButton";
 import { useEffect } from "react";
 
-//nothing is changed
+import dollarsGroup from "/images/sponsors/Dollars_group.png";
+import hetero from "/images/sponsors/Hetero.png";
+import kalanjali from "/images/sponsors/Kalanjali.png";
+import makeMyTrip from "/images/sponsors/Make_My_trip.png";
+import prakashArts from "/images/sponsors/Prakash_arts.png";
+import talentio from "/images/sponsors/Talentio.png";
 
 const sponsors = {
   title: {
-    head: "Official Title Sponsor",
-    img: dummy,
-    name: "Sponsor Name",
+    head: "",
+    img: dollarsGroup,
+    name: "Dollars Group",
     link: "#",
   },
   otherSponsers: [
     {
-      head: "Associate Title Sponsor",
-      img: dummy,
-      name: "Sponsor Name",
-      link: "#",
-    },
-    {
-      head: "Diamond Sponsor",
-      img: dummy,
-      name: "Sponsor Name",
-      link: "#",
-    },
-    {
-      head: "Co-Powered By",
-      img: dummy,
-      name: "Sponsor Name",
-      link: "#",
-    },
-    {
-      head: "Official Skincare Partner",
-      img: dummy,
-      name: "Sponsor Name",
-      link: "#",
-    },
-    {
-      head: "Official Community Partner",
-      img: dummy,
-      name: "Sponsor Name",
-      link: "#",
-    },
-    {
-      head: "Official Partner",
-      img: dummy,
-      name: "Sponsor Name",
-      link: "#",
-    },
-    {
-      head: "Official Travel Partner",
-      img: dummy,
-      name: "Sponsor Name",
-      link: "#",
-    },
-    {
-      head: "Official Infrastructure Partner",
-      img: dummy,
-      name: "Sponsor Name",
-      link: "#",
-    },
-    {
-      head: "Official Beauty and Wellness Partner",
-      img: dummy,
-      name: "Sponsor Name",
-      link: "#",
-    },
-    {
-      head: "Official Commute Partner",
-      img: dummy,
-      name: "Sponsor Name",
+      head: "",
+      img: hetero,
+      name: "Hetero",
       link: "#",
     },
     {
       head: "",
-      img: dummy,
-      name: "Sponsor Name",
+      img: kalanjali,
+      name: "Kalanjali",
       link: "#",
     },
     {
       head: "",
-      img: dummy,
-      name: "Sponsor Name",
-      link: "#",
-    },
-    {
-      head: "Official Banking Partner",
-      img: dummy,
-      name: "Sponsor Name",
-      link: "#",
-    },
-    {
-      head: "Pasta Partner",
-      img: dummy,
-      name: "Sponsor Name",
-      link: "#",
-    },
-    {
-      head: "Official Music Streaming Partner",
-      img: dummy,
-      name: "Sponsor Name",
-      link: "#",
-    },
-    {
-      head: "Official Beverage Partner",
-      img: dummy,
-      name: "Sponsor Name",
-      link: "#",
-    },
-    {
-      head: "Official Technology Partner",
-      img: dummy,
-      name: "Sponsor Name",
-      link: "#",
-    },
-    {
-      head: "Official Hygiene Partner",
-      img: dummy,
-      name: "Sponsor Name",
-      link: "#",
-    },
-    {
-      head: "Bath and BodyCare Partner",
-      img: dummy,
-      name: "Sponsor Name",
-      link: "#",
-    },
-    {
-      head: "Official Snack Partner",
-      img: dummy,
-      name: "Sponsor Name",
+      img: makeMyTrip,
+      name: "Make My Trip",
       link: "#",
     },
     {
       head: "",
-      img: dummy,
-      name: "Sponsor Name",
+      img: prakashArts,
+      name: "Prakash Arts",
+      link: "#",
+    },
+    {
+      head: "",
+      img: talentio,
+      name: "Talentio",
       link: "#",
     },
   ],
@@ -151,7 +59,6 @@ const Sponsors = () => {
     document.body.style.height = "";
     document.documentElement.style.overflow = "";
   }, []);
-
 
   return (
     <>
@@ -187,7 +94,9 @@ const Sponsors = () => {
             draggable={false}
           >
             <div className={styles.titleSponsor}>
-              <div className={styles.head}>{sponsors.title.head}</div>
+              {sponsors.title.head && (
+                <div className={styles.head}>{sponsors.title.head}</div>
+              )}
               <div className={styles.titleSponsImage}>
                 <img
                   src={sponsors.title.img}
@@ -211,15 +120,9 @@ const Sponsors = () => {
                 draggable={false}
               >
                 <div className={styles.otherSponsor}>
-                  <div
-                    className={
-                      sponsor.head
-                        ? styles.head
-                        : `${styles.head} ${styles.other}`
-                    }
-                  >
-                    {sponsor.head}
-                  </div>
+                  {sponsor.head && (
+                    <div className={styles.head}>{sponsor.head}</div>
+                  )}
 
                   <div
                     className={`${styles.otherSponsImage} ${styles.sponsImage}`}
