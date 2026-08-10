@@ -615,14 +615,26 @@ export default function LandingRevamp({
                   <rect x="15" y="6" width="2" height="12" />
                 </svg>
               </button>
+              <div className={styles.verticalDivider} />
+              {/* Playback indicator, not a control: the play/pause button above
+                  already toggles, so this is decorative and hidden from AT. */}
+              <div
+                className={`${styles.songWave} ${
+                  isPlaying ? styles.playing : ""
+                }`}
+                aria-hidden="true"
+              >
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+              </div>
             </div>
             <div className={`${styles.sideLines} ${styles.rightLines}`}>
               <span /><span /><span /><span />
             </div>
           </div>
-          <button className={`${styles.waveBtn} ${isPlaying ? styles.playing : ''}`} onClick={onToggle}>
-            <span /><span /><span /><span /><span />
-          </button>
         </div>
         <div className={styles.scrollerWrapper}>
           <div className={styles.scroller} ref={scrollerRef}>

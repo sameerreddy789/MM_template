@@ -403,48 +403,17 @@ body {
     }
   }
 
-  .waveBtn {
-    background: rgba(0, 0, 0, 0.7);
-    border: 2px solid #ffd700;
-    box-shadow: 0 0 12px rgba(255, 215, 0, 0.6), inset 0 0 12px rgba(255, 215, 0, 0.4);
-    border-radius: 20px;
-    padding: 8px 12px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-    height: 36px;
-    transition: transform 0.2s, filter 0.2s;
-
-    &:hover {
-      transform: scale(1.05);
-      filter: brightness(1.2);
+  // Bars animate with scaleY on a fixed-height element rather than animating
+  // `height`. Height animation relayouts the flex row every frame and fought the
+  // `transition: height` that used to sit on the same property; scaleY runs on
+  // the compositor and leaves the player's width alone.
+  @keyframes songWaveBounce {
+    from {
+      transform: scaleY(0.18);
     }
-
-    span {
-      display: block;
-      width: 4px;
-      height: 6px;
-      background: #ffd700;
-      border-radius: 2px;
-      box-shadow: 0 0 5px #ffd700;
-      transition: height 0.2s ease;
+    to {
+      transform: scaleY(1);
     }
-
-    &.playing span {
-      animation: waveAnimation 0.8s ease-in-out infinite alternate;
-    }
-    
-    &.playing span:nth-child(1) { animation-delay: 0.0s; }
-    &.playing span:nth-child(2) { animation-delay: 0.2s; }
-    &.playing span:nth-child(3) { animation-delay: 0.4s; }
-    &.playing span:nth-child(4) { animation-delay: 0.2s; }
-    &.playing span:nth-child(5) { animation-delay: 0.0s; }
-  }
-
-  @keyframes waveAnimation {
-    0% { height: 6px; }
-    100% { height: 20px; }
   }
 
   .customMusicControls {
@@ -516,6 +485,62 @@ body {
         &:hover {
           transform: scale(1.1);
           filter: brightness(1.3);
+        }
+      }
+
+      // Sits inside the player frame, so it carries no border or background of
+      // its own: the surrounding .playerMain already provides those.
+      .songWave {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        height: 20px;
+        padding-right: 6px;
+
+        span {
+          display: block;
+          width: 3px;
+          height: 100%;
+          background: #ffd700;
+          border-radius: 2px;
+          box-shadow: 0 0 5px #ffd700;
+          transform: scaleY(0.18);
+          transform-origin: center;
+          // When playback stops the animation is removed and the bar eases back
+          // down to the flat idle state instead of snapping.
+          transition: transform 0.35s ease;
+        }
+
+        // Each bar runs on its own clock so the wave reads as audio rather than
+        // five bars blinking in unison.
+        &.playing span {
+          animation: songWaveBounce 0.9s ease-in-out infinite alternate;
+        }
+        &.playing span:nth-child(1) {
+          animation-duration: 0.72s;
+        }
+        &.playing span:nth-child(2) {
+          animation-duration: 1.04s;
+          animation-delay: 0.13s;
+        }
+        &.playing span:nth-child(3) {
+          animation-duration: 0.84s;
+          animation-delay: 0.06s;
+        }
+        &.playing span:nth-child(4) {
+          animation-duration: 1.16s;
+          animation-delay: 0.2s;
+        }
+        &.playing span:nth-child(5) {
+          animation-duration: 0.94s;
+          animation-delay: 0.1s;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          &.playing span {
+            animation: none;
+            transform: scaleY(0.6);
+          }
         }
       }
     }
