@@ -17,12 +17,28 @@
   .backgroundImage {
     position: absolute;
     bottom: 0;
-    height: 75svh;
-    left: 7%;
+
+    // Centred. This artwork is a symmetric skyline built around the central
+    // gopuram, so the middle of the file wants to be the middle of the page. The
+    // previous rule pinned it at left: 7%, which suited the asset it was written
+    // for - a far wider 6.01 ratio panorama whose focal tower sat off to one side
+    // - but it drove this one's centrepiece into the left edge.
+    left: 50%;
     transform: translateX(-50%);
+
+    // Driven by width, with the height left to follow the file's own ratio.
+    // Sizing by height (this was 75svh) makes the rendered *width* a function of
+    // the artwork's aspect ratio, which is why swapping the asset from 6.01 to
+    // 2.81 shrank it to about half the page and left the right third bare.
+    // Width-driven means it spans the page whatever the artwork's ratio.
+    //
+    // No object-fit: at the natural ratio there is no box mismatch to resolve, so
+    // nothing is cropped and the chariots and elephants at both ends stay in
+    // frame - which matters for a symmetric composition.
+    width: 100%;
+    height: auto;
+
     pointer-events: none;
-    object-fit: cover;
-    object-position: 0 0.5vw;
     z-index: 1;
   }
 
