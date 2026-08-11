@@ -89,6 +89,30 @@ export default function Homepage({
     startPlayback();
   }, [isMusicOn]);
 
+  // Toggle music on spacebar press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.code === "Space" &&
+        !(e.target instanceof HTMLInputElement) &&
+        !(e.target instanceof HTMLTextAreaElement)
+      ) {
+        e.preventDefault();
+        if (!audioRef.current) return;
+        if (audioRef.current.paused) {
+          setMusicOn(true);
+          audioRef.current.play().catch(() => {});
+        } else {
+          setMusicOn(false);
+          audioRef.current.pause();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [setMusicOn]);
+
   return (
     <div>
       <Helmet>
