@@ -1,48 +1,102 @@
 .cloudWrapper {
   position: absolute;
   pointer-events: none;
-  z-index: 5; /* This should place it above the hills (usually 1 or 2) and behind tree (usually 100) */
+  z-index: 5; /* above the hills (1-2), behind the tree (100) */
+
+  /* Drift distances, overridable per instance from the component. */
+  --drift-x: 7vw;
+  --drift-y: 14px;
+
+  /* Sine-shaped ease-in-out. Softer through the turn than the keyword
+     `ease-in-out`, which is noticeably snappier either side of the midpoint. */
+  --drift-ease: cubic-bezier(0.37, 0, 0.63, 1);
+
   will-change: transform;
-  
-  /* X-axis drifting */
-  animation: driftX var(--duration) ease-in-out infinite alternate var(--delay);
-  
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+
+  /* One seamless cycle rather than `alternate`.
+     `alternate` restarts the timing function at every extreme, so each cloud
+     eased to a dead stop and snapped into reverse twice per cycle. Here 0% and
+     100% are the same position, so `infinite` loops with no discontinuity and
+     no reversal event to see. */
+  animation-name: driftX;
+  animation-duration: var(--duration);
+  animation-timing-function: var(--drift-ease);
+  animation-delay: var(--delay);
+  animation-iteration-count: infinite;
+
+  /* Essential, not cosmetic. The stagger delays are positive, and without a
+     backwards fill the cloud sits at its un-animated identity transform for the
+     whole delay and then snaps straight to the 0% keyframe - a jump of one full
+     --drift-x (112px at 1600px wide). That lurch as each cloud came alive was
+     the most visible abruptness. `backwards` adopts the 0% values immediately,
+     so the cloud is already in position and simply starts moving. */
+  animation-fill-mode: backwards;
+
   &.reverse {
-    animation-direction: alternate-reverse;
+    animation-direction: reverse;
   }
-  
+
   .cloudImage {
+    display: block;
     width: 100%;
     height: auto;
     object-fit: contain;
-    will-change: transform, opacity;
-    /* Y-axis floating and slight scaling */
-    animation: driftY calc(var(--duration) * 0.65) ease-in-out infinite alternate var(--delay);
+    will-change: transform;
+    backface-visibility: hidden;
+
+    /* The vertical period is ~0.618 of the horizontal one (golden ratio) and
+       carries its own negative offset. Both matter: with the old shared delay
+       and a 0.65 ratio the two axes kept resyncing, so the cloud came to a
+       complete standstill on both axes at once - the thing that read as a
+       stutter. Out of phase, whenever one axis is at its turn the other is at
+       full speed, so the cloud is always visibly moving. */
+    animation-name: driftY;
+    animation-duration: calc(var(--duration) * 0.618);
+    animation-timing-function: var(--drift-ease);
+    animation-delay: calc(var(--delay) - var(--duration) * 0.27);
+    animation-iteration-count: infinite;
+    /* Same reasoning as the wrapper: this offset can resolve positive. */
+    animation-fill-mode: backwards;
   }
 }
 
 @keyframes driftX {
-  0% {
-    transform: translate3d(-6vw, 0, 0);
-  }
+  0%,
   100% {
-    transform: translate3d(6vw, 0, 0);
+    transform: translate3d(calc(-1 * var(--drift-x)), 0, 0);
+  }
+  50% {
+    transform: translate3d(var(--drift-x), 0, 0);
   }
 }
 
 @keyframes driftY {
-  0% {
-    transform: translate3d(0, 6px, 0) scale(0.98);
-  }
+  0%,
   100% {
-    transform: translate3d(0, -6px, 0) scale(1.02);
+    transform: translate3d(0, var(--drift-y), 0) scale(0.985);
+  }
+  50% {
+    transform: translate3d(0, calc(-1 * var(--drift-y)), 0) scale(1.015);
   }
 }
 
 @media (max-width: 1024px) {
-  .hideOnTablet { display: none !important; }
+  .hideOnTablet {
+    display: none !important;
+  }
 }
 
 @media (max-width: 768px) {
-  .hideOnMobile { display: none !important; }
+  .hideOnMobile {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cloudWrapper,
+  .cloudWrapper .cloudImage {
+    animation: none;
+  }
 }
