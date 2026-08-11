@@ -1,4 +1,3 @@
-import React from "react";
 import "./TirumalaHills.css";
 import hillsImage from "./tirumala_hills_4k.png";
 

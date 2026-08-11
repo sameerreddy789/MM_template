@@ -7,7 +7,6 @@ import styles from "./LandingRevamp.module.scss";
 
 import { useGSAP } from "@gsap/react";
 import Navbar from "../components/navbar/Navbar";
-import landingImage from "/images/hero_hills.png";
 import TirumalaHills from "../components/TirumalaHills/TirumalaHills";
 import mobileMountains from "/images/hero_hills.png";
 import tree from "/images/landing/new tree.png";
