@@ -1,40 +1,46 @@
 import { useEffect, useState } from "react";
 
 const categoryAliases: Record<string, string[]> = {
-  drama: ["drama", "drama & theatre", "drama and theatre"],
-  music: ["music"],
+  kalakshetra: ["kalakshetra", "kalakshera", "drama & theatre", "drama and theatre", "drama", "dance"],
+  technoholic: ["technoholic", "music", "tech"],
+  "spot events": ["spot events", "photography", "spot"],
+  "pro shows": ["pro shows", "por shows", "proshow"],
   misc: ["misc", "fashion"],
-  dance: ["dance"],
-  photography: ["photography"],
 };
 
 const dummyEventsData = [
   {
-    category_name: "Drama",
+    category_name: "Kalakshetra",
     events: [
-      { name: "Stage Play", club_name: "Theatrix", venue: "Main Auditorium", description: "A dramatic stage play competition.", image_url: "https://via.placeholder.com/400x300?text=Stage+Play" },
-      { name: "Street Play", club_name: "Theatrix", venue: "Open Air Theatre", description: "Energetic street performances.", image_url: "https://via.placeholder.com/400x300?text=Street+Play" }
+      { name: "Let's Naacho", club_name: "Dance Club", venue: "Main Stage", description: "Show off your dance moves.", image_url: "https://via.placeholder.com/400x300?text=Lets+Naacho" },
+      { name: "Band Battle", club_name: "Music Club", venue: "Main Auditorium", description: "Battle of the bands.", image_url: "https://via.placeholder.com/400x300?text=Band+Battle" },
+      { name: "PUBG", club_name: "E-Sports Club", venue: "CS Lab", description: "Intense battle royale.", image_url: "https://via.placeholder.com/400x300?text=PUBG" },
+      { name: "Push-Up Challenge", club_name: "Fitness Club", venue: "Open Ground", description: "Test your strength.", image_url: "https://via.placeholder.com/400x300?text=Push-Up+Challenge" }
     ]
   },
   {
-    category_name: "Music",
+    category_name: "Technoholic",
     events: [
-      { name: "Battle of Bands", club_name: "Music Club", venue: "Main Stage", description: "Rock bands competing for the top prize.", image_url: "/images/events/Bob.png" },
-      { name: "Solo Singing", club_name: "Music Club", venue: "Seminar Hall", description: "Showcase your vocal talent.", image_url: "https://via.placeholder.com/400x300?text=Solo+Singing" }
+      { name: "Tech Exhibition", club_name: "Tech Club", venue: "Seminar Hall", description: "Showcasing the latest tech innovations.", image_url: "https://via.placeholder.com/400x300?text=Tech+Exhibition" },
+      { name: "Code Sprint", club_name: "Coding Club", venue: "CS Lab", description: "Fast-paced coding competition.", image_url: "https://via.placeholder.com/400x300?text=Code+Sprint" },
+      { name: "Hackathon", club_name: "Tech Club", venue: "Main Lab", description: "24-hour hackathon.", image_url: "https://via.placeholder.com/400x300?text=Hackathon" },
+      { name: "Workshop on AR/VR", club_name: "Tech Club", venue: "Seminar Hall", description: "Learn about AR and VR.", image_url: "https://via.placeholder.com/400x300?text=Workshop+on+AR/VR" },
+      { name: "Robo War", club_name: "Robotics Club", venue: "Open Ground", description: "Battle of the robots.", image_url: "https://via.placeholder.com/400x300?text=Robo+War" }
     ]
   },
   {
-    category_name: "Dance",
+    category_name: "Spot Events",
     events: [
-      { name: "Group Dance", club_name: "Dance Club", venue: "Main Stage", description: "Synchronized group performances.", image_url: "https://via.placeholder.com/400x300?text=Group+Dance" },
-      { name: "Solo Dance", club_name: "Dance Club", venue: "Main Stage", description: "Showcase your solo moves.", image_url: "https://via.placeholder.com/400x300?text=Solo+Dance" }
+      { name: "Spot Photography", club_name: "Photography Club", venue: "Campus", description: "Capture the moment.", image_url: "https://via.placeholder.com/400x300?text=Spot+Photography" },
+      { name: "Jenga", club_name: "Fun Club", venue: "Food Court", description: "Don't let the tower fall.", image_url: "https://via.placeholder.com/400x300?text=Jenga" },
+      { name: "Tug of War", club_name: "Sports Club", venue: "Ground", description: "Show your team strength.", image_url: "https://via.placeholder.com/400x300?text=Tug+of+War" }
     ]
   },
   {
-    category_name: "Photography",
+    category_name: "Pro Shows",
     events: [
-      { name: "Photo Walk", club_name: "Photography Club", venue: "Campus", description: "Capture the essence of the fest.", image_url: "https://via.placeholder.com/400x300?text=Photo+Walk" },
-      { name: "Exhibition", club_name: "Photography Club", venue: "Gallery", description: "Display your best shots.", image_url: "https://via.placeholder.com/400x300?text=Exhibition" }
+      { name: "Band Night", club_name: "Cultural Club", venue: "Main Stage", description: "Live band performances.", image_url: "https://via.placeholder.com/400x300?text=Band+Night" },
+      { name: "DJ Nights", club_name: "Cultural Club", venue: "Main Stage", description: "Dance to the beats.", image_url: "https://via.placeholder.com/400x300?text=DJ+Nights" }
     ]
   },
   {

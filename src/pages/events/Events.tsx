@@ -36,19 +36,19 @@ const fanImages: FanImage[] = [
   {
     src: drama,
     mobileSrc: dramaMobile,
-    alt: "Drama & Theatre",
+    alt: "Kalakshetra",
     className: styles.quizzes,
     shape: "quizzes"
   },
-  { src: music, mobileSrc: musicMobile, alt: "Music", className: styles.music, shape: "music" },
+  { src: music, mobileSrc: musicMobile, alt: "Technoholic", className: styles.music, shape: "music" },
   {
     src: photography,
     mobileSrc: photographyMobile,
-    alt: "Photography",
+    alt: "Spot Events",
     className: styles.photography,
     shape: "photography"
   },
-  { src: dance, mobileSrc: danceMobile, alt: "Dance", className: styles.dance, shape: "dance" },
+  { src: dance, mobileSrc: danceMobile, alt: "Pro Shows", className: styles.dance, shape: "dance" },
   { src: misc, mobileSrc: miscMobile, alt: "Misc", className: styles.misc, shape: "misc" },
 ];
 // const speed = 500; // constant speed in pixels/second
