@@ -86,12 +86,6 @@ export const useYouTubePlayer = (
     };
   }, [containerRef]);
 
-  const loadByIndex = (i: number) => {
-    if (!playerRef.current || typeof playerRef.current.loadVideoById !== "function") return;
-    setCurrent(i);
-    playerRef.current.loadVideoById(videos[i]);
-  };
-
   const nextVideo = () => {
     setCurrent((prev) => {
       const nextIdx = (prev + 1) % videos.length;
