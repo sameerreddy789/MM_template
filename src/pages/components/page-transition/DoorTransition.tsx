@@ -56,6 +56,7 @@ export default function DoorTransition({
 
   const onClosedRef = useRef(onClosed);
   const onOpenedRef = useRef(onOpened);
+  const prevPhaseRef = useRef<Phase>(phase);
 
   useEffect(() => {
     onClosedRef.current = onClosed;
@@ -64,6 +65,16 @@ export default function DoorTransition({
 
   useEffect(() => {
     let cancelled = false;
+
+    // A genuine opening is always preceded by a closing. Anything arriving here
+    // straight from "idle" is a page that loaded with the doors already
+    // off-screen, so the opening tween has nowhere to travel and moves nothing -
+    // it must not play the transition sound. App avoids queueing those, and this
+    // keeps the sound tied to real door movement whatever calls in.
+    const previousPhase = prevPhaseRef.current;
+    prevPhaseRef.current = phase;
+    const followsAClosing =
+      previousPhase === "closing" || previousPhase === "waiting";
 
     const runClosing = async () => {
       closeSoundRef.current?.play();
@@ -100,7 +111,7 @@ export default function DoorTransition({
 
     const runOpening = async () => {
       setTimeout(async () => {
-        openSoundRef.current?.play();
+        if (followsAClosing) openSoundRef.current?.play();
         await Promise.all([
           c2.start({
             "--dx": START.innerLeft,

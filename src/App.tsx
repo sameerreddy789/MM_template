@@ -131,6 +131,17 @@ export default function App() {
   const handlePreloaderEnter = () => {
     setIsPreloading(false);
 
+    // Only re-open doors that were actually closed. The preloader also runs when
+    // a page simply loads - a refresh, a pasted URL, browser back/forward, or the
+    // events page's category back button, which is a window.location.reload - and
+    // in none of those did anything close the doors. Opening from there animated
+    // them to the off-screen position they were already sitting in, so nothing
+    // moved on screen but the transition sound still played.
+    //
+    // nextRoute is only set by goToPage and cleared once the doors finish
+    // opening, so it is exactly "a door transition is in flight".
+    if (!nextRoute.current) return;
+
     setTimeout(() => {
       setDoorPhase("opening");
     }, 300);
