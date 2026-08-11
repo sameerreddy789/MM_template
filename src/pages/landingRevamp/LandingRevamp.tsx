@@ -106,37 +106,14 @@ export default function LandingRevamp({
   const aboutUsContRef = useRef<HTMLDivElement>(null);
   const aboutUsWrapperRef = useRef<HTMLDivElement>(null);
 
-  const [scrollHeight, setScrollHeight] = useState(window.innerHeight);
-  const [heroOverlap, setHeroOverlap] = useState(0);
-
-  useEffect(() => {
-    const updateScrollerMetrics = () => {
-      const scrollerHeight = scrollerRef.current?.scrollHeight ?? 0;
-
-      // The hero is only about one viewport tall, so subtracting 1.4 viewports
-      // used to floor this at 0 and give the hero timeline zero length: the tree
-      // zoom, background scale and countdown exit never ran. Keep at least one
-      // viewport of travel so the timeline always has somewhere to go.
-      setScrollHeight(
-        Math.max(
-          window.innerHeight,
-          scrollerHeight - window.innerHeight * 1.4
-        )
-      );
-      setHeroOverlap(0);
-    };
-
-    updateScrollerMetrics();
-
-    const resizeObserver = new ResizeObserver(updateScrollerMetrics);
-    if (scrollerRef.current) resizeObserver.observe(scrollerRef.current);
-    window.addEventListener("resize", updateScrollerMetrics);
-
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updateScrollerMetrics);
-    };
-  }, [removeGif]);
+  // `scrollHeight` state used to be measured off the scroller purely to give the
+  // hero's zoom timeline a scroll length, and the ResizeObserver existed to keep
+  // that measurement current. With the zoom gone there is nothing to size, so
+  // both are gone too.
+  //
+  // heroOverlap has been pinned at 0 the whole time; it stays as a constant so
+  // the layout below and the refresh-on-mount below read exactly as before.
+  const heroOverlap = 0;
 
   useEffect(() => {
     const refreshFrame = window.requestAnimationFrame(() => {
@@ -323,100 +300,16 @@ export default function LandingRevamp({
       }
     );
 
-    const mm = gsap.matchMedia();
-
-    mm.add("(max-width: 730px) or (aspect-ratio < 8/12)", () => {
-      // const masterTimeline = gsap.timeline({
-      //   scrollTrigger: {
-      //     trigger: wrapperRef.current,
-      //     start: "top top",
-      //     end: `+=300vh`,
-      //     scrub: true,
-      //     invalidateOnRefresh: true,
-      //   },
-      // });
-
-      // masterTimeline
-
-      gsap.to(
-        treeImageRef.current,
-        {
-          scale: 1.15,
-          ease: "power2.inOut",
-          force3D: false,
-          scrollTrigger: {
-            trigger: wrapperRef.current,
-            start: "top top",
-            end: `+=300vh`,
-            scrub: true,
-            invalidateOnRefresh: true,
-          },
-        }
-        // 0
-      );
-
-      gsap.to(
-        landingMobileRef.current,
-        {
-          scale: 1.08,
-          // y: "8%",
-          ease: "power2.inOut",
-          force3D: false,
-          scrollTrigger: {
-            trigger: wrapperRef.current,
-            start: "top top",
-            end: `+=300vh`,
-            scrub: true,
-            invalidateOnRefresh: true,
-          },
-        }
-        // 0
-      );
-
-
-    });
-    mm.add("(min-width: 730px) and (aspect-ratio > 8/12)", () => {
-      const masterTimeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: wrapperRef.current,
-          start: "top top",
-          end: `+=${scrollHeight}px`,
-          scrub: 1.5,
-          invalidateOnRefresh: true,
-        },
-      });
-      masterTimeline
-
-        .to(
-          treeImageRef.current,
-          {
-            scale: 1.2,
-            // y: "14%",
-            duration: 2,
-            force3D: false,
-          },
-          0
-        )
-        .to(
-          landingRef.current,
-          {
-            scale: 1.1,
-            // y: "8%",
-            duration: 2,
-            force3D: false,
-          },
-          0
-        );
-
-
-
-
-
-    });
-    return () => {
-      mm.revert();
-    };
-  }, [scrollHeight]);
+    // The scroll-scrubbed zoom used to live here: a gsap.matchMedia() with a
+    // mobile branch scaling the tree to 1.15 and the mobile background to 1.08,
+    // and a desktop timeline scaling the tree to 1.2 and the background to 1.1.
+    // Both are removed - the hero now holds its framing while you scroll, and
+    // the button/logo fades above are all that leave with it.
+    //
+    // Dropping them also stops the hero overflowing sideways: scaling a
+    // full-width layer past 1 pushes its edges outside the viewport, which is
+    // what made the page pannable to the right.
+  }, []);
 
   // useGSAP(() => {
   //   const scrollAnimationTimeline = gsap.timeline({

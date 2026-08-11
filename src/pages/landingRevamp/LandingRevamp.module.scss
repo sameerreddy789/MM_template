@@ -6,6 +6,19 @@ html {
   --counterSmallFontSize: 1.38rem;
   scrollbar-width: none;
 
+  // Nothing here is meant to be reachable sideways, but the hero's full-width
+  // boxes and the mountain art that sits at a negative right offset spill past
+  // the right edge, which let the page be swiped/panned to the right. Clip that
+  // axis so only vertical scrolling is possible.
+  //
+  // `clip` rather than `hidden`: on the root element `hidden` makes the viewport
+  // a scroll container and forces the other axis to `auto`, which puts it in
+  // competition with Lenis for ownership of the vertical scroll position. `clip`
+  // cuts the overflow without creating a scroll container. `hidden` is declared
+  // first as a fallback for browsers that predate `clip`.
+  overflow-x: hidden;
+  overflow-x: clip;
+
   img {
     user-select: none;
     -webkit-user-drag: none;
@@ -81,33 +94,9 @@ body {
   }
 }
 
-@keyframes zoom-parallex-on-Scroll-background {
-  0% {
-    transform: scale(1);
-  }
-
-  20% {
-    transform: scale(1.1);
-  }
-
-  100% {
-    transform: translateY(-3svh);
-  }
-}
-
-@keyframes zoom-parallex-on-Scroll-foreground {
-  0% {
-    transform: scale(1);
-  }
-
-  20% {
-    transform: scale(1.2);
-  }
-
-  100% {
-    transform: scale(1.2) translateY(-150svh);
-  }
-}
+// The zoom-parallex-on-Scroll-background / -foreground keyframes that used to sit
+// here were already unreferenced, and describe the same zoom that has now been
+// removed from the hero, so they are gone.
 
 .wrapper {
   width: 100%;

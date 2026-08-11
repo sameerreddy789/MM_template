@@ -125,14 +125,32 @@
 
     .contactHeading {
         position: absolute;
-        padding-top: 11rem;
+        // Pulled up from 11rem. This spacing suited a short banner strip; the
+        // current artwork is much taller, so it needs the empty room above it.
+        // Measured across desktop sizes, the smallest gap left above the banner
+        // was 76px, so reclaiming 40px of it still clears the viewport edge.
+        padding-top: 8.5rem;
         width: 100%;
         margin-bottom: 3rem;
 
         .contactBanner {
             position: relative;
             display: block;
-            width: clamp(12rem, 30vw, 30rem);
+            // The artwork is 1536x1024 (ratio 1.50) - a plaque beneath a temple
+            // tower - whereas this rule was written for a 578x142 (ratio 4.10)
+            // strip. Sizing by width therefore made it grow downwards over the
+            // contact cards, so it is sized by height instead.
+            //
+            // The room between the banner and the top of the cards tracks
+            // viewport width, not height: it measures 12.1vw to 13.1vw across
+            // desktop sizes (but 17.2vh to 23.3vh, which is why a vh cap is not
+            // safe here). 10vw plus the 2.5rem reclaimed above leaves a gap at
+            // every size. object-fit keeps the art undistorted if max-width
+            // ever binds.
+            height: clamp(7rem, calc(10vw + 2.5rem), 16rem);
+            width: auto;
+            max-width: min(88vw, 30rem);
+            object-fit: contain;
             margin: auto;
             z-index: 20;
             opacity: 0;
@@ -141,7 +159,9 @@
             transform: translateY(-100%);
 
             @media (max-width: 900px) {
-                width: clamp(15rem, 72vw, 30rem);
+                // The stacked layout leaves far more room here, ~38vw.
+                height: clamp(5rem, 30vw, 12rem);
+                max-width: 88vw;
             }
         }
 
