@@ -15,7 +15,11 @@ export const useYouTubePlayer = (
       if (playerRef.current || !window.YT?.Player || !containerRef.current) return;
 
       try {
-        playerRef.current = new window.YT.Player(containerRef.current, {
+        const playerDiv = document.createElement("div");
+        containerRef.current.innerHTML = "";
+        containerRef.current.appendChild(playerDiv);
+
+        playerRef.current = new window.YT.Player(playerDiv, {
           height: "100%",
           width: "100%",
           videoId: videos[current] || videos[0],
