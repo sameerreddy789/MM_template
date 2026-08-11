@@ -42,6 +42,28 @@
     z-index: 1;
   }
 
+  // Scrim between the artwork and the form. The skyline carries a near-white sun
+  // disc behind its central gopuram, and with the artwork centred and the form in
+  // a single centred column the two land on top of each other - the labels over
+  // the disc were unreadable. This darkens only the middle, so the skyline's
+  // outer detail is untouched.
+  //
+  // z-index 1 matches .backgroundImage; as the parent's last child this paints
+  // over it, while .birds (2) and the form (3) stay above.
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse 40% 44% at 50% 58%,
+      rgba(0, 0, 0, 0.74) 0%,
+      rgba(0, 0, 0, 0.46) 55%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  }
+
   .sun {
     position: absolute;
     bottom: 17vw;
@@ -57,7 +79,10 @@
 
   .birds {
     z-index: 2;
-    margin-top: 2rem;
+    // Was 2rem. Sits higher now, which also hands the space back to the form
+    // below it - six fields in one column need more height than the old
+    // two-column arrangement did.
+    margin-top: 0.5rem;
     width: clamp(6rem, 15vw, 15rem);
     display: flex;
     justify-content: center;

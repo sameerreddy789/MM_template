@@ -44,29 +44,36 @@
 
     .formColumns {
       display: flex;
+      // Stacks now. This was a row holding .left and .right side by side with a
+      // 21vw trench between them.
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 21vw;
 
-      .left {
-        align-items: flex-end;
-      }
-      .right {
-        align-items: flex-start;
-      }
+      // One width shared by the column and the field artwork inside it, so the
+      // two cannot drift apart. Bounded by svh as well as vw: six stacked fields
+      // sized purely in vw overflow a short, wide window - at 2560x900 they ran
+      // off the bottom of the viewport.
+      --field-width: min(21vw, 52svh);
 
-      .left,
-      .right {
-        width: 100%;
-        flex: 1;
+      .fields {
+        // Sized to the fields, not to the full width of the form. The field
+        // blocks are width: 100% and .error is positioned as a percentage of
+        // them, so a full-width column would strand the error text far to the
+        // left of the input it belongs to.
+        width: var(--field-width);
         display: flex;
         flex-direction: column;
+        align-items: center;
         justify-content: center;
-        gap: 1vw;
+        // Tighter than the old 1vw, because six fields in one column have to fit
+        // between the logo and the Next button. Each label is nudged down 0.2vw
+        // onto its own field, so the visible separation is a little under this.
+        gap: 0.8vw;
 
         .clouds {
           position: relative;
-          width: 28vw;
+          width: var(--field-width);
           aspect-ratio: 5.8223;
           overflow: visible;
           align-items: center;
@@ -185,15 +192,26 @@
           align-items: center;
           justify-content: center;
           position: relative;
-          top: 0.5vw;
+          // Was 0.5vw. Still tucks the label onto its field, but not so far that
+          // it closes up the gap against the field above it.
+          top: 0.2vw;
 
           label {
             color: #fff9e9;
-            font: 400 1.4vw "Abhaya Libre";
-            text-shadow: 0 0 6px rgba(229, 195, 132, 0.54);
+            // Kept on one line: the label sits between two flanking rules, and
+            // in a single 21vw column the old 1.4vw wrapped "MBU STUDENT?" and
+            // "COLLEGE NAME" onto two lines.
+            white-space: nowrap;
+            font: 400 1.25vw "Abhaya Libre";
+            // The warm glow alone disappears against the bright sun disc in the
+            // background artwork, so a dark drop shadow carries the contrast.
+            text-shadow: 0 0 6px rgba(229, 195, 132, 0.54),
+              0 1px 4px rgba(0, 0, 0, 0.85);
           }
           img {
-            width: 7vw;
+            // Narrower than the old 7vw so the label keeps its room now that the
+            // column is 21vw rather than a half-width column.
+            width: 4.5vw;
           }
         }
 
@@ -213,22 +231,10 @@
           flex-direction: column;
         }
 
-        .email,
-        .gender {
-          margin-right: 5vw;
-        }
-        .mobile,
-        .name {
-          margin-right: 1vw;
-        }
-        .college,
-        .city {
-          margin-left: 1vw;
-        }
-        .year,
-        .states {
-          margin-left: 5vw;
-        }
+        // The sideways stagger that used to live here (margin-right 5vw / 1vw on
+        // the left group, margin-left 1vw / 5vw on the right) fanned the fields
+        // out from the centre of the two-column layout. In a single column it
+        // just knocks every field off the centre line, so it is gone.
 
         .error {
           position: absolute;
@@ -280,6 +286,65 @@
     .confirmIcon {
       &:last-child {
         rotate: 180deg;
+      }
+    }
+  }
+}
+
+// Very wide, short desktop windows. 16:9 and 16:10 have the height for six
+// stacked fields, but past roughly 2:1 the vw-derived sizes inflate faster than
+// the viewport height allows and the column runs down into the Next button.
+// Switching this column to height-based units keeps it on the page.
+//
+// For the record, the old two-column layout overflowed here as well - measured at
+// 2560x900 it ran 156px into the button - so this window shape was already
+// imperfect rather than being broken by the single column.
+@media (min-width: 1201px) and (min-aspect-ratio: 2/1) {
+  .registerContainer .registrationForm .formColumns {
+    --field-width: 23svh;
+
+    .fields {
+      gap: 1.1svh;
+
+      .sameline {
+        top: 0.2svh;
+
+        label {
+          font-size: 2svh;
+        }
+        img {
+          width: 6svh;
+        }
+      }
+
+      // The text inside the fields needs the same treatment. Left in vw it
+      // reaches 36px on a 2560-wide window, inside a box only 36px tall.
+      .clouds {
+        input {
+          font-size: 2svh;
+        }
+
+        .radioGroup {
+          gap: 1.6svh;
+
+          .radioLabel {
+            font-size: 2svh;
+
+            .radioInput {
+              width: 1.7svh !important;
+              height: 1.7svh !important;
+
+              &:checked::after {
+                width: 0.6svh;
+                height: 0.6svh;
+              }
+            }
+          }
+        }
+      }
+
+      .error {
+        font-size: 1.7svh;
       }
     }
   }
@@ -337,9 +402,11 @@
       .formColumns {
         flex-direction: column;
         gap: 2vw;
+        --field-width: 70vw;
 
-        .left,
-        .right {
+        .fields {
+          gap: 2vw;
+
           .year,
           .states,
           .college,
@@ -351,7 +418,6 @@
             margin: 0;
           }
           .clouds {
-            width: 70vw;
             .dropDown {
               height: 6vw;
               width: 6vw;
@@ -428,12 +494,11 @@
 
       .formColumns {
         gap: 9vw;
+        --field-width: 87vw;
 
-        .left,
-        .right {
+        .fields {
           gap: 9vw;
           .clouds {
-            width: 87vw;
             .dropDown {
               height: 6.5vw;
               width: 6.5vw;

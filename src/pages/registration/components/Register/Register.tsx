@@ -248,7 +248,9 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
           className={styles.registrationForm}
         >
           <div className={styles.formColumns}>
-            <div className={styles.left}>
+            {/* One column, in reading order. This used to be a .left/.right pair
+                with the six fields split across them and staggered sideways. */}
+            <div className={styles.fields}>
               <div className={styles.name}>
                 <div className={styles.sameline}>
                   <img src={Left} alt="Glow" />
@@ -307,21 +309,8 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
                 <p className={styles.error}>{errors.is_mbu?.message}</p>
               </div>
 
-              <div className={styles.mobile}>
-                <div className={styles.sameline}>
-                  <img src={Left} alt="Glow" />
-                  <label>MOBILE NUMBER </label>
-                  <img src={Right} alt="Glow" />
-                </div>
-                <div className={styles.clouds}>
-                  <img src={Field} alt="Field" className={styles.fieldImg} />
-                  <input {...register("phone")} />
-                </div>
-                <p className={styles.error}>{errors.phone?.message}</p>
-              </div>
-            </div>
-
-            <div className={styles.right}>
+              {/* Directly below MBU STUDENT?, since that answer is what decides
+                  whether this asks for a roll number or a college name. */}
               {isMbu ? (
                 <div className={styles.college}>
                   <div className={styles.sameline}>
@@ -349,6 +338,19 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
                   <p className={styles.error}>{errors.college_id?.message}</p>
                 </div>
               )}
+
+              <div className={styles.mobile}>
+                <div className={styles.sameline}>
+                  <img src={Left} alt="Glow" />
+                  <label>MOBILE NUMBER </label>
+                  <img src={Right} alt="Glow" />
+                </div>
+                <div className={styles.clouds}>
+                  <img src={Field} alt="Field" className={styles.fieldImg} />
+                  <input {...register("phone")} />
+                </div>
+                <p className={styles.error}>{errors.phone?.message}</p>
+              </div>
 
               <div className={styles.year}>
                 <div className={styles.sameline}>
