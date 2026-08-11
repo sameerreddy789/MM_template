@@ -1,40 +1,26 @@
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import Select from "react-select";
 import Field from "/svgs/registration/field2.svg";
 import styles from "./Register.module.scss";
-import { useEffect, useState, forwardRef, useRef } from "react";
-import { useForm, Controller } from "react-hook-form";
-import axios from "axios";
-import statesData from "./cities.json";
+import { useEffect, forwardRef } from "react";
+import { useForm } from "react-hook-form";
 import Left from "/svgs/registration/leftarr.svg";
 import Right from "/svgs/registration/rightarr.svg";
-import DropDown from "/svgs/registration/dropdown.svg";
 
-const stateOptions = statesData.map((item) => ({
-  value: item.state,
-  label: item.state,
-}));
-
+// Four fields. The MBU student question and the city field are gone, and with
+// them roll_no: that was only ever asked when the answer to MBU was Yes, so
+// without the question there is nothing to gate it on and college_id is simply
+// required for everyone.
+//
+// Note all three are still sent in the submit payload - see onSubmit.
 const registrationSchema = yup.object({
   name: yup.string().required("Name is required"),
   email_id: yup.string().email("Invalid email"),
-  is_mbu: yup.string().required("Select an option"),
-  roll_no: yup.string().when("is_mbu", {
-    is: "Yes",
-    then: () => yup.string().required("Roll No is required"),
-    otherwise: () => yup.string(),
-  }),
-  college_id: yup.string().when("is_mbu", {
-    is: "No",
-    then: () => yup.string().required("College Name is required"),
-    otherwise: () => yup.string(),
-  }),
+  college_id: yup.string().required("College Name is required"),
   phone: yup
     .string()
     .matches(/^[1-9]\d{9}$/, "Invalid number")
     .required("Mobile number is required"),
-  city: yup.string().required("City is required"),
 });
 
 type FormData = yup.InferType<typeof registrationSchema>;
@@ -45,17 +31,6 @@ type PropsType = {
   setUserData: React.Dispatch<React.SetStateAction<any>>;
 };
 
-type GenderOption = {
-  value: "M" | "F" | "O";
-  label: string;
-};
-
-const genderOptions: GenderOption[] = [
-  { value: "M", label: "Male" },
-  { value: "F", label: "Female" },
-  { value: "O", label: "Other" },
-];
-
 const Register = forwardRef<HTMLDivElement, PropsType>(  
   function RegisterComponent(props, ref) {
     const { onClickNext, userEmail, setUserData } = props;
@@ -64,7 +39,6 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
       register,
       handleSubmit,
       formState: { errors },
-      setValue,
       watch,
       reset,
     } = useForm<FormData>({
@@ -72,15 +46,10 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
       defaultValues: {
         name: "",
         email_id: userEmail,
-        is_mbu: "",
-        roll_no: "",
         phone: "",
         college_id: "",
-        city: "",
       },
     });
-
-    const isMbu = watch("is_mbu") === "Yes";
 
     useEffect(() => {
       const savedData = localStorage.getItem("registrationFormData");
@@ -106,137 +75,22 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
       return () => subscription.unsubscribe();
     }, [watch]);
 
-    const isTablet = window.matchMedia(
-      "(max-width: 1200px) and (max-aspect-ratio: 1.45) "
-    ).matches;
-    const isMobile = window.matchMedia(
-      "(max-width: 1200px) and (max-aspect-ratio: 0.75) "
-    ).matches;
-    const customStyle = {
-      control: (provided: any) => ({
-        ...provided,
-        outline: "none",
-        border: "none",
-        height: "100%",
-        width: "100%",
-        textAlign: "center",
-        borderRadius: "0",
-        boxShadow: "none",
-        cursor: "pointer",
-      }),
-      noOptionsMessage: (provided: any, state: any) => ({
-        ...provided,
-        backgroundColor: state.isFocused ? "#FFF9E9" : "#131313CC",
-        color: state.isFocused ? "#1E1E1E" : "#FFF9E9",
-        textAlign: "center",
-        cursor: "pointer",
-        padding: "0.5vw 0",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        font: `100 ${
-          isMobile ? 4.2 : isTablet ? 3.2 : 1.5
-        }vw Abhaya Libre Extrabold`,
-        "&:hover": {
-          backgroundColor: state.isFocused ? "#FFF9E9" : "#1E1E1E",
-        },
-      }),
-      dropdownIndicator: () => ({
-        display: "none",
-      }),
-      indicatorSeparator: () => ({
-        display: "none",
-      }),
-      placeholder: (provided: any, state: any) => ({
-        ...provided,
-        width: "100%",
-        height: "100%",
-        color: "#e2dccb",
-        font: `100 ${
-          isMobile ? 4.2 : isTablet ? 3.2 : 1.5
-        }vw Abhaya Libre Extrabold`,
-        display: state.hasValue || state.isFocused ? "none" : "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }),
-      input: (provided: any) => ({
-        ...provided,
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        maxWidth: "65%",
-        overflow: "hidden",
-        transform: "translate(-50%, -50%)",
-      }),
-      singleValue: (provided: any) => ({
-        ...provided,
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        width: "65%",
-      }),
-      valueContainer: () => ({
-        width: "100%",
-        height: "100%",
-        color: "#e2dccb",
-        font: `100 ${
-          isMobile ? 4.2 : isTablet ? 3.2 : 1.5
-        }vw Abhaya Libre Extrabold`,
-      }),
-      menuPortal: (provided: any) => ({
-        ...provided,
-        zIndex: 9999,
-      }),
-      menu: (provided: any) => ({
-        ...provided,
-        zIndex: 4,
-        backgroundColor: "#1E1E1E",
-        maxHeight: `${isMobile ? 40 : isTablet ? 30 : 10}vw`,
-        overflow: "hidden",
-        scrollbarWidth: "none",
-        "::-webkit-scrollbar": {
-          display: "none",
-        },
-        border: "1px solid #FFF9E9",
-        borderRadius: "5px",
-      }),
-      menuList: (provided: any) => ({
-        ...provided,
-        zIndex: 10,
-        maxHeight: `${isMobile ? 40 : isTablet ? 30 : 10}vw`,
-        scrollbarWidth: "none",
-        "::-webkit-scrollbar": {
-          display: "none",
-        },
-      }),
-      option: (provided: any, state: any) => ({
-        ...provided,
-        backgroundColor: state.isFocused ? "#FFF9E9" : "#131313CC",
-        color: state.isFocused ? "#1E1E1E" : "#FFF9E9",
-        textAlign: "center",
-        cursor: "pointer",
-        padding: "0.5vw 0",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        font: `100 ${
-          isMobile ? 4.4 : isTablet ? 3.2 : 1.5
-        }vw Abhaya Libre Extrabold`,
-        "&:hover": {
-          backgroundColor: state.isFocused ? "#FFF9E9" : "#1E1E1E",
-        },
-      }),
-    };
-
     const onSubmit = (data: any) => {
-      console.log("Form Data:", data);
       setUserData({
         ...data,
         email_id: userEmail,
+        // is_mbu, roll_no and city are no longer asked for, but they are still
+        // sent. ConfirmModal spreads the whole of userData straight into the body
+        // of the POST to /registrations/register/, so dropping the fields from
+        // this form would also drop these keys out of that request. Empty rather
+        // than invented values, because they genuinely are not collected any
+        // more - if the API rejects blanks for these, it needs a change there.
+        is_mbu: "",
+        roll_no: "",
+        city: "",
       });
       onClickNext();
-      
+
       localStorage.removeItem("registrationFormData");
     };
 
@@ -248,8 +102,9 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
           className={styles.registrationForm}
         >
           <div className={styles.formColumns}>
-            {/* One column, in reading order. This used to be a .left/.right pair
-                with the six fields split across them and staggered sideways. */}
+            {/* A 2x2 grid, filling across then down:
+                  NAME          EMAIL
+                  COLLEGE NAME  MOBILE NUMBER */}
             <div className={styles.fields}>
               <div className={styles.name}>
                 <div className={styles.sameline}>
@@ -277,67 +132,18 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
                 <p className={styles.error}>{errors.email_id?.message}</p>
               </div>
 
-              <div className={styles.gender}>
+              <div className={styles.college}>
                 <div className={styles.sameline}>
                   <img src={Left} alt="Glow" />
-                  <label>MBU STUDENT?</label>
+                  <label>COLLEGE NAME </label>
                   <img src={Right} alt="Glow" />
                 </div>
                 <div className={styles.clouds}>
                   <img src={Field} alt="Field" className={styles.fieldImg} />
-                  <fieldset
-                    className={styles.radioGroup}
-                    aria-label="MBU Student"
-                  >
-                    {["Yes", "No"].map((opt) => (
-                      <label key={opt} className={styles.radioLabel}>
-                        <input
-                          type="radio"
-                          value={opt}
-                          {...register("is_mbu")}
-                          className={styles.radioInput}
-                          onChange={(e) => {
-                             setValue("is_mbu", e.target.value);
-                             setValue("college_id", e.target.value === "Yes" ? "Mohan Babu University" : "");
-                          }}
-                        />
-                        <span className={styles.yearNumber}>{opt}</span>
-                      </label>
-                    ))}
-                  </fieldset>
+                  <input {...register("college_id")} />
                 </div>
-                <p className={styles.error}>{errors.is_mbu?.message}</p>
+                <p className={styles.error}>{errors.college_id?.message}</p>
               </div>
-
-              {/* Directly below MBU STUDENT?, since that answer is what decides
-                  whether this asks for a roll number or a college name. */}
-              {isMbu ? (
-                <div className={styles.college}>
-                  <div className={styles.sameline}>
-                    <img src={Left} alt="Glow" />
-                    <label>ROLL NUMBER</label>
-                    <img src={Right} alt="Glow" />
-                  </div>
-                  <div className={styles.clouds}>
-                    <img src={Field} alt="Field" className={styles.fieldImg} />
-                    <input {...register("roll_no")} />
-                  </div>
-                  <p className={styles.error}>{errors.roll_no?.message}</p>
-                </div>
-              ) : (
-                <div className={styles.college}>
-                  <div className={styles.sameline}>
-                    <img src={Left} alt="Glow" />
-                    <label>COLLEGE NAME </label>
-                    <img src={Right} alt="Glow" />
-                  </div>
-                  <div className={styles.clouds}>
-                    <img src={Field} alt="Field" className={styles.fieldImg} />
-                    <input {...register("college_id")} />
-                  </div>
-                  <p className={styles.error}>{errors.college_id?.message}</p>
-                </div>
-              )}
 
               <div className={styles.mobile}>
                 <div className={styles.sameline}>
@@ -350,19 +156,6 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
                   <input {...register("phone")} />
                 </div>
                 <p className={styles.error}>{errors.phone?.message}</p>
-              </div>
-
-              <div className={styles.year}>
-                <div className={styles.sameline}>
-                  <img src={Left} alt="Glow" />
-                  <label>CITY</label>
-                  <img src={Right} alt="Glow" />
-                </div>
-                <div className={styles.clouds}>
-                  <img src={Field} alt="Field" className={styles.fieldImg} />
-                  <input {...register("city")} />
-                </div>
-                <p className={styles.error}>{errors.city?.message}</p>
               </div>
             </div>
           </div>

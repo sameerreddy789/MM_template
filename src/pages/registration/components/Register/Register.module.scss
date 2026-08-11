@@ -50,26 +50,26 @@
       align-items: center;
       justify-content: center;
 
-      // One width shared by the column and the field artwork inside it, so the
-      // two cannot drift apart. Bounded by svh as well as vw: six stacked fields
-      // sized purely in vw overflow a short, wide window - at 2560x900 they ran
-      // off the bottom of the viewport.
-      --field-width: min(21vw, 52svh);
+      // One width shared by each grid track and the field artwork inside it, so
+      // the two cannot drift apart. Bounded by svh as well as vw so the fields
+      // cannot outgrow a short window.
+      //
+      // Roomier than when this was a single column of six: two rows leave plenty
+      // of height, so the fields are back to something close to their original
+      // size.
+      --field-width: min(26vw, 46svh);
 
       .fields {
-        // Sized to the fields, not to the full width of the form. The field
-        // blocks are width: 100% and .error is positioned as a percentage of
-        // them, so a full-width column would strand the error text far to the
-        // left of the input it belongs to.
-        width: var(--field-width);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        // 2x2. Explicit tracks rather than 1fr so each column is exactly one
+        // field wide: the field blocks are width: 100% and .error is positioned
+        // as a percentage of them, so wider tracks would strand the error text
+        // away from the input it belongs to.
+        display: grid;
+        grid-template-columns: repeat(2, var(--field-width));
         justify-content: center;
-        // Tighter than the old 1vw, because six fields in one column have to fit
-        // between the logo and the Next button. Each label is nudged down 0.2vw
-        // onto its own field, so the visible separation is a little under this.
-        gap: 0.8vw;
+        align-items: start;
+        column-gap: 4vw;
+        row-gap: 1.2vw;
 
         .clouds {
           position: relative;
@@ -128,62 +128,6 @@
             z-index: 100;
             // overflow: visible;
           }
-          .radioGroup {
-            border: none;
-            box-shadow: none;
-            width: 100%;
-            z-index: 5;
-            height: 100%;
-            background: transparent;
-            box-shadow: none;
-            color: #e2dccb;
-            border-radius: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 1.3vw;
-            position: relative;
-
-            .radioLabel {
-              display: flex;
-              align-items: center;
-              gap: 0.3vw;
-              font: 100 1.4vw "Abhaya Libre Extrabold";
-              color: #e2dccb;
-              cursor: pointer;
-
-              .radioInput {
-                appearance: none;
-                padding: 0;
-                width: 1.2vw !important;
-                height: 1.2vw !important;
-                border: 2px solid white;
-                border-radius: 50%;
-                position: relative;
-                outline: none;
-                cursor: pointer;
-                background-color: transparent;
-                transition: border-color 0.3s ease;
-
-                &:checked::after {
-                  content: "";
-                  position: absolute;
-                  top: 50%;
-                  left: 50%;
-                  width: 0.4vw;
-                  height: 0.4vw;
-                  background: linear-gradient(
-                    0deg,
-                    #f57572 0%,
-                    #f8a26c 42.84%,
-                    #fcdf81 102.69%
-                  );
-                  border-radius: 50%;
-                  transform: translate(-50%, -50%);
-                }
-              }
-            }
-          }
         }
 
         .sameline {
@@ -198,31 +142,29 @@
 
           label {
             color: #fff9e9;
-            // Kept on one line: the label sits between two flanking rules, and
-            // in a single 21vw column the old 1.4vw wrapped "MBU STUDENT?" and
-            // "COLLEGE NAME" onto two lines.
+            // Kept on one line: the label sits between two flanking rules, and a
+            // wrapped label pushes its own field down out of line with the one
+            // beside it in the grid.
             white-space: nowrap;
-            font: 400 1.25vw "Abhaya Libre";
+            font: 400 1.4vw "Abhaya Libre";
             // The warm glow alone disappears against the bright sun disc in the
             // background artwork, so a dark drop shadow carries the contrast.
             text-shadow: 0 0 6px rgba(229, 195, 132, 0.54),
               0 1px 4px rgba(0, 0, 0, 0.85);
           }
           img {
-            // Narrower than the old 7vw so the label keeps its room now that the
-            // column is 21vw rather than a half-width column.
-            width: 4.5vw;
+            // Short enough that the longest label, MOBILE NUMBER, still fits on
+            // one line between the two of them.
+            width: 5.5vw;
           }
         }
 
+        // .gender (the MBU radios), .city / .year and .states are gone along with
+        // the fields they belonged to.
         .email,
-        .gender,
-        .city,
         .mobile,
         .name,
-        .college,
-        .year,
-        .states {
+        .college {
           width: 100%;
           z-index: 5;
           position: relative;
@@ -291,65 +233,6 @@
   }
 }
 
-// Very wide, short desktop windows. 16:9 and 16:10 have the height for six
-// stacked fields, but past roughly 2:1 the vw-derived sizes inflate faster than
-// the viewport height allows and the column runs down into the Next button.
-// Switching this column to height-based units keeps it on the page.
-//
-// For the record, the old two-column layout overflowed here as well - measured at
-// 2560x900 it ran 156px into the button - so this window shape was already
-// imperfect rather than being broken by the single column.
-@media (min-width: 1201px) and (min-aspect-ratio: 2/1) {
-  .registerContainer .registrationForm .formColumns {
-    --field-width: 23svh;
-
-    .fields {
-      gap: 1.1svh;
-
-      .sameline {
-        top: 0.2svh;
-
-        label {
-          font-size: 2svh;
-        }
-        img {
-          width: 6svh;
-        }
-      }
-
-      // The text inside the fields needs the same treatment. Left in vw it
-      // reaches 36px on a 2560-wide window, inside a box only 36px tall.
-      .clouds {
-        input {
-          font-size: 2svh;
-        }
-
-        .radioGroup {
-          gap: 1.6svh;
-
-          .radioLabel {
-            font-size: 2svh;
-
-            .radioInput {
-              width: 1.7svh !important;
-              height: 1.7svh !important;
-
-              &:checked::after {
-                width: 0.6svh;
-                height: 0.6svh;
-              }
-            }
-          }
-        }
-      }
-
-      .error {
-        font-size: 1.7svh;
-      }
-    }
-  }
-}
-
 @media (max-width: 1200px) and (max-aspect-ratio: 1.45) {
   .registerContainer {
     margin: 0 0 5vw 0;
@@ -405,18 +288,10 @@
         --field-width: 70vw;
 
         .fields {
-          gap: 2vw;
+          // One column here: two 70vw tracks side by side do not fit a phone.
+          grid-template-columns: var(--field-width);
+          row-gap: 2vw;
 
-          .year,
-          .states,
-          .college,
-          .city,
-          .mobile,
-          .name,
-          .email,
-          .gender {
-            margin: 0;
-          }
           .clouds {
             .dropDown {
               height: 6vw;
@@ -424,25 +299,6 @@
             }
             input {
               font: 100 3.2vw "Abhaya Libre Extrabold";
-            }
-            .radioGroup {
-              gap: 1.5vw;
-
-              .radioLabel {
-                gap: 0.3vw;
-                font: 100 3.2vw "Abhaya Libre Extrabold";
-
-                .radioInput {
-                  width: 3.5vw !important;
-                  height: 3.5vw !important;
-                  border: 2px solid white;
-
-                  &:checked::after {
-                    width: 1.7vw;
-                    height: 1.7vw;
-                  }
-                }
-              }
             }
           }
           .error {
@@ -497,7 +353,8 @@
         --field-width: 87vw;
 
         .fields {
-          gap: 9vw;
+          grid-template-columns: var(--field-width);
+          row-gap: 9vw;
           .clouds {
             .dropDown {
               height: 6.5vw;
@@ -505,25 +362,6 @@
             }
             input {
               font: 100 4.2vw "Abhaya Libre Extrabold";
-            }
-            .radioGroup {
-              gap: 2.5vw;
-
-              .radioLabel {
-                gap: 0.7vw;
-                font: 100 4.2vw "Abhaya Libre Extrabold";
-
-                .radioInput {
-                  width: 3.5vw !important;
-                  height: 3.5vw !important;
-                  border: 2px solid white;
-
-                  &:checked::after {
-                    width: 1.7vw;
-                    height: 1.7vw;
-                  }
-                }
-              }
             }
           }
           .error {

@@ -96,11 +96,15 @@
   // Absolutely positioned on purpose: Instructions / Register / Events are
   // in-flow flex children of .instrback, so adding the countdown to the flow
   // would push the animated panels out of place.
+  // Top right corner. It used to sit bottom centre, where it collided with the
+  // Next button. The back button owns the top left, so this corner was free.
   .regCountdown {
     position: absolute;
-    bottom: 3vh;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 1.5vw;
+    right: 2vw;
+    bottom: auto;
+    left: auto;
+    transform: none;
     z-index: 4;
     pointer-events: none;
   }
