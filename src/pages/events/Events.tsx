@@ -4,7 +4,7 @@ import dance from "/images/events/dancef.png";
 import drama from "/images/events/dramaf.png";
 import dramaMobile from "/images/events/DramaMobile.png";
 import music from "/images/events/music1.png";
-import misc from "/images/events/misc.png";
+import misc from "/images/events/misc1.png";
 import photography from "/images/events/proshow.png";
 // import quizzes from "/images/events/quizzes.png";
 import danceMobile from "/images/events/DanceMobile.png";
