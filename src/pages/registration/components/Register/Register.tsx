@@ -15,7 +15,13 @@ import Right from "/svgs/registration/rightarr.svg";
 // Note all three are still sent in the submit payload - see onSubmit.
 const registrationSchema = yup.object({
   name: yup.string().required("Name is required"),
-  email_id: yup.string().email("Invalid email"),
+  // Required, not just email-shaped. It was optional, and since nothing could
+  // ever put a value in the field, every submission passed validation with an
+  // empty address.
+  email_id: yup
+    .string()
+    .email("Invalid email")
+    .required("Email is required"),
   college_id: yup.string().required("College Name is required"),
   phone: yup
     .string()
@@ -58,7 +64,10 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
           const parsedData = JSON.parse(savedData);
           reset({
             ...parsedData,
-            email_id: userEmail,
+            // Only fall back to the prop. This used to overwrite unconditionally,
+            // which threw away a restored email the same way the disabled input
+            // threw away a typed one.
+            email_id: parsedData.email_id || userEmail,
           });
         } catch (err) {
           console.error("Failed to parse local storage data:", err);
@@ -78,7 +87,10 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
     const onSubmit = (data: any) => {
       setUserData({
         ...data,
-        email_id: userEmail,
+        // email_id deliberately not overridden here any more. It used to be reset
+        // to the userEmail prop, which is hardcoded empty in Registration.tsx, so
+        // whatever the field held was discarded on the way out.
+        //
         // is_mbu, roll_no and city are no longer asked for, but they are still
         // sent. ConfirmModal spreads the whole of userData straight into the body
         // of the POST to /registrations/register/, so dropping the fields from
@@ -127,7 +139,14 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
                 </div>
                 <div className={styles.clouds}>
                   <img src={Field} alt="Field" className={styles.fieldImg} />
-                  <input value={userEmail} disabled placeholder={userEmail} />
+                  {/* Was `value={userEmail} disabled`, so it could neither be
+                      typed into nor tracked by the form. Registered like every
+                      other field now. */}
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    {...register("email_id")}
+                  />
                 </div>
                 <p className={styles.error}>{errors.email_id?.message}</p>
               </div>

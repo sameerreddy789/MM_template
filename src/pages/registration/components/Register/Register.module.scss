@@ -33,8 +33,11 @@
 
   .registrationForm {
     position: absolute;
+    // The translate makes this value the vertical centre line of the form rather
+    // than its bottom edge, so a larger number lifts the whole grid. Raised from
+    // 45.5svh; the 2x2 grid is short enough that it had room above it.
     transform: translateY(50%);
-    bottom: 45.5svh;
+    bottom: 52svh;
     left: 0;
     color: white;
     width: 100%;
