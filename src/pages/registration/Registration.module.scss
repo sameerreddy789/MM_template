@@ -41,16 +41,14 @@
 
   .birds {
     z-index: 2;
-    margin-top: 1.5vw;
-    width: 45vw;
-    background: center / contain no-repeat url("/svgs/registration/birds.svg");
-    background-blend-mode: overlay;
+    margin-top: 2rem;
+    width: clamp(6rem, 15vw, 15rem);
     display: flex;
     justify-content: center;
     align-items: center;
 
     .bannerImage {
-      width: 70%;
+      width: 100%;
       object-fit: contain;
     }
   }

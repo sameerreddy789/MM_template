@@ -1,8 +1,8 @@
 @use "/src/assets/global.scss" as *;
 
 .registerContainer {
-  display: none;
-  opacity: 0;
+  display: flex;
+  opacity: 1;
   flex-direction: column;
   align-items: center;
   justify-content: center;

@@ -19,14 +19,21 @@ const stateOptions = statesData.map((item) => ({
 const registrationSchema = yup.object({
   name: yup.string().required("Name is required"),
   email_id: yup.string().email("Invalid email"),
-  gender: yup.string().required("Gender is required"),
+  is_mbu: yup.string().required("Select an option"),
+  roll_no: yup.string().when("is_mbu", {
+    is: "Yes",
+    then: () => yup.string().required("Roll No is required"),
+    otherwise: () => yup.string(),
+  }),
+  college_id: yup.string().when("is_mbu", {
+    is: "No",
+    then: () => yup.string().required("College Name is required"),
+    otherwise: () => yup.string(),
+  }),
   phone: yup
     .string()
     .matches(/^[1-9]\d{9}$/, "Invalid number")
     .required("Mobile number is required"),
-  college_id: yup.string().required("College is required"),
-  year: yup.string().required("Field is required"),
-  state: yup.string().required("State is required"),
   city: yup.string().required("City is required"),
 });
 
@@ -52,87 +59,53 @@ const genderOptions: GenderOption[] = [
 const Register = forwardRef<HTMLDivElement, PropsType>(  
   function RegisterComponent(props, ref) {
     const { onClickNext, userEmail, setUserData } = props;
-    const [selectedState, setSelectedState] = useState("");
-    const [availableCities, setAvailableCities] = useState<
-      { value: string; label: string }[]
-    >([]);
-
-    const [inputValue, setInputValue] = useState("");
-
-    const dropDownRef = useRef<(HTMLImageElement | null)[]>([]);
-    
-
-
-    const getAvailableCities = (stateName: string) =>
-      (statesData.find((item) => item.state === stateName)?.cities ?? []).map(
-        (city) => ({ value: city, label: city })
-      );
-
-    useEffect(() => {
-      setAvailableCities(getAvailableCities(selectedState));
-    }, [selectedState]);
 
     const {
       register,
       handleSubmit,
       formState: { errors },
       setValue,
-      control,
-      reset,
       watch,
+      reset,
     } = useForm<FormData>({
       resolver: yupResolver(registrationSchema as any),
       defaultValues: {
         name: "",
         email_id: userEmail,
-        gender: "",
+        is_mbu: "",
+        roll_no: "",
         phone: "",
         college_id: "",
-        year: "",
-        state: "",
         city: "",
       },
     });
 
-useEffect(() => {
-  const savedData = localStorage.getItem("registrationFormData");
-  if (savedData) {
-    try {
-      const parsedData = JSON.parse(savedData);
-      reset({
-        ...parsedData,
-        email_id: userEmail,
-      });
-      if (parsedData.state) {
-        setSelectedState(parsedData.state);
-      }
-    } catch (err) {
-      console.error("Failed to parse local storage data:", err);
-      localStorage.removeItem("registrationFormData");
-    }
-  }
-}, [reset, userEmail]);
+    const isMbu = watch("is_mbu") === "Yes";
+
     useEffect(() => {
-  const subscription = watch((value) => {
-    localStorage.setItem("registrationFormData", JSON.stringify(value));
-  });
+      const savedData = localStorage.getItem("registrationFormData");
+      if (savedData) {
+        try {
+          const parsedData = JSON.parse(savedData);
+          reset({
+            ...parsedData,
+            email_id: userEmail,
+          });
+        } catch (err) {
+          console.error("Failed to parse local storage data:", err);
+          localStorage.removeItem("registrationFormData");
+        }
+      }
+    }, [reset, userEmail]);
 
-  return () => subscription.unsubscribe();
-}, [watch]);
+    useEffect(() => {
+      const subscription = watch((value) => {
+        localStorage.setItem("registrationFormData", JSON.stringify(value));
+      });
 
-    const getFilteredOptions = (input: string) => {
-      if (!input) return stateOptions;
-      const inputLower = input.toLowerCase();
-      const startsWith = stateOptions.filter((opt) =>
-        opt.label.toLowerCase().startsWith(inputLower)
-      );
-      const contains = stateOptions.filter(
-        (opt) =>
-          !opt.label.toLowerCase().startsWith(inputLower) &&
-          opt.label.toLowerCase().includes(inputLower)
-      );
-      return [...startsWith, ...contains];
-    };
+      return () => subscription.unsubscribe();
+    }, [watch]);
+
     const isTablet = window.matchMedia(
       "(max-width: 1200px) and (max-aspect-ratio: 1.45) "
     ).matches;
@@ -305,55 +278,33 @@ useEffect(() => {
               <div className={styles.gender}>
                 <div className={styles.sameline}>
                   <img src={Left} alt="Glow" />
-                  <label>GENDER</label>
+                  <label>MBU STUDENT?</label>
                   <img src={Right} alt="Glow" />
                 </div>
                 <div className={styles.clouds}>
                   <img src={Field} alt="Field" className={styles.fieldImg} />
-
-                  <Controller
-                    name="gender"
-                    control={control}
-                    render={({ field }) => (
-                      <Select<GenderOption, false>
-                        {...field}
-                        menuPortalTarget={document.body}
-                        options={genderOptions}
-                        styles={customStyle}
-                        onChange={(val) => field.onChange(val?.value || "")}
-                        value={
-                          genderOptions.find(
-                            (opt) => opt.value === field.value
-                          ) || null
-                        }
-                        unstyled
-                        placeholder="--SELECT--"
-                        className={styles["react-select-container"]}
-                        classNamePrefix="react-select"
-                        onMenuOpen={() => {
-                          dropDownRef.current[0]!.classList.add(
-                            styles.rotateDropDown
-                          );
-                        }}
-                        onMenuClose={() => {
-                          dropDownRef.current[0]!.classList.remove(
-                            styles.rotateDropDown
-                          );
-                        }}
-                      />
-                    )}
-                  />
-
-                  <img
-                    src={DropDown}
-                    alt="dropDown"
-                    className={styles.dropDown}
-                    ref={(el) => {
-                      dropDownRef.current[0] = el;
-                    }}
-                  />
+                  <fieldset
+                    className={styles.radioGroup}
+                    aria-label="MBU Student"
+                  >
+                    {["Yes", "No"].map((opt) => (
+                      <label key={opt} className={styles.radioLabel}>
+                        <input
+                          type="radio"
+                          value={opt}
+                          {...register("is_mbu")}
+                          className={styles.radioInput}
+                          onChange={(e) => {
+                             setValue("is_mbu", e.target.value);
+                             setValue("college_id", e.target.value === "Yes" ? "Mohan Babu University" : "");
+                          }}
+                        />
+                        <span className={styles.yearNumber}>{opt}</span>
+                      </label>
+                    ))}
+                  </fieldset>
                 </div>
-                <p className={styles.error}>{errors.gender?.message}</p>
+                <p className={styles.error}>{errors.is_mbu?.message}</p>
               </div>
 
               <div className={styles.mobile}>
@@ -371,160 +322,43 @@ useEffect(() => {
             </div>
 
             <div className={styles.right}>
-              <div className={styles.college}>
-                <div className={styles.sameline}>
-                  <img src={Left} alt="Glow" />
-                  <label>COLLEGE NAME </label>
-                  <img src={Right} alt="Glow" />
+              {isMbu ? (
+                <div className={styles.college}>
+                  <div className={styles.sameline}>
+                    <img src={Left} alt="Glow" />
+                    <label>ROLL NUMBER</label>
+                    <img src={Right} alt="Glow" />
+                  </div>
+                  <div className={styles.clouds}>
+                    <img src={Field} alt="Field" className={styles.fieldImg} />
+                    <input {...register("roll_no")} />
+                  </div>
+                  <p className={styles.error}>{errors.roll_no?.message}</p>
                 </div>
-                <div className={styles.clouds}>
-                  <img src={Field} alt="Field" className={styles.fieldImg} />
-                  <input {...register("college_id")} />
+              ) : (
+                <div className={styles.college}>
+                  <div className={styles.sameline}>
+                    <img src={Left} alt="Glow" />
+                    <label>COLLEGE NAME </label>
+                    <img src={Right} alt="Glow" />
+                  </div>
+                  <div className={styles.clouds}>
+                    <img src={Field} alt="Field" className={styles.fieldImg} />
+                    <input {...register("college_id")} />
+                  </div>
+                  <p className={styles.error}>{errors.college_id?.message}</p>
                 </div>
-                <p className={styles.error}>{errors.college_id?.message}</p>
-              </div>
+              )}
 
               <div className={styles.year}>
                 <div className={styles.sameline}>
                   <img src={Left} alt="Glow" />
-                  <label>YEAR OF STUDY </label>
+                  <label>CITY</label>
                   <img src={Right} alt="Glow" />
                 </div>
                 <div className={styles.clouds}>
                   <img src={Field} alt="Field" className={styles.fieldImg} />
-                  <fieldset
-                    className={styles.radioGroup}
-                    aria-label="Year of Study"
-                  >
-                    {["1", "2", "3", "4", "5"].map((year) => (
-                      <label key={year} className={styles.radioLabel}>
-                        <input
-                          type="radio"
-                          value={year}
-                          {...register("year")}
-                          className={styles.radioInput}
-                        />
-                        <span className={styles.yearNumber}>{year}</span>
-                      </label>
-                    ))}
-                  </fieldset>
-                </div>
-                <p className={styles.error}>{errors.year?.message}</p>
-              </div>
-
-              <div className={styles.states}>
-                <div className={styles.sameline}>
-                  <img src={Left} alt="Glow" />
-                  <label>STATE</label>
-                  <img src={Right} alt="Glow" />
-                </div>
-                <div className={styles.clouds}>
-                  <img src={Field} alt="Field" className={styles.fieldImg} />
-                  <Controller
-                    name="state"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        {...field}
-                        menuPortalTarget={document.body}
-                        unstyled
-                        options={getFilteredOptions(inputValue)}
-                        styles={customStyle}
-                        onInputChange={(value) => setInputValue(value)}
-                        filterOption={() => true}
-                        value={
-                          field.value
-                            ? stateOptions.find(
-                                (option) => option.value === field.value
-                              ) || null
-                            : null
-                        }
-                        onChange={(option) => {
-                          const val = option?.value || "";
-                          field.onChange(val);
-                          setSelectedState(val);
-                          setValue("city", "", { shouldValidate: true });
-                        }}
-                        placeholder="--SELECT--"
-                        className={styles["react-select-container"]}
-                        classNamePrefix="react-select"
-                        onMenuOpen={() => {
-                          dropDownRef.current[2]!.classList.add(
-                            styles.rotateDropDown
-                          );
-                        }}
-                        onMenuClose={() => {
-                          dropDownRef.current[2]!.classList.remove(
-                            styles.rotateDropDown
-                          );
-                        }}
-                      />
-                    )}
-                  />
-                  <img
-                    src={DropDown}
-                    alt="dropDown"
-                    className={styles.dropDown}
-                    ref={(el) => {
-                      dropDownRef.current[2] = el;
-                    }}
-                  />
-                </div>
-                <p className={styles.error}>{errors.state?.message}</p>
-              </div>
-
-              <div className={styles.city}>
-                <div className={styles.sameline}>
-                  <img src={Left} alt="Glow" />
-                  <label>CITY </label>
-                  <img src={Right} alt="Glow" />
-                </div>
-                <div className={styles.clouds}>
-                  <img src={Field} alt="Field" className={styles.fieldImg} />
-                  <Controller
-                    name="city"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        {...field}
-                        menuPortalTarget={document.body}
-                        menuPlacement="top"
-                        options={availableCities}
-                        styles={customStyle}
-                        isDisabled={!selectedState}
-                        onChange={(val) => field.onChange(val?.value || "")}
-                        value={
-                          field.value
-                            ? availableCities.find(
-                                (c) => c.value === field.value
-                              ) || null
-                            : null
-                        }
-                        unstyled
-                        placeholder="--SELECT--"
-                        className={styles["react-select-container"]}
-                        classNamePrefix="react-select"
-                        onMenuOpen={() => {
-                          dropDownRef.current[3]!.classList.add(
-                            styles.rotateDropDown
-                          );
-                        }}
-                        onMenuClose={() => {
-                          dropDownRef.current[3]!.classList.remove(
-                            styles.rotateDropDown
-                          );
-                        }}
-                      />
-                    )}
-                  />
-                  <img
-                    src={DropDown}
-                    alt="dropDown"
-                    className={styles.dropDown}
-                    ref={(el) => {
-                      dropDownRef.current[3] = el;
-                    }}
-                  />
+                  <input {...register("city")} />
                 </div>
                 <p className={styles.error}>{errors.city?.message}</p>
               </div>
