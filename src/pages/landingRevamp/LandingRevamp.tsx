@@ -215,8 +215,30 @@ export default function LandingRevamp({
 
     lenis.on("scroll", ScrollTrigger.update);
 
-    // Use GSAP ticker for better sync with ScrollTrigger
+    // Lenis measures the document once on construction and afterwards only
+    // watches the wrapper element for resizes - it never notices the document
+    // growing underneath it. On a first visit the preloader delays this mount
+    // long enough for the about and contact sections to exist, so the cached
+    // limit is correct. Returning to this route client-side skips the preloader
+    // (removeGif is already true in the store), so Lenis initialises while the
+    // page is still just the hero and its limit sticks at ~one viewport past it.
+    // Wheel scrolling then dead-ends at the about/contact boundary while
+    // keyboard and programmatic scrolling still reach the bottom - which is what
+    // made the page look stuck at the contact section.
+    //
+    // A ResizeObserver is no use here: body's own box stays one viewport tall,
+    // it's the overflowing content that grows. So compare the document height
+    // each tick instead - one property read per frame - and re-measure when it
+    // changes. lenis.resize() only reads layout, so unlike ScrollTrigger.refresh()
+    // it cannot feed back into the pinned contact section.
+    let lastScrollHeight = document.documentElement.scrollHeight;
+
     const raf = (time: number) => {
+      const scrollHeightNow = document.documentElement.scrollHeight;
+      if (scrollHeightNow !== lastScrollHeight) {
+        lastScrollHeight = scrollHeightNow;
+        lenis.resize();
+      }
       lenis.raf(time * 1000);
     };
 

@@ -1,5 +1,5 @@
 import styles from "./Sponsers.module.scss";
-import heading from "/svgs/sponsors/sponsorsHead.svg";
+import heading from "/svgs/sponsors/sponsorsHead.png";
 import BackButton from "../components/backButton/BackButton";
 import { useEffect } from "react";
 
