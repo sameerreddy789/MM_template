@@ -1,11 +1,11 @@
 import styles from "./Events.module.scss";
 import Text from "/images/events/text.png";
-import dance from "/images/events/dance.png";
+import dance from "/images/events/dancef.png";
 import drama from "/images/events/drama.png";
 import dramaMobile from "/images/events/DramaMobile.png";
-import music from "/images/events/music.png";
+import music from "/images/events/music1.png";
 import misc from "/images/events/misc.png";
-import photography from "/images/events/photography.png";
+import photography from "/images/events/proshow.png";
 // import quizzes from "/images/events/quizzes.png";
 import danceMobile from "/images/events/DanceMobile.png";
 import musicMobile from "/images/events/MusicMobile.png";
@@ -186,15 +186,15 @@ const Events: React.FC = () => {
     setSelectedCategory(alt);
     setFoldFan(true);
     imageRefs.current.forEach((img) => {
-  if (!img) return;
-  gsap.killTweensOf(img);
-  img.style.filter = "saturate(1) "; // reset if needed
-  img.style.scale = "1";  // optional: reset transforms
-});
+      if (!img) return;
+      gsap.killTweensOf(img);
+      img.style.filter = "saturate(1) "; // reset if needed
+      img.style.scale = "1";  // optional: reset transforms
+    });
     setTimeout(() => {
       setShowImages(false);
     }, 2000);
-     setShowEventPage(true);
+    setShowEventPage(true);
 
     const mm = gsap.matchMedia();
 
@@ -216,11 +216,11 @@ const Events: React.FC = () => {
               y: rec.top + rec.height / 2 - rect.top,
             };
           })();
-          
+
           //  reset transforms before animation
           gsap.killTweensOf(imgEl);
           gsap.set(imgEl, { scale: 1 });
-         
+
 
           imgEl.style.transformOrigin = `${origin.x}px ${origin.y}px`;
 
@@ -228,11 +228,11 @@ const Events: React.FC = () => {
             rotate: rotationAngles[orderIndex],
             duration: 2,
             delay: 10,
-              scaleX: [1,2].includes(originalIndex) ? 0.2: 1, // X scale for index 1,2,3
-  scaleY: [0,3,4].includes(originalIndex) ? 0.2 : 1,
-          // pointerEvents:"none",
-          // scale:"1",
-          // filter:"drop-shadow(0px 0px 30px rgba(0, 0,  0,1))",
+            scaleX: [1, 2].includes(originalIndex) ? 0.2 : 1, // X scale for index 1,2,3
+            scaleY: [0, 3, 4].includes(originalIndex) ? 0.2 : 1,
+            // pointerEvents:"none",
+            // scale:"1",
+            // filter:"drop-shadow(0px 0px 30px rgba(0, 0,  0,1))",
             ease: "linear",
             // zIndex: alt === fanImages[originalIndex].alt ? 5 : 2, // clicked image on top
           });
@@ -260,13 +260,13 @@ const Events: React.FC = () => {
           gsap.killTweensOf(imgEl);
           gsap.set(imgEl, { scale: 1 });
           imgEl.style.transformOrigin = `${origin.x}px ${origin.y}px`;
-          imgEl.style.pointerEvents ="none";
+          imgEl.style.pointerEvents = "none";
           gsap.to(imgEl, {
             rotate: rotationAngles[i],
             duration: 1.7,
             delay: 10,
-            scaleX: [1, 2, 3].includes(i) ? 0.2: 1, // X scale for index 1,2,3
-  scaleY: [0, 4].includes(i) ? 0.2 : 1,
+            scaleX: [1, 2, 3].includes(i) ? 0.2 : 1, // X scale for index 1,2,3
+            scaleY: [0, 4].includes(i) ? 0.2 : 1,
             ease: "linear",
             // zIndex: 2,
           });
@@ -314,9 +314,8 @@ const Events: React.FC = () => {
                 ref={(el) => {
                   imageRefs.current[i] = el;
                 }}
-                className={`${img.className} ${
-                  foldFan ? `${styles.fold} ${styles.folding}` : ""
-                }`}
+                className={`${img.className} ${foldFan ? `${styles.fold} ${styles.folding}` : ""
+                  }`}
                 onClick={() => handleImageClick(img.alt)}
               />
             );

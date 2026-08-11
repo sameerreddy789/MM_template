@@ -19,7 +19,7 @@ const dummyEventsData = [
   {
     category_name: "Music",
     events: [
-      { name: "Battle of Bands", club_name: "Music Club", venue: "Main Stage", description: "Rock bands competing for the top prize.", image_url: "https://via.placeholder.com/400x300?text=Battle+of+Bands" },
+      { name: "Battle of Bands", club_name: "Music Club", venue: "Main Stage", description: "Rock bands competing for the top prize.", image_url: "/images/events/Bob.png" },
       { name: "Solo Singing", club_name: "Music Club", venue: "Seminar Hall", description: "Showcase your vocal talent.", image_url: "https://via.placeholder.com/400x300?text=Solo+Singing" }
     ]
   },
