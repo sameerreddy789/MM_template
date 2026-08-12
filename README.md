@@ -6,7 +6,7 @@
 
 The official website for MohanaMantra 2K26, the annual cultural festival at MBU.
 
-[**mohanamantra.com**](https://www.mohanamantra.com/)
+[**mm-template.vercel.app**](https://mm-template.vercel.app)
 
 ---
 
@@ -38,10 +38,6 @@ the lantern social links strung from the tree.
 ### Registration
 
 ![Registration page](docs/screenshots/register.webp)
-
-### Mobile
-
-![Landing page on mobile](docs/screenshots/mobile-home.webp)
 
 ---
 
@@ -160,15 +156,9 @@ Two paths are configured:
 
 ## Contributors
 
-| Contributor  |
-| --- | --- |
-| **Monish Reddy**  |
-| Vedium Sameer Reddy  |
-| chaitanya03456  |
-
-```text
-Monish Reddy <monishreddy2629@gmail.com> <technicalmonish@Monishs-MacBook-Air-2.local>
-```
+- **Monish Reddy**
+- Vedium Sameer Reddy
+- chaitanya03456
 
 ---
 
