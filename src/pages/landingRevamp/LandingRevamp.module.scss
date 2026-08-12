@@ -397,6 +397,15 @@ body {
       padding: 0 5px;
       align-items: center;
       height: 40px;
+      // 5% larger, as a single uniform scale rather than by editing the height,
+      // padding, border, bevel, divider, icon and wave-bar sizes independently -
+      // those are tuned against each other and rounding each one would drift the
+      // proportions. Everything here is vector or a shadow, so it stays crisp.
+      //
+      // Sits on .playerMain, NOT on the parent .customMusicControls: that is a
+      // motion element and framer-motion writes `transform` on it every frame for
+      // the hide/show slide, so a transform declared there would be overwritten.
+      transform: scale(1.05);
 
       .verticalDivider {
         width: 2px;
