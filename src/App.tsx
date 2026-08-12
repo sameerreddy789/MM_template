@@ -23,6 +23,7 @@ import Brochure from "./pages/brochure/Brochure";
 import Sponsors from "./pages/sponsers/Sponers";
 import MediaPatners from "./pages/mediaPartners/MediaPartners";
 import Gallery from "./pages/gallery/Gallery";
+import BackgroundMusic from "./pages/components/backgroundMusic/BackgroundMusic";
 
 const TRACKING_ID = "G-57YBBH7RXW";
 if (window.location.hostname.search("mohanamantra.com") !== -1) {
@@ -187,6 +188,11 @@ export default function App() {
         percentageLoaded={doorPLPercentageLoaded}
         targetPageRef={nextRoute}
       />
+      {/* Deliberately outside the conditional page block below. Every page down
+          there is unmounted on navigation, and the audio element has to outlive
+          that. Suppressed on the gallery, which autoplays an unmuted video. */}
+      <BackgroundMusic suppressed={currentPage === "gallery"} />
+
       <h1 style={{ display: "none" }}>MohanaMantra 2K26 | MBU</h1>
       {isPreloading && (
         <Preloader

@@ -34,22 +34,77 @@ export const useMainHamStore = create<mainHam>((set) => ({
     setMainHamOpen: (isOpen) => set({ isMainHamOpen: isOpen })
 }));
 
-// Music preference has to outlive the homepage mount. The <audio> element lives
-// inside Homepage, and App unmounts Homepage on every navigation, so the element
-// is destroyed and recreated paused each time. Keeping the user's choice and the
-// selected track here means returning to the landing page resumes what was
-// playing instead of falling silent and resetting to the first track.
+export const PLAYLIST = [
+    "/sounds/Shape of U x Carnatic.mp3",
+    "/sounds/FUNK DESTRAVADO slowed.mp3",
+    "/sounds/bg-music.mp3",
+    "/sounds/bg-music2.mp3"
+];
+
+// The whole music system lives here so it can outlive any page. App has no
+// <Routes>; it conditionally renders each page as a sibling, so every component
+// below it is destroyed on navigation. The <audio> element therefore belongs to
+// BackgroundMusic, which App mounts once outside that conditional block, and the
+// element is parked in this store so the player controls on the landing page can
+// still reach it from a different part of the tree.
+//
+// audioEl is deliberately state rather than a ref: consumers need to re-render
+// when the element arrives, otherwise an effect that subscribes to its play and
+// pause events would run once against null and never attach.
 type music = {
     isMusicOn: boolean;
     trackIndex: number;
+    audioEl: HTMLAudioElement | null;
     setMusicOn: (isOn: boolean) => void;
     setTrackIndex: (index: number) => void;
+    setAudioEl: (el: HTMLAudioElement | null) => void;
+    play: () => void;
+    pause: () => void;
+    toggle: () => void;
+    next: () => void;
+    prev: () => void;
 }
-export const useMusicStore = create<music>((set) => ({
+export const useMusicStore = create<music>((set, get) => ({
     isMusicOn: false,
     trackIndex: 0,
+    audioEl: null,
     setMusicOn: (isOn) => set({ isMusicOn: isOn }),
-    setTrackIndex: (index) => set({ trackIndex: index })
+    setTrackIndex: (index) => set({ trackIndex: index }),
+    setAudioEl: (el) => set({ audioEl: el }),
+
+    // play() rejects when the browser refuses autoplay. Swallow it: the player
+    // icon is derived from the element's own events, so it stays truthful either
+    // way, and an uncaught rejection would just noise up the console.
+    play: () => {
+        set({ isMusicOn: true });
+        get().audioEl?.play().catch(() => {});
+    },
+    pause: () => {
+        set({ isMusicOn: false });
+        get().audioEl?.pause();
+    },
+    // The element's own paused flag is the source of truth, not isMusicOn, so a
+    // toggle still does the expected thing if the two ever drift (a rejected
+    // autoplay, say).
+    toggle: () => {
+        const audio = get().audioEl;
+        if (!audio) return;
+        if (audio.paused) {
+            set({ isMusicOn: true });
+            audio.play().catch(() => {});
+        } else {
+            set({ isMusicOn: false });
+            audio.pause();
+        }
+    },
+    // Track changes only move the index. Swapping the src resets the element to
+    // paused, and BackgroundMusic's reconciling effect picks it back up once the
+    // new src has actually been committed - which is why there is no longer a
+    // setTimeout here guessing at how long that takes.
+    next: () => set((s) => ({ trackIndex: (s.trackIndex + 1) % PLAYLIST.length })),
+    prev: () => set((s) => ({
+        trackIndex: (s.trackIndex - 1 + PLAYLIST.length) % PLAYLIST.length
+    }))
 }));
 
 // The navbar owns the scroll listener that decides whether the header is showing.

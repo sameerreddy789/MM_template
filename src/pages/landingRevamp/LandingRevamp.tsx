@@ -30,7 +30,11 @@ import FloatingCloud from "./components/FloatingCloud/FloatingCloud";
 import MainHam from "../components/mainHam/mainHam";
 import Lenis from "@studio-freight/lenis";
 
-import { useMainHamStore, useNavVisibilityStore } from "../../utils/store";
+import {
+  useMainHamStore,
+  useMusicStore,
+  useNavVisibilityStore,
+} from "../../utils/store";
 import { motion } from "framer-motion";
 import ContactDoors from "../contact/ContactDoors";
 import { Helmet } from "react-helmet";
@@ -70,18 +74,17 @@ const socialLinks = [
 
 export default function LandingRevamp({
   goToPage,
-  onToggle,
-  onNext,
-  onPrev,
-  audioRef,
 }: {
   goToPage: (path: string) => void;
-  onToggle: () => void;
-  onNext: () => void;
-  onPrev: () => void;
-  audioRef: React.RefObject<HTMLAudioElement | null>;
 }) {
   const [isPlaying, setIsPlaying] = useState(false);
+  // The audio element belongs to BackgroundMusic, mounted by App well above this
+  // component so it can survive navigation. These used to arrive as props from
+  // Homepage back when it owned the element.
+  const audioEl = useMusicStore((state) => state.audioEl);
+  const onToggle = useMusicStore((state) => state.toggle);
+  const onNext = useMusicStore((state) => state.next);
+  const onPrev = useMusicStore((state) => state.prev);
   // Written by the navbar's scroll listener; the player mirrors it.
   const isNavVisible = useNavVisibilityStore((state) => state.isNavVisible);
   const overlayIsActive = useOverlayStore((state) => state.isActive);
@@ -122,27 +125,31 @@ export default function LandingRevamp({
     return () => window.cancelAnimationFrame(refreshFrame);
   }, [heroOverlap]);
 
-  // Mirror the audio element's real state. Reading `audioRef.current?.paused` as
-  // an effect dependency never worked: a ref mutation doesn't re-render, so the
-  // icon went stale whenever playback changed from anywhere other than a click
-  // (autoplay on Enter, track changes, the track finishing).
+  // Mirror the audio element's real state. Reading `.paused` as an effect
+  // dependency never worked: it isn't reactive, so the icon went stale whenever
+  // playback changed from anywhere other than a click (autoplay on Enter, track
+  // changes, the track finishing).
+  //
+  // Keyed on the element itself, which is why the store holds it as state rather
+  // than a ref. BackgroundMusic mounts alongside this component, so on the first
+  // pass the element can still be null; a ref would never re-run this effect and
+  // the listeners would never attach.
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
+    if (!audioEl) return;
 
-    const sync = () => setIsPlaying(!audio.paused);
+    const sync = () => setIsPlaying(!audioEl.paused);
     sync();
 
-    audio.addEventListener("play", sync);
-    audio.addEventListener("pause", sync);
-    audio.addEventListener("ended", sync);
+    audioEl.addEventListener("play", sync);
+    audioEl.addEventListener("pause", sync);
+    audioEl.addEventListener("ended", sync);
 
     return () => {
-      audio.removeEventListener("play", sync);
-      audio.removeEventListener("pause", sync);
-      audio.removeEventListener("ended", sync);
+      audioEl.removeEventListener("play", sync);
+      audioEl.removeEventListener("pause", sync);
+      audioEl.removeEventListener("ended", sync);
     };
-  }, [audioRef]);
+  }, [audioEl]);
 
   useEffect(() => {
     if (overlayIsActive) {
