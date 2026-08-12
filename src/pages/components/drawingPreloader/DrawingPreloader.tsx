@@ -272,17 +272,23 @@ export default function DrawingPreloader({
       const segment = Math.min(1, (revealed - start) / (end - start));
       gsap.to(path, {
         strokeDashoffset: length * (1 - segment),
-        duration: 1.2,
+        // 1.2s slowed by 17% so each stroke is easier to follow as it draws.
+        // The exit delay below is scaled by the same factor - it exists to let
+        // the drawing finish, so the two have to move together.
+        duration: 1.404,
         ease: "power2.out",
         overwrite: "auto",
       });
     });
   }, [progress, pathsReady]);
 
-  // Loading ends once every asset is in and the sketch has finished drawing
+  // Loading ends once every asset is in and the sketch has finished drawing.
+  // Was 1500ms against a 1.2s stroke tween, so 300ms of headroom. Scaled by the
+  // same 17% as that tween: leaving it at 1500 would have cut the final strokes
+  // off mid-draw, since the tween alone now runs 1404ms.
   useEffect(() => {
     if (progress < 99) return;
-    const timer = setTimeout(() => setIsAnimating(false), 1500);
+    const timer = setTimeout(() => setIsAnimating(false), 1755);
     return () => clearTimeout(timer);
   }, [progress]);
 
