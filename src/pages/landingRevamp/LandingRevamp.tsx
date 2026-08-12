@@ -7,11 +7,11 @@ import styles from "./LandingRevamp.module.scss";
 
 import { useGSAP } from "@gsap/react";
 import Navbar from "../components/navbar/Navbar";
-import landingImage from "/images/hero_hills.png";
+import landingImage from "/images/hero_hills.webp";
 import TirumalaHills from "../components/TirumalaHills/TirumalaHills";
-import mobileMountains from "/images/hero_hills.png";
-import tree from "/images/landing/new tree.png";
-import treeMob from "/images/landing/new tree.png";
+import mobileMountains from "/images/hero_hills.webp";
+import tree from "/images/landing/new tree.webp";
+import treeMob from "/images/landing/new tree.webp";
 
 import insta from "/svgs/landing/insta.svg";
 import instaLamp from "/svgs/landing/instaLamp.svg";
@@ -22,7 +22,7 @@ import mobileRegisterBtn from "/svgs/landing/mobileRegisterBtn.svg";
 import registerBtn from "/svgs/landing/registerBtn.svg";
 import eventsBtn from "/svgs/landing/mobileEventsBtn.svg";
 import wire from "/svgs/landing/wire.svg";
-import logo from "/images/logo.png";
+import logo from "/images/logo.webp";
 import mobileCloud from "/images/landing/cloud_1.png";
 import AboutUs from "../aboutus/AboutUs";
 import FloatingCloud from "./components/FloatingCloud/FloatingCloud";

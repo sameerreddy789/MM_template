@@ -1,13 +1,13 @@
 import styles from "./Contact.module.scss";
 import { useEffect, useRef, useState } from "react";
-import door1 from "/images/contact/Door1.png";
-import door2 from "/images/contact/Door2.png";
+import door1 from "/images/contact/Door1.webp";
+import door2 from "/images/contact/Door2.webp";
 import door1mobile from "/images/contact/Door1Mobile.png";
 import door2mobile from "/images/contact/Door2Mobile.png";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import contactBanner from "/images/contact/contact-banner.png";
+import contactBanner from "/images/contact/contact-banner.webp";
 import contacts from "./components/contactGallery/contacts";
 // import ContactGallery from './components/contactGallery/ContactGallery';
 import { FaEnvelope } from "react-icons/fa6";

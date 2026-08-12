@@ -1,5 +1,5 @@
-import Back from "/images/events/backg.png";
-import MobileBack from "/images/events/evenback.png";
+import Back from "/images/events/backg.webp";
+import MobileBack from "/images/events/evenback.webp";
 import styles from "./Eventspage.module.scss";
 import cl1 from "/svgs/events/cl1.svg";
 import cl2 from "/svgs/events/cl2.svg";

@@ -1,8 +1,8 @@
 import styles from "./Sponsers.module.scss";
-import heading from "/svgs/sponsors/sponsorsHead.png";
+import heading from "/svgs/sponsors/sponsorsHead.webp";
 import BackButton from "../components/backButton/BackButton";
 import { useEffect } from "react";
-import sponsors6K from "/images/sponsors/Sponsors_6K.png";
+import sponsors6K from "/images/sponsors/Sponsors_6K.webp";
 
 const Sponsors = () => {
   useEffect(() => {

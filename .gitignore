@@ -109,3 +109,6 @@ vite.config.ts.timestamp-*
 # Strix security scan outputs
 strix_runs/
 testing/.env
+
+# Pre-optimization asset originals (local safety copy, not for commit)
+.asset-originals/

@@ -1,7 +1,7 @@
 import ContactGallery from './components/contactGallery/ContactGallery';
 import styles from './Contact.module.scss';
-import doors from '/images/contact/DoorsCombined.png';
-import doorsMobile from '/images/contact/DoorsMobile.png';
+import doors from '/images/contact/DoorsCombined.webp';
+import doorsMobile from '/images/contact/DoorsMobile.webp';
 import BackButton from '../components/backButton/BackButton';
 import { useEffect, useState } from 'react';
 

@@ -9,7 +9,7 @@
   left: 0;
   z-index: 1000;
   color: white;
-  background-image: url("/svgs/landing/crumpled-black-paper-texture.svg");
+  background-image: url("/svgs/landing/crumpled-black-paper-texture.webp");
   background-size: cover;
   background-position: center;
   pointer-events: all;
@@ -66,12 +66,12 @@
       transform: scale(0.8);
       transform-origin: center;
        &.hamOpen{
-        mask-image: url("/videos/dragon-reveal.gif");
+        mask-image: url("/videos/dragon-reveal.webp");
         mask-size: contain;
         mask-position: 12% center;
         mask-repeat: no-repeat;
 
-        -webkit-mask-image: url("/videos/dragon-reveal.gif");
+        -webkit-mask-image: url("/videos/dragon-reveal.webp");
         -webkit-mask-size: contain;
         -webkit-mask-position: 12% center;
         -webkit-mask-repeat: no-repeat;

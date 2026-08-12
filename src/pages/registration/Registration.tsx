@@ -5,8 +5,8 @@ import Instructions from "../../pages/registration/components/Instructions/Instr
 import Register from "../../pages/registration/components/Register/Register";
 import Events from "../../pages/registration/components/Events/Events";
 
-import bgExtend from "/images/registration/bg-extended.png";
-import banner from "/images/registration/reg-banner.png";
+import bgExtend from "/images/registration/bg-extended.webp";
+import banner from "/images/registration/reg-banner.webp";
 import bgMobile from "/svgs/registration/bg-mobile.svg";
 import BackButton from "../components/backButton/BackButton";
 

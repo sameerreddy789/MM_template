@@ -1,7 +1,7 @@
 import { FaEnvelope } from 'react-icons/fa6';
 import styles from './ContactGallery.module.scss';
 import contacts from './contacts';
-import contactBanner from '/images/contact/contact-banner.png'
+import contactBanner from '/images/contact/contact-banner.webp'
 import { useEffect, useState } from 'react';
 
 interface HoriBarDetails {

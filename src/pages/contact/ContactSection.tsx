@@ -1,5 +1,5 @@
 import styles from "./ContactSection.module.scss";
-import contactBanner from '/images/contact/contact-banner.png';
+import contactBanner from '/images/contact/contact-banner.webp';
 import ContactGallery from './components/contactGallery/ContactGallery';
 
 export default function ContactSection() {
