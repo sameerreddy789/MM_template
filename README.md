@@ -43,12 +43,6 @@ the lantern social links strung from the tree.
 
 ![Registration page](docs/screenshots/register.webp)
 
-### Mobile
-
-<div align="center">
-  <img src="docs/screenshots/mobile-home.webp" alt="Landing page on mobile" width="300" />
-</div>
-
 ---
 
 ## Tech stack
@@ -166,18 +160,12 @@ Two paths are configured:
 
 ## Contributors
 
-| Contributor | Commits |
+| Contributor  |
 | --- | --- |
-| **Monish Reddy** | 38 |
-| Vedium Sameer Reddy | 48 |
-| chaitanya03456 | 9 |
+| **Monish Reddy**  |
+| Vedium Sameer Reddy  |
+| chaitanya03456  |
 
-95 commits total, from 2026-08-04 onward. Counts come from `git shortlog -sne --all` and
-are not the ordering of this table.
-
-Monish's 38 is two git identities combined — commits were authored from two machines with
-different configured emails. A `.mailmap` at the repo root would merge them in `git
-shortlog` and on GitHub:
 
 ```
 Monish Reddy <monishreddy2629@gmail.com> <technicalmonish@Monishs-MacBook-Air-2.local>
