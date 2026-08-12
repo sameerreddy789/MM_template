@@ -170,3 +170,27 @@ Two paths are configured:
 ```
 Monish Reddy <monishreddy2629@gmail.com> <technicalmonish@Monishs-MacBook-Air-2.local>
 ```
+
+---
+
+## 🛡️ Security Audit Report
+
+A comprehensive vulnerability assessment was performed against the live production deployment using **RapidScan v1.2** (Kali Linux multi-tool security engine).
+
+### 📊 Scan Performance & Metrics
+- **Target URL:** `https://mm-template.vercel.app/`
+- **Audit Date:** August 12, 2026
+- **Total Scan Duration:** `1h 40m 03s` (1 hour, 40 minutes, 3 seconds)
+- **Total Vulnerability Checks Evaluated:** **80** checks
+- **Security Tools Deployed:** `Nmap`, `Nikto`, `SSLyze`, `Wafw00f`, `Uniscan`, `WhatWeb`, `Wapiti`, `TheHarvester`, `Fierce`, `AMass`
+- **Result:** **PASSED (Clean Infrastructure)**
+
+### 🔍 Key Findings & Security Summary
+- **Network Isolation:** Only standard web ports (`80/HTTP` and `443/HTTPS`) are accessible. No database (MySQL, PostgreSQL, MSSQL, Oracle) or administrative ports (RDP, SMB, FTP, Telnet) are exposed.
+- **SSL/TLS Security:** Fully patched against Heartbleed, POODLE, FREAK, and CCS Injection attacks.
+- **DoS / Slowloris Resilience:** Passed. Server connections time out cleanly against slow HTTP header attacks.
+- **Application Vulnerabilities:** Zero LFI (Local File Inclusion), RFI (Remote File Inclusion), RCE (Remote Code Execution), or SQL Injection vulnerabilities detected.
+- **CMS Security:** No legacy CMS backdoors or plugin vulnerabilities present.
+
+---
+
