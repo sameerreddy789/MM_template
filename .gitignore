@@ -112,3 +112,17 @@ testing/.env
 
 # Pre-optimization asset originals (local safety copy, not for commit)
 .asset-originals/
+
+# Docker files & artifacts
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Security scan & rapidscan artifacts
+rapidscan/
+rs.vul.*
+rs.dbg.*
+scan_results*.txt
+*.vul.*
+*.dbg.*
+
