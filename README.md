@@ -42,6 +42,7 @@ the lantern social links strung from the tree.
 ### Mobile
 
 ![Landing page on mobile](docs/screenshots/mobile-home.webp)
+
 ---
 
 ## Tech stack
@@ -164,7 +165,6 @@ Two paths are configured:
 | **Monish Reddy**  |
 | Vedium Sameer Reddy  |
 | chaitanya03456  |
-
 
 ```text
 Monish Reddy <monishreddy2629@gmail.com> <technicalmonish@Monishs-MacBook-Air-2.local>
