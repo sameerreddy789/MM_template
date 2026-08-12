@@ -1,14 +1,6 @@
 import styles from "./Navbar.module.scss";
-import moon from "/svgs/landing/moon1.svg";
-import moonHam from "/svgs/landing/moonHam.svg";
-import cloud1 from "/svgs/landing/hamClouds/cloud1.min.svg";
-import cloud2 from "/svgs/landing/hamClouds/cloud2.min.svg";
-import cloud3 from "/svgs/landing/hamClouds/cloud3.min.svg";
-import cloud4 from "/svgs/landing/hamClouds/cloud4.min.svg";
-import cloud5 from "/svgs/landing/hamClouds/cloud5.min.svg";
-import cloud6 from "/svgs/landing/hamClouds/cloud6.min.svg";
 import { useEffect, useContext, useRef } from "react";
-import { useMainHamStore, useNavVisibilityStore } from "../../../utils/store";
+import { useNavVisibilityStore } from "../../../utils/store";
 import { navContext } from "../../../App";
 import { gsap } from "gsap";
 import _ScrollTrigger, { ScrollTrigger } from "gsap/ScrollTrigger";
