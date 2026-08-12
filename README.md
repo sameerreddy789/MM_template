@@ -1,16 +1,12 @@
-<div align="center">
-
-<img src="public/images/logo.webp" alt="MohanaMantra 2026" width="180" />
-
 # MohanaMantra 2K26
+
+![MohanaMantra 2026](public/images/logo.webp)
 
 **United By Art. Inspired By Culture.**
 
 The official website for MohanaMantra 2K26, the annual cultural festival at MBU.
 
 [**mohanamantra.com**](https://www.mohanamantra.com/)
-
-</div>
 
 ---
 
@@ -43,6 +39,9 @@ the lantern social links strung from the tree.
 
 ![Registration page](docs/screenshots/register.webp)
 
+### Mobile
+
+![Landing page on mobile](docs/screenshots/mobile-home.webp)
 ---
 
 ## Tech stack
@@ -94,7 +93,7 @@ error**, including unused variables. Worth running before you push.
 
 ## Project structure
 
-```
+```text
 public/            Static assets copied verbatim into the build
   images/          Photography and UI art (WebP)
   svgs/            Vector art
@@ -167,7 +166,7 @@ Two paths are configured:
 | chaitanya03456  |
 
 
-```
+```text
 Monish Reddy <monishreddy2629@gmail.com> <technicalmonish@Monishs-MacBook-Air-2.local>
 ```
 
@@ -178,6 +177,7 @@ Monish Reddy <monishreddy2629@gmail.com> <technicalmonish@Monishs-MacBook-Air-2.
 A comprehensive vulnerability assessment was performed against the live production deployment using **RapidScan v1.2** (Kali Linux multi-tool security engine).
 
 ### 📊 Scan Performance & Metrics
+
 - **Target URL:** `https://mm-template.vercel.app/`
 - **Audit Date:** August 12, 2026
 - **Total Scan Duration:** `1h 40m 03s` (1 hour, 40 minutes, 3 seconds)
@@ -186,6 +186,7 @@ A comprehensive vulnerability assessment was performed against the live producti
 - **Result:** **PASSED (Clean Infrastructure)**
 
 ### 🔍 Key Findings & Security Summary
+
 - **Network Isolation:** Only standard web ports (`80/HTTP` and `443/HTTPS`) are accessible. No database (MySQL, PostgreSQL, MSSQL, Oracle) or administrative ports (RDP, SMB, FTP, Telnet) are exposed.
 - **SSL/TLS Security:** Fully patched against Heartbleed, POODLE, FREAK, and CCS Injection attacks.
 - **DoS / Slowloris Resilience:** Passed. Server connections time out cleanly against slow HTTP header attacks.
@@ -193,4 +194,3 @@ A comprehensive vulnerability assessment was performed against the live producti
 - **CMS Security:** No legacy CMS backdoors or plugin vulnerabilities present.
 
 ---
-
