@@ -21,8 +21,8 @@ const FlyingIcons: React.FC<Props> = ({ icons }) => {
       img.alt = "Stars";
 
       const padding = 10;
-      let startX = corner === "top-right" ? container.clientWidth - padding : padding;
-      let startY = corner === "top-right" ? padding : container.clientHeight - padding;
+      const startX = corner === "top-right" ? container.clientWidth - padding : padding;
+      const startY = corner === "top-right" ? padding : container.clientHeight - padding;
 
       img.style.left = `${startX}px`;
       img.style.top = `${startY}px`;

@@ -36,7 +36,7 @@ const Confirmation = (props: PropsType) => {
 
     // Add each key-value pair to the form
     for (const key in data) {
-      if (data.hasOwnProperty(key)) {
+      if (Object.hasOwn(data, key)) {
         const input = document.createElement("input");
         input.type = "hidden";
         input.name = key;
@@ -87,8 +87,8 @@ const Confirmation = (props: PropsType) => {
           showSelection: false,
           isError: true,
           message:
-            error.response.data.message ||
-            error.response.data.error ||
+            error.response?.data?.message ||
+            error.response?.data?.error ||
             "Registration Failed.",
         });
       });
@@ -109,11 +109,12 @@ const Confirmation = (props: PropsType) => {
   }
 
   useEffect(() => {
-    if (!mainContainerRef.current) return;
-    mainContainerRef.current.addEventListener("scroll", handleScroll);
+    const el = mainContainerRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", handleScroll);
 
     return () => {
-      document.removeEventListener("scroll", handleScroll);
+      el.removeEventListener("scroll", handleScroll);
     };
   }, []);
 

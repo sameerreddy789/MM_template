@@ -35,11 +35,12 @@ const Confirmation = (props: PropsType) => {
   }
 
   useEffect(() => {
-    if (!mainContainerRef.current) return;
-    mainContainerRef.current.addEventListener("scroll", handleScroll);
+    const el = mainContainerRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", handleScroll);
 
     return () => {
-      document.removeEventListener("scroll", handleScroll);
+      el.removeEventListener("scroll", handleScroll);
     };
   }, []);
 

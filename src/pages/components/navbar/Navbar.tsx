@@ -3,7 +3,7 @@ import { useEffect, useContext, useRef } from "react";
 import { useNavVisibilityStore } from "../../../utils/store";
 import { navContext } from "../../../App";
 import { gsap } from "gsap";
-import _ScrollTrigger, { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion } from "framer-motion";
 // import debouncedHandler from "../../../utils/debounce";
 // import { rect } from "framer-motion/client";
@@ -75,7 +75,7 @@ export default function Navbar({
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [setNavShow]);
 
   useEffect(() => {
     const handleResize = () => {

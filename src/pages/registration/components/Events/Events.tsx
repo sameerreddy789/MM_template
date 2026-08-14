@@ -210,11 +210,12 @@ const Events = forwardRef<
   }
 
   useEffect(() => {
-    if (!mainContainerRef.current) return;
-    mainContainerRef.current.addEventListener("scroll", handleScroll);
+    const el = mainContainerRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", handleScroll);
 
     return () => {
-      document.removeEventListener("scroll", handleScroll);
+      el.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -287,8 +288,7 @@ const Events = forwardRef<
     }
   };
   const showEventResponsive = (event: any) => {
-    if (isMobile) {
-    } else {
+    if (!isMobile) {
       showEventDescription(event);
     }
   };
@@ -419,7 +419,8 @@ const Events = forwardRef<
                       }
                       alt="Information"
                       onClick={(e) => {
-                        showEventDescription(event), e.stopPropagation();
+                        e.stopPropagation();
+                        showEventDescription(event);
                       }}
                     />
                   </div>

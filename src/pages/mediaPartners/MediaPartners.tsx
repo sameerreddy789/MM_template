@@ -6,7 +6,7 @@ import Back from "/svgs/registration/back.svg";
 import { useContext, useEffect } from "react";
 import { navContext } from "../../App";
 
-let mediaPatners = [
+const mediaPatners = [
   {
     head: "Official Vlogging Partner",
     img: dummy,
@@ -92,12 +92,13 @@ const MediaPatners = () => {
           <div className={styles.otherMediaPatners}>
             {mediaPatners.map((mediaPatner, index) => (
               <a
+                key={index}
                 href={mediaPatner.link}
                 target="_blank"
                 rel="noreferrer"
                 draggable={false}
               >
-                <div key={index} className={styles.mediaPatner}>
+                <div className={styles.mediaPatner}>
                   {mediaPatner.head != "" && (
                     <div className={styles.head}>{mediaPatner.head}</div>
                   )}

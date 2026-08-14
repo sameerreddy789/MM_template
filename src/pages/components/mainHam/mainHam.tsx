@@ -6,7 +6,7 @@ import { useRef, useEffect } from "react";
 // import { gsap } from "gsap";
 // import { useGSAP } from "@gsap/react";
 
-export default function mainHam({
+export default function MainHam({
   goToPage,
 }: {
   goToPage: (path: string) => void;
