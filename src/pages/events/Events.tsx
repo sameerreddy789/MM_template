@@ -10,7 +10,7 @@ import photography from "/images/events/proshow.webp";
 import danceMobile from "/images/events/DanceMobilef.png";
 import musicMobile from "/images/events/MusicMobilef.png";
 import miscMobile from "/images/events/MiscMobilef.png";
-import photographyMobile from "/images/events/PhotographyMobile.png";
+import photographyMobile from "/images/events/PhotographyMobilef.png";
 // import quizzesMobile from "/images/events/QuizzesMobile.png";
 import Eventspage from "./components/Eventspage";
 import { useRef, useState, useEffect } from "react";
