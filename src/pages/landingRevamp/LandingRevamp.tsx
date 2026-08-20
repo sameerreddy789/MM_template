@@ -28,7 +28,7 @@ import FloatingCloud from "./components/FloatingCloud/FloatingCloud";
 // import ContactDoors from "../contact/ContactDoors";
 // import Ham from "../components/ham/ham";
 import MainHam from "../components/mainHam/mainHam";
-import Lenis from "@studio-freight/lenis";
+import Lenis from "lenis";
 
 import {
   useMainHamStore,
@@ -37,7 +37,7 @@ import {
 } from "../../utils/store";
 import { motion } from "framer-motion";
 import ContactDoors from "../contact/ContactDoors";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import ScrollLabel from "./components/ScrollLabel";
 gsap.registerPlugin(ScrollTrigger);
 

@@ -17,7 +17,7 @@ import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import TextMobile from "/images/events/TextMobile.png";
 import BackButton from "../components/backButton/BackButton";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import BreadCrumb from "../components/breadCrumb/BreadCrumb";
 import EventFrame from "./components/EventFrame/EventFrame";
 
@@ -275,6 +275,13 @@ const Events: React.FC = () => {
     });
   };
 
+  const handleBackFromCategory = () => {
+    setShowEventPage(false);
+    setSelectedCategory(null);
+    setFoldFan(false);
+    setShowImages(true);
+  };
+
   return (
     <div
       className={styles.eventsmaincontainer}
@@ -290,9 +297,11 @@ const Events: React.FC = () => {
         <link rel="canonical" href="https://www.mohanamantra.com/events" />
       </Helmet>
       <BreadCrumb data={breadcrumbJsonLd} />
-      <div>
-        <BackButton className={styles.aboutBB} />
-      </div>
+      {!showEventPage && (
+        <div>
+          <BackButton className={styles.aboutBB} />
+        </div>
+      )}
       {/* <img src={Text} alt="Text" className={styles.text} /> */}
 
       {showImages && (
@@ -330,7 +339,7 @@ const Events: React.FC = () => {
 
       {showEventPage && selectedCategory && (
         <div className={styles.eventspageWrapper}>
-          <Eventspage category={selectedCategory} />
+          <Eventspage category={selectedCategory} onBack={handleBackFromCategory} />
         </div>
       )}
     </div>

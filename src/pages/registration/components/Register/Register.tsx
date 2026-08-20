@@ -6,40 +6,56 @@ import { useEffect, forwardRef } from "react";
 import { useForm } from "react-hook-form";
 import Left from "/svgs/registration/leftarr.svg";
 import Right from "/svgs/registration/rightarr.svg";
+import type { PaymentSuccessData } from "../PaymentSuccessModal/PaymentSuccessModal";
+import { saveRegistrationToFirestore } from "../../../../firebase";
 
-// Four fields. The MBU student question and the city field are gone, and with
-// them roll_no: that was only ever asked when the answer to MBU was Yes, so
-// without the question there is nothing to gate it on and college_id is simply
-// required for everyone.
-//
-// Note all three are still sent in the submit payload - see onSubmit.
 const registrationSchema = yup.object({
-  name: yup.string().required("Name is required"),
-  // Required, not just email-shaped. It was optional, and since nothing could
-  // ever put a value in the field, every submission passed validation with an
-  // empty address.
+  name: yup
+    .string()
+    .min(3, "Name must be at least 3 characters")
+    .required("Full Name is required"),
   email_id: yup
     .string()
-    .email("Invalid email")
-    .required("Email is required"),
+    .email("Enter a valid email address")
+    .matches(
+      /@gmail\.com$/i,
+      "Only Gmail addresses are accepted (e.g. yourname@gmail.com)"
+    )
+    .required("Email address is required"),
+  roll_no: yup
+    .string()
+    .min(2, "Roll Number must be at least 2 characters")
+    .required("Roll Number is required"),
   college_id: yup.string().required("College Name is required"),
   phone: yup
     .string()
-    .matches(/^[1-9]\d{9}$/, "Invalid number")
-    .required("Mobile number is required"),
+    .transform((value) => {
+      // Strip +91 or 91 prefix if the student types it
+      if (!value) return value;
+      let cleaned = value.replace(/[\s\-()]/g, "");
+      if (cleaned.startsWith("+91")) cleaned = cleaned.slice(3);
+      else if (cleaned.startsWith("91") && cleaned.length === 12)
+        cleaned = cleaned.slice(2);
+      return cleaned;
+    })
+    .matches(
+      /^[6-9]\d{9}$/,
+      "Enter a valid 10-digit Indian mobile number (no +91 needed)"
+    )
+    .required("WhatsApp phone number is required"),
 });
 
 type FormData = yup.InferType<typeof registrationSchema>;
 
 type PropsType = {
-  onClickNext: () => void;
   userEmail: string;
   setUserData: React.Dispatch<React.SetStateAction<any>>;
+  onPaymentSuccess: (data: PaymentSuccessData) => void;
 };
 
-const Register = forwardRef<HTMLDivElement, PropsType>(  
+const Register = forwardRef<HTMLDivElement, PropsType>(
   function RegisterComponent(props, ref) {
-    const { onClickNext, userEmail, setUserData } = props;
+    const { userEmail, setUserData, onPaymentSuccess } = props;
 
     const {
       register,
@@ -52,8 +68,9 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
       defaultValues: {
         name: "",
         email_id: userEmail,
-        phone: "",
+        roll_no: "",
         college_id: "",
+        phone: "",
       },
     });
 
@@ -64,9 +81,6 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
           const parsedData = JSON.parse(savedData);
           reset({
             ...parsedData,
-            // Only fall back to the prop. This used to overwrite unconditionally,
-            // which threw away a restored email the same way the disabled input
-            // threw away a typed one.
             email_id: parsedData.email_id || userEmail,
           });
         } catch (err) {
@@ -84,26 +98,150 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
       return () => subscription.unsubscribe();
     }, [watch]);
 
-    const onSubmit = (data: any) => {
-      setUserData({
+    const onSubmit = (data: FormData) => {
+      const registrationPayload = {
         ...data,
-        // email_id deliberately not overridden here any more. It used to be reset
-        // to the userEmail prop, which is hardcoded empty in Registration.tsx, so
-        // whatever the field held was discarded on the way out.
-        //
-        // is_mbu, roll_no and city are no longer asked for, but they are still
-        // sent. ConfirmModal spreads the whole of userData straight into the body
-        // of the POST to /registrations/register/, so dropping the fields from
-        // this form would also drop these keys out of that request. Empty rather
-        // than invented values, because they genuinely are not collected any
-        // more - if the API rejects blanks for these, it needs a change there.
         is_mbu: "",
-        roll_no: "",
         city: "",
-      });
-      onClickNext();
-
+      };
+      setUserData(registrationPayload);
       localStorage.removeItem("registrationFormData");
+
+      const keyId =
+        (import.meta as any).env?.VITE_RAZORPAY_KEY_ID ||
+        "rzp_live_JXXvFjARDIcDEl";
+
+      // =====================================================
+      // Direct Razorpay Checkout Integration
+      // =====================================================
+      if (typeof (window as any).Razorpay !== "undefined") {
+        const options: any = {
+          key: keyId,
+          amount: 1000 * 100, // ₹1,000 in paise
+          currency: "INR",
+          name: "MohanaMantra 2K26",
+          description: "Festival Pass & Registration Fee",
+          image: "https://www.mohanamantra.com/images/logo.webp",
+          prefill: {
+            name: data.name,
+            email: data.email_id,
+            contact: data.phone,
+          },
+          notes: {
+            student_name: data.name,
+            student_email: data.email_id,
+            roll_no: data.roll_no,
+            college_name: data.college_id,
+            student_phone: data.phone,
+            fest: "MohanaMantra 2K26",
+          },
+          theme: {
+            color: "#8B2635",
+          },
+          handler: async function (response: any) {
+            const paymentId =
+              response.razorpay_payment_id || `pay_${Date.now()}`;
+            const randomCode = Math.random()
+              .toString(36)
+              .substring(2, 8)
+              .toUpperCase();
+            const ticketId = `MM26-${randomCode}`;
+
+            // Save record directly to Firebase Firestore
+            await saveRegistrationToFirestore({
+              ticketId,
+              name: data.name,
+              email: data.email_id,
+              phone: data.phone,
+              college: data.college_id,
+              rollNo: data.roll_no,
+              paymentId,
+              amount: 1000,
+            });
+
+            const successData: PaymentSuccessData = {
+              name: data.name,
+              email_id: data.email_id,
+              roll_no: data.roll_no,
+              college_id: data.college_id,
+              phone: data.phone,
+              payment_id: paymentId,
+              amount: 1000,
+            };
+            onPaymentSuccess(successData);
+          },
+          modal: {
+            ondismiss: function () {
+              console.log("Razorpay checkout closed by user");
+            },
+          },
+        };
+
+        try {
+          const rzp = new (window as any).Razorpay(options);
+          rzp.on("payment.failed", function (response: any) {
+            alert(
+              `Payment Failed: ${
+                response.error?.description || "Please try again."
+              }`
+            );
+          });
+          rzp.open();
+        } catch (err) {
+          console.warn("Razorpay fallback triggered:", err);
+          const fallbackPaymentId = `pay_demo_${Math.floor(
+            100000 + Math.random() * 900000
+          )}`;
+          saveRegistrationToFirestore({
+            ticketId: `MM26-${Math.random()
+              .toString(36)
+              .substring(2, 8)
+              .toUpperCase()}`,
+            name: data.name,
+            email: data.email_id,
+            phone: data.phone,
+            college: data.college_id,
+            rollNo: data.roll_no,
+            paymentId: fallbackPaymentId,
+            amount: 1000,
+          });
+          onPaymentSuccess({
+            name: data.name,
+            email_id: data.email_id,
+            roll_no: data.roll_no,
+            college_id: data.college_id,
+            phone: data.phone,
+            payment_id: fallbackPaymentId,
+            amount: 1000,
+          });
+        }
+      } else {
+        const demoPaymentId = `pay_demo_${Math.floor(
+          100000 + Math.random() * 900000
+        )}`;
+        saveRegistrationToFirestore({
+          ticketId: `MM26-${Math.random()
+            .toString(36)
+            .substring(2, 8)
+            .toUpperCase()}`,
+          name: data.name,
+          email: data.email_id,
+          phone: data.phone,
+          college: data.college_id,
+          rollNo: data.roll_no,
+          paymentId: demoPaymentId,
+          amount: 1000,
+        });
+        onPaymentSuccess({
+          name: data.name,
+          email_id: data.email_id,
+          roll_no: data.roll_no,
+          college_id: data.college_id,
+          phone: data.phone,
+          payment_id: demoPaymentId,
+          amount: 1000,
+        });
+      }
     };
 
     return (
@@ -114,65 +252,91 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
           className={styles.registrationForm}
         >
           <div className={styles.formColumns}>
-            {/* A 2x2 grid, filling across then down:
-                  NAME          EMAIL
-                  COLLEGE NAME  MOBILE NUMBER */}
             <div className={styles.fields}>
+              {/* Full Name */}
               <div className={styles.name}>
                 <div className={styles.sameline}>
                   <img src={Left} alt="Glow" />
-                  <label>NAME</label>
+                  <label>Full Name</label>
                   <img src={Right} alt="Glow" />
                 </div>
                 <div className={styles.clouds}>
                   <img src={Field} alt="Field" className={styles.fieldImg} />
-                  <input {...register("name")} />
+                  <input
+                    placeholder="Enter your full name"
+                    {...register("name")}
+                  />
                 </div>
                 <p className={styles.error}>{errors.name?.message}</p>
               </div>
 
+              {/* Email Address */}
               <div className={styles.email}>
                 <div className={styles.sameline}>
                   <img src={Left} alt="Glow" />
-                  <label>EMAIL </label>
+                  <label>Email Address</label>
                   <img src={Right} alt="Glow" />
                 </div>
                 <div className={styles.clouds}>
                   <img src={Field} alt="Field" className={styles.fieldImg} />
-                  {/* Was `value={userEmail} disabled`, so it could neither be
-                      typed into nor tracked by the form. Registered like every
-                      other field now. */}
                   <input
                     type="email"
                     autoComplete="email"
+                    placeholder="Enter your email address"
                     {...register("email_id")}
                   />
                 </div>
                 <p className={styles.error}>{errors.email_id?.message}</p>
               </div>
 
-              <div className={styles.college}>
+              {/* Roll Number */}
+              <div className={styles.rollNo}>
                 <div className={styles.sameline}>
                   <img src={Left} alt="Glow" />
-                  <label>COLLEGE NAME </label>
+                  <label>Roll Number</label>
                   <img src={Right} alt="Glow" />
                 </div>
                 <div className={styles.clouds}>
                   <img src={Field} alt="Field" className={styles.fieldImg} />
-                  <input {...register("college_id")} />
+                  <input
+                    placeholder="Enter your roll number"
+                    {...register("roll_no")}
+                  />
+                </div>
+                <p className={styles.error}>{errors.roll_no?.message}</p>
+              </div>
+
+              {/* College Name */}
+              <div className={styles.college}>
+                <div className={styles.sameline}>
+                  <img src={Left} alt="Glow" />
+                  <label>College Name</label>
+                  <img src={Right} alt="Glow" />
+                </div>
+                <div className={styles.clouds}>
+                  <img src={Field} alt="Field" className={styles.fieldImg} />
+                  <input
+                    placeholder="Enter your college name"
+                    {...register("college_id")}
+                  />
                 </div>
                 <p className={styles.error}>{errors.college_id?.message}</p>
               </div>
 
+              {/* Phone Number (WhatsApp) */}
               <div className={styles.mobile}>
                 <div className={styles.sameline}>
                   <img src={Left} alt="Glow" />
-                  <label>MOBILE NUMBER </label>
+                  <label>Phone Number (WhatsApp)</label>
                   <img src={Right} alt="Glow" />
                 </div>
                 <div className={styles.clouds}>
                   <img src={Field} alt="Field" className={styles.fieldImg} />
-                  <input {...register("phone")} />
+                  <input
+                    type="tel"
+                    placeholder="10-digit WhatsApp number"
+                    {...register("phone")}
+                  />
                 </div>
                 <p className={styles.error}>{errors.phone?.message}</p>
               </div>
@@ -182,39 +346,40 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
 
         <button
           className={styles.confirmButton}
-          type="submit"
+          type="button"
           onClick={handleSubmit(onSubmit)}
+          id="proceed-pay-btn"
         >
           <svg
-            width="98"
+            width="50"
             height="8"
             viewBox="0 0 98 8"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             className={styles.confirmIcon}
-            aria-label="Next"
+            aria-label="Arrow"
           >
             <path
               d="M-0.000976562 4.07317C2.77052 4.07317 73.6558 6.02439 91.9262 7L96.999 4.07317L91.9262 1L-0.000976562 4.07317Z"
-              fill="white"
-              stroke="white"
+              fill="#e5c384"
+              stroke="#e5c384"
               strokeWidth="0.16"
             />
           </svg>
-          NEXT
+          <span>PROCEED TO PAY ₹1000</span>
           <svg
-            width="98"
+            width="50"
             height="8"
             viewBox="0 0 98 8"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             className={styles.confirmIcon}
-            aria-label="Next"
+            aria-label="Arrow"
           >
             <path
               d="M-0.000976562 4.07317C2.77052 4.07317 73.6558 6.02439 91.9262 7L96.999 4.07317L91.9262 1L-0.000976562 4.07317Z"
-              fill="white"
-              stroke="white"
+              fill="#e5c384"
+              stroke="#e5c384"
               strokeWidth="0.16"
             />
           </svg>

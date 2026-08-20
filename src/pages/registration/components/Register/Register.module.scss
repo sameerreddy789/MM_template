@@ -13,6 +13,14 @@
 
   input {
     caret-color: #fff9e9;
+    font-family: $regFont;
+  }
+
+  input::placeholder {
+    color: rgba(226, 220, 203, 0.6);
+    font-family: $regFont;
+    font-weight: 300;
+    font-size: 1.1vw;
   }
 
   input:-webkit-autofill,
@@ -26,18 +34,15 @@
     box-shadow: 0 0 0 1000px transparent inset !important;
     -webkit-text-fill-color: #e2dccb !important;
     color: #e2dccb !important;
-    font: 100 1.4vw "Abhaya Libre Extrabold" !important;
+    font: 500 1.25vw $regFont !important;
     background-color: transparent !important;
     transition: background-color 5000s ease-in-out 0s !important;
   }
 
   .registrationForm {
     position: absolute;
-    // The translate makes this value the vertical centre line of the form rather
-    // than its bottom edge, so a larger number lifts the whole grid. Raised from
-    // 45.5svh; the 2x2 grid is short enough that it had room above it.
     transform: translateY(50%);
-    bottom: 52svh;
+    bottom: 54svh;
     left: 0;
     color: white;
     width: 100%;
@@ -47,32 +52,18 @@
 
     .formColumns {
       display: flex;
-      // Stacks now. This was a row holding .left and .right side by side with a
-      // 21vw trench between them.
       flex-direction: column;
       align-items: center;
       justify-content: center;
-
-      // One width shared by each grid track and the field artwork inside it, so
-      // the two cannot drift apart. Bounded by svh as well as vw so the fields
-      // cannot outgrow a short window.
-      //
-      // Roomier than when this was a single column of six: two rows leave plenty
-      // of height, so the fields are back to something close to their original
-      // size.
-      --field-width: min(26vw, 46svh);
+      --field-width: min(26vw, 42svh);
 
       .fields {
-        // 2x2. Explicit tracks rather than 1fr so each column is exactly one
-        // field wide: the field blocks are width: 100% and .error is positioned
-        // as a percentage of them, so wider tracks would strand the error text
-        // away from the input it belongs to.
         display: grid;
         grid-template-columns: repeat(2, var(--field-width));
         justify-content: center;
         align-items: start;
         column-gap: 4vw;
-        row-gap: 1.2vw;
+        row-gap: 2.2vw;
 
         .clouds {
           position: relative;
@@ -103,12 +94,13 @@
             margin: 0 auto;
             width: 90%;
             height: 100%;
-            color: #e2dccb;
+            color: #fff9e9;
             box-sizing: border-box;
             background: transparent;
             border: 0;
             text-align: center;
-            font: 100 1.4vw "Abhaya Libre Extrabold";
+            font: 500 1.2vw $regFont;
+            letter-spacing: 0.5px;
             &:focus {
               outline: none;
               box-shadow: none;
@@ -125,12 +117,6 @@
             pointer-events: none;
             z-index: -2;
           }
-          .react-select-container {
-            width: 100%;
-            height: 100%;
-            z-index: 100;
-            // overflow: visible;
-          }
         }
 
         .sameline {
@@ -139,33 +125,25 @@
           align-items: center;
           justify-content: center;
           position: relative;
-          // Was 0.5vw. Still tucks the label onto its field, but not so far that
-          // it closes up the gap against the field above it.
           top: 0.2vw;
 
           label {
             color: #fff9e9;
-            // Kept on one line: the label sits between two flanking rules, and a
-            // wrapped label pushes its own field down out of line with the one
-            // beside it in the grid.
             white-space: nowrap;
-            font: 400 1.4vw "Abhaya Libre";
-            // The warm glow alone disappears against the bright sun disc in the
-            // background artwork, so a dark drop shadow carries the contrast.
-            text-shadow: 0 0 6px rgba(229, 195, 132, 0.54),
-              0 1px 4px rgba(0, 0, 0, 0.85);
+            font-family: $primaryFont;
+            font-size: 2.1vw;
+            font-weight: bold;
+            letter-spacing: 1.2px;
+            text-shadow: 0 0 10px rgba(229, 195, 132, 0.7),
+              0 2px 5px rgba(0, 0, 0, 0.9);
           }
           img {
-            // Short enough that the longest label, MOBILE NUMBER, still fits on
-            // one line between the two of them.
-            width: 5.5vw;
+            width: 4.5vw;
           }
         }
 
-        // .gender (the MBU radios), .city / .year and .states are gone along with
-        // the fields they belonged to.
         .email,
-        .mobile,
+        .rollNo,
         .name,
         .college {
           width: 100%;
@@ -176,27 +154,34 @@
           flex-direction: column;
         }
 
-        // The sideways stagger that used to live here (margin-right 5vw / 1vw on
-        // the left group, margin-left 1vw / 5vw on the right) fanned the fields
-        // out from the centre of the two-column layout. In a single column it
-        // just knocks every field off the centre line, so it is gone.
+        .mobile {
+          width: 100%;
+          z-index: 5;
+          position: relative;
+          display: flex;
+          align-items: center;
+          flex-direction: column;
+          grid-column: 1 / -1;
+          justify-self: center;
+        }
 
         .error {
-          position: absolute;
-          left: 18%;
-          bottom: -0.8vw;
-          // text-shadow: 0px 0px 2px rgb(0, 0, 0);
-          color: rgb(255, 0, 0);
-          // text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
-          //   1px 1px 0 black;
-          -webkit-text-stroke: 0.1px rgb(0, 0, 0);
-          // stroke: 0.25px white;
-          font: 400 1.2vw "Abhaya Libre";
-          text-align: left;
+          position: relative;
+          width: 100%;
+          margin-top: -0.3vw;
+          color: rgb(255, 100, 100);
+          font-family: $regFont;
+          font-size: 0.85vw;
+          font-weight: 500;
+          text-align: center;
+          text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+          min-height: 1em;
+          letter-spacing: 0.3px;
         }
       }
     }
   }
+
   .confirmButton {
     position: absolute;
     bottom: 2vw;
@@ -207,25 +192,34 @@
     border: none;
     text-align: center;
     cursor: pointer;
-    margin: 2vw 0;
+    margin: 1.5vw 0;
     background: center / contain no-repeat
       url("/svgs/registration/button-banner.svg");
-    padding: 1vw;
-    color: #fff;
-    font: 100 1.5vw "Abhaya Libre Extrabold";
+    padding: 1vw 2.5vw;
+    color: #fff6dd;
+    font-family: $primaryFont;
+    font-size: 1.6vw;
+    letter-spacing: 1.5px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    width: 22vw;
-    transition: filter 0.3s;
+    justify-content: center;
+    gap: 0.8vw;
+    width: 30vw;
+    min-width: 360px;
+    transition: filter 0.3s, transform 0.2s;
 
     &:hover {
-      filter: brightness(0.8);
+      filter: brightness(1.2) drop-shadow(0 0 14px rgba(229, 195, 132, 0.9));
+      transform: translateX(-50%) scale(1.02);
+    }
+
+    &:active {
+      transform: translateX(-50%) scale(0.98);
     }
 
     span {
-      padding-left: 40%;
       text-align: center;
+      white-space: nowrap;
     }
 
     .confirmIcon {
@@ -243,24 +237,20 @@
     height: 100svh;
     position: relative;
 
+    input::placeholder {
+      font-size: 2.8vw;
+    }
+
     input:-webkit-autofill,
     input:-webkit-autofill:hover,
     input:-webkit-autofill:focus,
     textarea:-webkit-autofill,
     select:-webkit-autofill {
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
-      box-shadow: 0 0 0 1000px transparent inset !important;
-      -webkit-text-fill-color: #e2dccb !important;
-      color: #e2dccb !important;
-      font: 100 3.2vw "Abhaya Libre Extrabold";
-      background-color: transparent !important;
-      transition: background-color 5000s ease-in-out 0s !important;
+      font: 500 3.2vw $regFont !important;
     }
 
     .registrationForm {
-      max-height: 60svh;
+      max-height: 62svh;
       bottom: auto;
       top: 0%;
       transform: translateY(0%);
@@ -288,10 +278,9 @@
       .formColumns {
         flex-direction: column;
         gap: 2vw;
-        --field-width: 70vw;
+        --field-width: 74vw;
 
         .fields {
-          // One column here: two 70vw tracks side by side do not fit a phone.
           grid-template-columns: var(--field-width);
           row-gap: 2vw;
 
@@ -301,93 +290,108 @@
               width: 6vw;
             }
             input {
-              font: 100 3.2vw "Abhaya Libre Extrabold";
+              font: 500 3.2vw $regFont;
             }
           }
           .error {
-            left: 13%;
-            bottom: -1.2vw;
-            font: 400 2.5vw "Abhaya Libre";
+            position: relative;
+            margin-top: -0.5vw;
+            font-family: $regFont;
+            font-size: 2.2vw;
+            font-weight: 500;
+            text-align: center;
           }
           .sameline {
             label {
-              font: 400 3vw "Abhaya Libre";
+              font-family: $primaryFont;
+              font-size: 4.6vw;
+              letter-spacing: 1px;
             }
             img {
-              width: 18vw;
+              width: 14vw;
             }
           }
         }
       }
     }
     .confirmButton {
-      padding: 1.5vw;
-      font: 100 3vw "Abhaya Libre Extrabold";
+      padding: 2vw 3vw;
+      font-family: $primaryFont;
+      font-size: 3.6vw;
+      letter-spacing: 1px;
       justify-content: center;
-      gap: 1vw;
-      width: 55vw;
+      gap: 1.5vw;
+      width: 78vw;
+      min-width: unset;
+      white-space: nowrap;
     }
   }
 }
 
 @media (max-width: 1200px) and (max-aspect-ratio: 0.75) {
   .registerContainer {
+    input::placeholder {
+      font-size: 3.8vw;
+    }
+
     input:-webkit-autofill,
     input:-webkit-autofill:hover,
     input:-webkit-autofill:focus,
     textarea:-webkit-autofill,
     select:-webkit-autofill {
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
-      box-shadow: 0 0 0 1000px transparent inset !important;
-      -webkit-text-fill-color: #e2dccb !important;
-      color: #e2dccb !important;
-      font: 100 4.2vw "Abhaya Libre Extrabold" !important;
-      background-color: transparent !important;
-      transition: background-color 5000s ease-in-out 0s !important;
+      font: 500 4.2vw $regFont !important;
     }
     .registrationForm {
       max-height: 75svh;
-      padding: 7vw 0 18vw 0;
+      padding: 6vw 0 18vw 0;
 
       .formColumns {
-        gap: 9vw;
-        --field-width: 87vw;
+        gap: 6vw;
+        --field-width: 88vw;
 
         .fields {
           grid-template-columns: var(--field-width);
-          row-gap: 9vw;
+          row-gap: 6vw;
           .clouds {
             .dropDown {
               height: 6.5vw;
               width: 6.5vw;
             }
             input {
-              font: 100 4.2vw "Abhaya Libre Extrabold";
+              font: 500 4vw $regFont;
             }
           }
           .error {
-            left: 13%;
-            bottom: -4vw;
-            font: 400 3.2vw "Abhaya Libre";
+            position: relative;
+            margin-top: -1vw;
+            font-family: $regFont;
+            font-size: 2.8vw;
+            font-weight: 500;
+            text-align: center;
           }
           .sameline {
             label {
-              font: 400 4.4vw "Abhaya Libre";
+              font-family: $primaryFont;
+              font-size: 5.6vw;
+              letter-spacing: 1px;
             }
             img {
-              width: 20vw;
+              width: 16vw;
             }
           }
         }
       }
     }
     .confirmButton {
-      width: 70vw;
-      gap: 1vw;
-      bottom: 6vw;
-      font: 100 5.2vw "Abhaya Libre Extrabold";
+      width: 90vw;
+      gap: 1.5vw;
+      bottom: 5vw;
+      padding: 2.8vw 3vw;
+      font-family: $primaryFont;
+      font-size: 4.8vw;
+      letter-spacing: 1px;
+      min-width: unset;
+      white-space: nowrap;
     }
   }
 }

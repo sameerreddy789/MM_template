@@ -24,6 +24,7 @@ import Sponsors from "./pages/sponsers/Sponers";
 import MediaPatners from "./pages/mediaPartners/MediaPartners";
 import Gallery from "./pages/gallery/Gallery";
 import BackgroundMusic from "./pages/components/backgroundMusic/BackgroundMusic";
+import useOverlayStore from "./utils/store";
 
 const TRACKING_ID = "G-57YBBH7RXW";
 if (window.location.hostname.search("mohanamantra.com") !== -1) {
@@ -82,7 +83,12 @@ export default function App() {
 
   useEffect(() => {
     const path = location.pathname.replace("/", "");
-    // const pages = ["register", "events", "aboutus", "contact", "brochure"];
+
+    // If visiting any subpage, mark the session as already entered so
+    // returning home never prompts with the initial enter animation
+    if (path !== "") {
+      useOverlayStore.getState().setRemoveGif();
+    }
 
     setCurrentPage(
       pageList.includes(path)

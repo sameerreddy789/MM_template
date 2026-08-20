@@ -2,7 +2,7 @@
 import DrawingPreloader from "./pages/components/drawingPreloader/DrawingPreloader";
 import useOverlayStore from "./utils/store";
 import LandingRevamp from "./pages/landingRevamp/LandingRevamp";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import BreadCrumb from "./pages/components/breadCrumb/BreadCrumb";
 import { useMusicStore } from "./utils/store";
 export default function Homepage({
@@ -66,13 +66,11 @@ export default function Homepage({
         />
       </Helmet>
       <BreadCrumb data={breadcrumbJsonLd} />
-      <div
-        style={
-          removeGif ? { display: "none" } : { zIndex: 50, position: "relative" }
-        }
-      >
-        <DrawingPreloader onEnter={playMusic} />
-      </div>
+      {!removeGif && (
+        <div style={{ zIndex: 50, position: "relative" }}>
+          <DrawingPreloader onEnter={playMusic} />
+        </div>
+      )}
       <div style={{ zIndex: 100, position: "relative" }}>
         <LandingRevamp goToPage={goToPage} />
       </div>

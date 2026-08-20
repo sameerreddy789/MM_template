@@ -1,14 +1,14 @@
 # Dependencies
 node_modules
-
-# Build output
-dist
-dist-ssr
-build
+server/node_modules/
+server/test_output/
+.agents/
 
 # Environment variables
 .env
 .env.*
+server/.env
+server/.env.*
 !.env.example
 
 # Logs

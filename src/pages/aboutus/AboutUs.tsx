@@ -21,7 +21,7 @@ import letter6 from "/svgs/aboutus/letter6.svg";
 import letter7 from "/svgs/aboutus/letter7.svg";
 import letter8 from "/svgs/aboutus/letter8.svg";
 import VideoMetaData from "./components/VideoMetaData";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import SocialLinks from "./components/SocialLinks/SocialLinks";
 import AboutText from "./components/AboutText/AboutText";
 import { useYouTubePlayer } from "./components/useYoutubePlayer/useYoutubePlayer";

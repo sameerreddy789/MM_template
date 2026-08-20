@@ -7,11 +7,25 @@ type overlayActive ={
     setRemoveGif: () => void;
 }
 
+const hasEnteredSession =
+    typeof window !== "undefined" &&
+    sessionStorage.getItem("mm_has_entered") === "true";
+
 const useOverlayStore = create<overlayActive>((set) => ({
-    isActive: false,
-    removeGif: false,
-    setActive: () => set({ isActive: true }),
-    setRemoveGif: () => set({ removeGif: true })
+    isActive: hasEnteredSession,
+    removeGif: hasEnteredSession,
+    setActive: () => {
+        if (typeof window !== "undefined") {
+            sessionStorage.setItem("mm_has_entered", "true");
+        }
+        set({ isActive: true });
+    },
+    setRemoveGif: () => {
+        if (typeof window !== "undefined") {
+            sessionStorage.setItem("mm_has_entered", "true");
+        }
+        set({ removeGif: true });
+    }
 }));
 
 export default useOverlayStore;

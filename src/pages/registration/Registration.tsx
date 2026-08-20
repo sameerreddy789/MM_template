@@ -1,9 +1,11 @@
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import styles from "./Registration.module.scss";
 
 import Instructions from "../../pages/registration/components/Instructions/Instructions";
 import Register from "../../pages/registration/components/Register/Register";
-import Events from "../../pages/registration/components/Events/Events";
+import PaymentSuccessModal, {
+  type PaymentSuccessData,
+} from "./components/PaymentSuccessModal/PaymentSuccessModal";
 
 import bgExtend from "/images/registration/bg-extended.webp";
 import banner from "/images/registration/reg-banner.webp";
@@ -15,6 +17,7 @@ import gsap from "gsap";
 import { useRef, useState, useEffect } from "react";
 import BreadCrumb from "../components/breadCrumb/BreadCrumb";
 import Countdown from "../components/countdown/Countdown";
+
 interface RegistrationProps {
   startAnimation: boolean;
   goToPage: (path: string) => void;
@@ -39,16 +42,18 @@ const Registration = ({ goToPage }: RegistrationProps) => {
       },
     ],
   };
+
   const { contextSafe } = useGSAP();
   const [currentPage, setCurrentPage] = useState(1);
   const [userEmail] = useState("");
   const [isAnim, setIsAnim] = useState(false);
-  const [userData, setUserData] = useState<any>(null);
+  const [, setUserData] = useState<any>(null);
+  const [paymentSuccessData, setPaymentSuccessData] =
+    useState<PaymentSuccessData | null>(null);
 
   const bgRef = useRef<HTMLImageElement>(null);
   const elemRef1 = useRef<HTMLDivElement>(null);
   const elemRef2 = useRef<HTMLDivElement>(null);
-  const elemRef3 = useRef<HTMLDivElement>(null);
 
   const toFirstPage = () => {
     const mm = gsap.matchMedia();
@@ -58,7 +63,6 @@ const Registration = ({ goToPage }: RegistrationProps) => {
         gsap.to(bgRef.current, {
           left: "0",
           duration: 1.5,
-          // ease: "power1.out",
           onStart: () => setIsAnim(true),
           onComplete: () => setIsAnim(false),
         });
@@ -116,34 +120,31 @@ const Registration = ({ goToPage }: RegistrationProps) => {
     );
   };
 
-
-
-  const toRegPage = (back: boolean) => {
+  const toRegPage = () => {
     const mm = gsap.matchMedia();
     contextSafe(() => {
       mm.add("(min-width: 1200px) or (aspect-ratio > 1.45)", () => {
         gsap.to(bgRef.current, {
           left: "50%",
           duration: 1.5,
-          // ease: "power1.out",
           onStart: () => setIsAnim(true),
           onComplete: () => setIsAnim(false),
         });
         const tl = gsap.timeline();
-        tl.to(back ? elemRef3.current : elemRef1.current, {
+        tl.to(elemRef1.current, {
           opacity: 0,
           duration: 1,
           ease: "power1.out",
         })
-          .set(back ? elemRef3.current : elemRef1.current, {
+          .set(elemRef1.current, {
             display: "none",
             ease: "power1.out",
           })
-          .set(back ? elemRef2.current : elemRef2.current, {
+          .set(elemRef2.current, {
             display: "flex",
             ease: "power1.out",
           })
-          .to(back ? elemRef2.current : elemRef2.current, {
+          .to(elemRef2.current, {
             opacity: 1,
             duration: 1,
             ease: "power1.out",
@@ -154,20 +155,20 @@ const Registration = ({ goToPage }: RegistrationProps) => {
         const tl = gsap.timeline({
           onStart: () => setIsAnim(true),
         });
-        tl.to(back ? elemRef3.current : elemRef1.current, {
+        tl.to(elemRef1.current, {
           opacity: 0,
           duration: 1,
           ease: "power1.out",
         })
-          .set(back ? elemRef3.current : elemRef1.current, {
+          .set(elemRef1.current, {
             display: "none",
             ease: "power1.out",
           })
-          .set(back ? elemRef2.current : elemRef2.current, {
+          .set(elemRef2.current, {
             display: "flex",
             ease: "power1.out",
           })
-          .to(back ? elemRef2.current : elemRef2.current, {
+          .to(elemRef2.current, {
             opacity: 1,
             duration: 1,
             ease: "power1.out",
@@ -183,97 +184,6 @@ const Registration = ({ goToPage }: RegistrationProps) => {
   useEffect(() => {
     document.body.style.position = "static";
   }, []);
-  // useEffect(() => {
-  //   // if (startAnimation) {
-  //   toRegPage(false);
-  //   setTimeout(() => {
-  //     toEventPage();
-  //   }, 2500);
-  //   // }
-  // }, []);
-  // const prevWidth = useRef(window.innerWidth);
-  // const prevHeight = useRef(window.innerHeight);
-
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     const newWidth = window.innerWidth;
-  //     const newHeight = window.innerHeight;
-
-  //     const widthDiff = Math.abs(newWidth - prevWidth.current);
-  //     const heightDiff = Math.abs(newHeight - prevHeight.current);
-
-  //     if (widthDiff >= 100 || heightDiff >= 100) {
-  //       window.location.reload();
-  //     }
-  //   };
-
-  //   window.addEventListener("resize", handleResize);
-  //   return () => window.removeEventListener("resize", handleResize);
-  // }, []);
-
-  const toEventPage = () => {
-    const mm = gsap.matchMedia();
-    mm.add("(min-width: 1200px) or (aspect-ratio > 1.45)", () => {
-      contextSafe(() => {
-        gsap.to(bgRef.current, {
-          left: "76%",
-          duration: 1.5,
-          // ease: "power1.out",
-          onStart: () => setIsAnim(true),
-          onComplete: () => setIsAnim(false),
-        });
-        const tl = gsap.timeline();
-        tl.to(elemRef2.current, {
-          opacity: 0,
-          duration: 1,
-          ease: "power1.out",
-        })
-          .set(elemRef2.current, {
-            display: "none",
-            ease: "power1.out",
-          })
-          .set(elemRef3.current, {
-            display: "flex",
-            ease: "power1.out",
-          })
-          .to(elemRef3.current, {
-            opacity: 1,
-            duration: 1,
-            ease: "power1.out",
-            onComplete: () => setCurrentPage(3),
-          });
-      })();
-    });
-    mm.add("(max-width: 1200px) and (aspect-ratio < 1.45)", () => {
-      contextSafe(() => {
-        const tl = gsap.timeline({
-          onStart: () => setIsAnim(true),
-        });
-        tl.to(elemRef2.current, {
-          opacity: 0,
-          duration: 1,
-          ease: "power1.out",
-        })
-          .set(elemRef2.current, {
-            display: "none",
-            ease: "power1.out",
-          })
-          .set(elemRef3.current, {
-            display: "flex",
-            ease: "power1.out",
-          })
-          .to(elemRef3.current, {
-            opacity: 1,
-            duration: 1,
-            ease: "power1.out",
-            onComplete: () => {
-              setCurrentPage(3);
-              setIsAnim(false);
-            },
-          });
-      })();
-    });
-  };
 
   const backButtonHandler = () => {
     if (isAnim) return;
@@ -284,28 +194,22 @@ const Registration = ({ goToPage }: RegistrationProps) => {
       case 2:
         toFirstPage();
         break;
-      case 3:
-        toRegPage(true);
-        break;
     }
   };
 
   const onGoogleSignIn = () => {
-    toRegPage(false);
+    toRegPage();
   };
 
   return (
     <div className={styles.instrback}>
-      {/* <img src={sun} alt="sun" className={styles.sun} ref={sunRef} /> */}
-      {/* <div className={styles.overlay}></div> */}
       <Helmet>
         <title>Registration | MohanaMantra 2K26 | MBU</title>
         <meta
           name="description"
-          content="Register for MohanaMantra 2K26, the annual cultural festival of MBU. Follow our simple instructions to sign up and start participating in events."
+          content="Register for MohanaMantra 2K26, the annual cultural festival of MBU. Fill your details and complete registration."
         />
         <link rel="canonical" href="https://www.mohanamantra.com/register" />
-        {/* Open Graph */}
         <meta
           property="og:title"
           content="Registration | MohanaMantra 2K26 | MBU"
@@ -321,7 +225,6 @@ const Registration = ({ goToPage }: RegistrationProps) => {
           content="https://www.mohanamantra.com/logo2.png"
         />
         <meta property="og:site_name" content="MohanaMantra 2K26 | MBU" />
-        {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta
           name="twitter:title"
@@ -357,11 +260,18 @@ const Registration = ({ goToPage }: RegistrationProps) => {
       <Instructions onGoogleSignIn={onGoogleSignIn} ref={elemRef1} />
       <Register
         ref={elemRef2}
-        onClickNext={toEventPage}
         userEmail={userEmail}
         setUserData={setUserData}
+        onPaymentSuccess={(data) => setPaymentSuccessData(data)}
       />
-      <Events ref={elemRef3} userData={userData} setUserData={setUserData} />
+
+      {paymentSuccessData && (
+        <PaymentSuccessModal
+          paymentData={paymentSuccessData}
+          onClose={() => setPaymentSuccessData(null)}
+          goToHome={() => goToPage("/")}
+        />
+      )}
     </div>
   );
 };

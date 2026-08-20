@@ -14,9 +14,10 @@ import MobileEvents from "./MobileEvents/MobileEvents";
 import DesktopEvents from "./DesktopEvents/DesktopEvents";
 interface EventspageProps {
   category: string;
+  onBack?: () => void;
 }
 
-const Eventspage: React.FC<EventspageProps> = ({ category }) => {
+const Eventspage: React.FC<EventspageProps> = ({ category, onBack }) => {
   const [isMobile, setIsMobile] = useState(
     window.matchMedia("(max-width: 1200px) and (max-aspect-ratio: 1.45)")
       .matches
@@ -60,7 +61,7 @@ const events = useFetchEvents(category);
         <img src={topright} alt="Borders" className={styles.bar2} />
         <BackButton
           className={styles.aboutBB}
-          onClick={() => window.location.reload()}
+          onClick={onBack}
         />
          <FlyingIcons icons={[Star, Star2]} /> 
 

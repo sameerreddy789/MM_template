@@ -1,7 +1,7 @@
 const debouncedHandler = (callback: () => void, period: number) => {
-    let timer: number;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     return () => {
-        clearTimeout(timer);
+        if (timer) clearTimeout(timer);
         timer = setTimeout(() => {
             callback();
         }, period);
