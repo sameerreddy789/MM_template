@@ -53,32 +53,33 @@ async function generateIdCard(studentData) {
   // Title
   ctx.textAlign = "center";
   ctx.fillStyle = COLORS.gold;
-  ctx.font = "bold 52px serif";
-  ctx.fillText("MOHANA MANTRA", CARD_WIDTH / 2, 240);
-  ctx.font = "bold 48px serif";
+  ctx.font = "bold 44px serif";
+  ctx.fillText("MOHANA MANTRA", CARD_WIDTH / 2, 105);
+
+  ctx.font = "bold 38px serif";
   ctx.fillStyle = COLORS.goldLight;
-  ctx.fillText("2K26", CARD_WIDTH / 2, 295);
+  ctx.fillText("2K26 PASS", CARD_WIDTH / 2, 155);
 
   // Decorative line
   ctx.strokeStyle = COLORS.gold;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.moveTo(200, 315);
-  ctx.lineTo(600, 315);
+  ctx.moveTo(180, 175);
+  ctx.lineTo(620, 175);
   ctx.stroke();
 
   // Subtitle
   ctx.fillStyle = COLORS.textMuted;
-  ctx.font = "22px serif";
-  ctx.fillText("✦  ENTRY PASS  ✦", CARD_WIDTH / 2, 345);
+  ctx.font = "20px serif";
+  ctx.fillText("✦  OFFICIAL FEST PASS  ✦", CARD_WIDTH / 2, 205);
 
   ctx.beginPath();
-  ctx.moveTo(200, 360);
-  ctx.lineTo(600, 360);
+  ctx.moveTo(180, 222);
+  ctx.lineTo(620, 222);
   ctx.stroke();
 
   // Student details
-  const detailsStartY = 420;
+  const detailsStartY = 285;
   const labelX = 80;
   const valueX = 280;
   const lineSpacing = 65;
@@ -113,7 +114,7 @@ async function generateIdCard(studentData) {
   ctx.textAlign = "center";
   ctx.fillStyle = COLORS.textMuted;
   ctx.font = "italic 16px serif";
-  ctx.fillText("Scan QR code at gate for verification", CARD_WIDTH / 2, 920);
+  ctx.fillText("Scan QR code at gate for entry verification", CARD_WIDTH / 2, 800);
 
   ctx.strokeStyle = COLORS.gold;
   ctx.lineWidth = 1.5;
@@ -131,9 +132,9 @@ async function generateIdCard(studentData) {
 
   const composites = [];
 
-  const qrSize = 220;
+  const qrSize = 230;
   const qrX = Math.round((CARD_WIDTH - qrSize) / 2);
-  const qrY = 685;
+  const qrY = 550;
 
   const qrResized = await sharp(qrBuffer).resize(qrSize, qrSize).png().toBuffer();
   composites.push({
@@ -142,25 +143,44 @@ async function generateIdCard(studentData) {
     top: qrY,
   });
 
-  // Check logo path in functions/assets/
+  // Left Logo: MM Logo
   const logoPath = path.join(__dirname, "..", "assets", "logo.webp");
   const fallbackLogoPath = path.join(__dirname, "..", "..", "server", "assets", "logo.webp");
   const activeLogoPath = fs.existsSync(logoPath) ? logoPath : (fs.existsSync(fallbackLogoPath) ? fallbackLogoPath : null);
 
   if (activeLogoPath) {
-    const logoSize = 160;
+    const logoW = 120;
+    const logoH = 120;
     const logoResized = await sharp(activeLogoPath)
-      .resize(logoSize, logoSize, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .resize(logoW, logoH, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
       .png()
       .toBuffer();
 
     composites.push({
       input: logoResized,
-      left: Math.round((CARD_WIDTH - logoSize) / 2),
+      left: 55,
+      top: 55,
+    });
+  }
+
+  // Right Logo: College Griffin Emblem
+  const collegeLogoPath = path.join(__dirname, "..", "assets", "college_logo.png");
+  const fallbackCollegeLogoPath = path.join(__dirname, "..", "..", "server", "assets", "college_logo.png");
+  const activeCollegeLogoPath = fs.existsSync(collegeLogoPath) ? collegeLogoPath : (fs.existsSync(fallbackCollegeLogoPath) ? fallbackCollegeLogoPath : null);
+
+  if (activeCollegeLogoPath) {
+    const collegLogoW = 120;
+    const collegLogoH = 130;
+    const collegeLogoResized = await sharp(activeCollegeLogoPath)
+      .resize(collegLogoW, collegLogoH, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .png()
+      .toBuffer();
+
+    composites.push({
+      input: collegeLogoResized,
+      left: CARD_WIDTH - 55 - collegLogoW,
       top: 50,
     });
-  } else {
-    console.warn("⚠️ Logo not found at:", logoPath);
   }
 
   const finalCard = await sharp(cardBuffer)

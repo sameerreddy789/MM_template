@@ -93,41 +93,41 @@ async function generateIdCard(studentData) {
   drawCornerOrnaments(ctx);
 
   // =========================================
-  // 4. Draw title "MOHANA MANTRA 2K26"
+  // 4. Draw title "MOHANA MANTRA 2K26 — PASS"
   // =========================================
   ctx.textAlign = "center";
 
-  // Main title
+  // Main title (Centered between left MM logo and right College logo)
   ctx.fillStyle = COLORS.gold;
-  ctx.font = "bold 52px serif";
-  ctx.fillText("MOHANA MANTRA", CARD_WIDTH / 2, 240);
-  ctx.font = "bold 48px serif";
+  ctx.font = "bold 44px serif";
+  ctx.fillText("MOHANA MANTRA", CARD_WIDTH / 2, 105);
+
+  ctx.font = "bold 38px serif";
   ctx.fillStyle = COLORS.goldLight;
-  ctx.fillText("2K26", CARD_WIDTH / 2, 295);
+  ctx.fillText("2K26 PASS", CARD_WIDTH / 2, 155);
 
   // Decorative line
   ctx.strokeStyle = COLORS.gold;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.moveTo(200, 315);
-  ctx.lineTo(600, 315);
+  ctx.moveTo(180, 175);
+  ctx.lineTo(620, 175);
   ctx.stroke();
 
-  // "ENTRY PASS" subtitle
+  // Subtitle
   ctx.fillStyle = COLORS.textMuted;
-  ctx.font = "22px serif";
-  ctx.fillText("✦  ENTRY PASS  ✦", CARD_WIDTH / 2, 345);
+  ctx.font = "20px serif";
+  ctx.fillText("✦  OFFICIAL FEST PASS  ✦", CARD_WIDTH / 2, 205);
 
-  // Another decorative line
   ctx.beginPath();
-  ctx.moveTo(200, 360);
-  ctx.lineTo(600, 360);
+  ctx.moveTo(180, 222);
+  ctx.lineTo(620, 222);
   ctx.stroke();
 
   // =========================================
   // 5. Draw student details
   // =========================================
-  const detailsStartY = 420;
+  const detailsStartY = 285;
   const labelX = 80;
   const valueX = 280;
   const lineSpacing = 65;
@@ -142,13 +142,13 @@ async function generateIdCard(studentData) {
   details.forEach((detail, index) => {
     const y = detailsStartY + index * lineSpacing;
 
-    // Label (golden, uppercase)
+    // Label
     ctx.textAlign = "left";
     ctx.fillStyle = COLORS.textMuted;
     ctx.font = "bold 20px sans-serif";
     ctx.fillText(detail.label + ":", labelX, y);
 
-    // Value (white, larger)
+    // Value
     ctx.fillStyle = COLORS.white;
     ctx.font = "bold 26px sans-serif";
     ctx.fillText(detail.value, valueX, y);
@@ -168,12 +168,11 @@ async function generateIdCard(studentData) {
   ctx.textAlign = "center";
   ctx.fillStyle = COLORS.textMuted;
   ctx.font = "italic 16px serif";
-  ctx.fillText("Scan QR code at gate for verification", CARD_WIDTH / 2, 920);
+  ctx.fillText("Scan QR code at gate for entry verification", CARD_WIDTH / 2, 800);
 
   // =========================================
   // 7. Footer tagline
   // =========================================
-  // Bottom decorative line
   ctx.strokeStyle = COLORS.gold;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
@@ -196,14 +195,14 @@ async function generateIdCard(studentData) {
   const qrBuffer = await generateQRCode(ticketId, name, secureToken);
 
   // =========================================
-  // 10. Composite logo + QR onto the card using Sharp
+  // 10. Composite logos & QR onto the card using Sharp
   // =========================================
   const composites = [];
 
-  // --- Add QR Code (centered, below details) ---
-  const qrSize = 220;
+  // --- Add QR Code (centered below details) ---
+  const qrSize = 230;
   const qrX = Math.round((CARD_WIDTH - qrSize) / 2);
-  const qrY = 685;
+  const qrY = 550;
 
   const qrResized = await sharp(qrBuffer).resize(qrSize, qrSize).png().toBuffer();
   composites.push({
@@ -212,37 +211,37 @@ async function generateIdCard(studentData) {
     top: qrY,
   });
 
-  // --- Add MohanaMantra Logo (centered, top) ---
+  // --- Add Left Logo: MohanaMantra Logo ---
   const logoPath = path.join(__dirname, "..", "assets", "logo.webp");
   if (fs.existsSync(logoPath)) {
-    const logoSize = 160;
+    const logoW = 120;
+    const logoH = 120;
     const logoResized = await sharp(logoPath)
-      .resize(logoSize, logoSize, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .resize(logoW, logoH, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
       .png()
       .toBuffer();
 
     composites.push({
       input: logoResized,
-      left: Math.round((CARD_WIDTH - logoSize) / 2),
-      top: 50,
+      left: 55,
+      top: 55,
     });
-  } else {
-    console.warn("⚠️  Logo not found at:", logoPath);
   }
 
-  // --- Add College Logo (if exists) ---
+  // --- Add Right Logo: College Griffin Emblem ---
   const collegeLogoPath = path.join(__dirname, "..", "assets", "college_logo.png");
   if (fs.existsSync(collegeLogoPath)) {
-    const collegLogoSize = 80;
+    const collegLogoW = 120;
+    const collegLogoH = 130;
     const collegeLogoResized = await sharp(collegeLogoPath)
-      .resize(collegLogoSize, collegLogoSize, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .resize(collegLogoW, collegLogoH, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
       .png()
       .toBuffer();
 
     composites.push({
       input: collegeLogoResized,
-      left: Math.round((CARD_WIDTH - collegLogoSize) / 2),
-      top: 940,
+      left: CARD_WIDTH - 55 - collegLogoW,
+      top: 50,
     });
   }
 
