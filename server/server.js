@@ -36,9 +36,16 @@ const path = require("path");
 
 let serviceAccount = null;
 const keyPath = path.join(__dirname, "serviceAccountKey.json");
+const renderSecretPath = "/etc/secrets/serviceAccountKey.json";
 
 if (fs.existsSync(keyPath)) {
   serviceAccount = require("./serviceAccountKey.json");
+} else if (fs.existsSync(renderSecretPath)) {
+  try {
+    serviceAccount = JSON.parse(fs.readFileSync(renderSecretPath, "utf8"));
+  } catch (err) {
+    console.error("❌ Failed to parse Render secret file at /etc/secrets/serviceAccountKey.json:", err.message);
+  }
 } else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   try {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
