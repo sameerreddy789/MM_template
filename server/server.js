@@ -74,10 +74,23 @@ const app = express();
 // Security headers
 app.use(helmet());
 
-// CORS — allow your frontend to talk to this backend
+// CORS — allow frontend (localhost, Vercel, or custom domain) to talk to this backend
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, postman) or matching allowed domains
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app") || origin.includes("mohanamantra")) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
     methods: ["GET", "POST"],
     credentials: true,
   })
