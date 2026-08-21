@@ -47,17 +47,17 @@ if (fs.existsSync(keyPath)) {
   }
 }
 
+let db = null;
+
 if (serviceAccount) {
   admin.initializeApp({
     credential: cert(serviceAccount),
   });
+  db = getFirestore();
   console.log(`✅ Firebase Admin connected to Firestore (${serviceAccount.project_id})`);
 } else {
   console.error("⚠️ Firebase Admin NOT initialized — service account missing.");
 }
-
-const db = getFirestore();
-console.log("✅ Firebase Admin connected to Firestore");
 
 // ==========================================
 // 2. EXPRESS APP SETUP
@@ -324,7 +324,7 @@ app.get("/api/health", (_req, res) => {
 // START SERVER
 // ==========================================
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`\n🚀 MohanaMantra 2K26 Backend running on port ${PORT}`);
   console.log(`   Health check: http://localhost:${PORT}/api/health`);
   console.log(`   Register:     POST http://localhost:${PORT}/api/register`);
