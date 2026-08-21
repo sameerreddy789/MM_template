@@ -12,11 +12,11 @@ import { getFirestore, doc, setDoc, serverTimestamp } from "firebase/firestore";
 // If environment variables are not yet provided, fallbacks prevent runtime crashes.
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDummyKeyForMohanaMantra2026",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "mohanamantra-2026.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "mohanamantra-2026",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "mohanamantra-2026.appspot.com",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789012",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789012:web:abcdef123456",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "mohanamantra-2k26.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "mohanamantra-2k26",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "mohanamantra-2k26.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "108808621437",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:108808621437:web:abcdef123456",
 };
 
 // Initialize Firebase App singleton
