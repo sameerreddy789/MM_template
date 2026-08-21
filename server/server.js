@@ -29,11 +29,31 @@ require("dotenv").config();
 //   Firebase Console → Project Settings → Service Accounts → Generate New Private Key
 // Place it in the server/ directory.
 
-const serviceAccount = require("./serviceAccountKey.json");
+const { cert } = require("firebase-admin/app");
+const fs = require("fs");
+const path = require("path");
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+let serviceAccount = null;
+const keyPath = path.join(__dirname, "serviceAccountKey.json");
+
+if (fs.existsSync(keyPath)) {
+  serviceAccount = require("./serviceAccountKey.json");
+} else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  try {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } catch (err) {
+    console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT env variable:", err.message);
+  }
+}
+
+if (serviceAccount) {
+  admin.initializeApp({
+    credential: cert(serviceAccount),
+  });
+  console.log(`✅ Firebase Admin connected to Firestore (${serviceAccount.project_id})`);
+} else {
+  console.error("⚠️ Firebase Admin NOT initialized — service account missing.");
+}
 
 const db = admin.firestore();
 console.log("✅ Firebase Admin connected to Firestore");

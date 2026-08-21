@@ -4,12 +4,15 @@ server/node_modules/
 server/test_output/
 .agents/
 
-# Environment variables
+# Environment variables & secrets
 .env
 .env.*
 server/.env
 server/.env.*
+serviceAccountKey.json
+server/serviceAccountKey.json
 !.env.example
+
 
 # Logs
 logs

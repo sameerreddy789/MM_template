@@ -1,0 +1,31 @@
+{
+  "name": "mohanamantra-2k26-functions",
+  "description": "Firebase Cloud Functions for MohanaMantra 2K26 — Razorpay, Firestore, ID Card & Email Services",
+  "scripts": {
+    "serve": "firebase serve --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.0.1",
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^6.0.1",
+    "nodemailer": "^9.0.5",
+    "qrcode": "^1.5.4",
+    "razorpay": "^2.9.8",
+    "sharp": "^0.35.3"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^3.3.0"
+  },
+  "private": true
+}
