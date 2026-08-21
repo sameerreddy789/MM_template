@@ -30,6 +30,7 @@ require("dotenv").config();
 // Place it in the server/ directory.
 
 const { cert } = require("firebase-admin/app");
+const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const fs = require("fs");
 const path = require("path");
 
@@ -55,7 +56,7 @@ if (serviceAccount) {
   console.error("⚠️ Firebase Admin NOT initialized — service account missing.");
 }
 
-const db = admin.firestore();
+const db = getFirestore();
 console.log("✅ Firebase Admin connected to Firestore");
 
 // ==========================================
@@ -273,7 +274,7 @@ app.post("/api/payment-webhook", async (req, res) => {
         checkInStatus: "Not Checked In",
         checkedInAt: null,
         secureToken,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdAt: FieldValue.serverTimestamp(),
       });
 
       console.log(`🎉 Registration CONFIRMED & saved to Firestore!`);
