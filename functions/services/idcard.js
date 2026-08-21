@@ -149,8 +149,8 @@ async function generateIdCard(studentData) {
   const activeLogoPath = fs.existsSync(logoPath) ? logoPath : (fs.existsSync(fallbackLogoPath) ? fallbackLogoPath : null);
 
   if (activeLogoPath) {
-    const logoW = 120;
-    const logoH = 120;
+    const logoW = 140;
+    const logoH = 140;
     const logoResized = await sharp(activeLogoPath)
       .resize(logoW, logoH, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
       .png()
@@ -158,8 +158,8 @@ async function generateIdCard(studentData) {
 
     composites.push({
       input: logoResized,
-      left: 55,
-      top: 55,
+      left: 45,
+      top: 45,
     });
   }
 
@@ -169,8 +169,8 @@ async function generateIdCard(studentData) {
   const activeCollegeLogoPath = fs.existsSync(collegeLogoPath) ? collegeLogoPath : (fs.existsSync(fallbackCollegeLogoPath) ? fallbackCollegeLogoPath : null);
 
   if (activeCollegeLogoPath) {
-    const collegLogoW = 120;
-    const collegLogoH = 130;
+    const collegLogoW = 135;
+    const collegLogoH = 140;
     const collegeLogoResized = await sharp(activeCollegeLogoPath)
       .resize(collegLogoW, collegLogoH, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
       .png()
@@ -178,8 +178,8 @@ async function generateIdCard(studentData) {
 
     composites.push({
       input: collegeLogoResized,
-      left: CARD_WIDTH - 55 - collegLogoW,
-      top: 50,
+      left: CARD_WIDTH - 45 - collegLogoW,
+      top: 45,
     });
   }
 

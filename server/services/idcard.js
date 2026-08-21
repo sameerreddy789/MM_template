@@ -214,8 +214,8 @@ async function generateIdCard(studentData) {
   // --- Add Left Logo: MohanaMantra Logo ---
   const logoPath = path.join(__dirname, "..", "assets", "logo.webp");
   if (fs.existsSync(logoPath)) {
-    const logoW = 120;
-    const logoH = 120;
+    const logoW = 140;
+    const logoH = 140;
     const logoResized = await sharp(logoPath)
       .resize(logoW, logoH, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
       .png()
@@ -223,16 +223,16 @@ async function generateIdCard(studentData) {
 
     composites.push({
       input: logoResized,
-      left: 55,
-      top: 55,
+      left: 45,
+      top: 45,
     });
   }
 
   // --- Add Right Logo: College Griffin Emblem ---
   const collegeLogoPath = path.join(__dirname, "..", "assets", "college_logo.png");
   if (fs.existsSync(collegeLogoPath)) {
-    const collegLogoW = 120;
-    const collegLogoH = 130;
+    const collegLogoW = 135;
+    const collegLogoH = 140;
     const collegeLogoResized = await sharp(collegeLogoPath)
       .resize(collegLogoW, collegLogoH, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
       .png()
@@ -240,8 +240,8 @@ async function generateIdCard(studentData) {
 
     composites.push({
       input: collegeLogoResized,
-      left: CARD_WIDTH - 55 - collegLogoW,
-      top: 50,
+      left: CARD_WIDTH - 45 - collegLogoW,
+      top: 45,
     });
   }
 
