@@ -99,12 +99,20 @@ app.use(
 // ==========================================
 // 3. RAZORPAY INSTANCE
 // ==========================================
-const razorpayInstance = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
-
-console.log("✅ Razorpay client initialized");
+let razorpayInstance = null;
+if (process.env.RAZORPAY_KEY_ID) {
+  try {
+    razorpayInstance = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET || "dummy_secret",
+    });
+    console.log("✅ Razorpay client initialized");
+  } catch (err) {
+    console.warn("⚠️ Razorpay client initialization warning:", err.message);
+  }
+} else {
+  console.log("ℹ️  RAZORPAY_KEY_ID not set — direct client-side checkout mode active.");
+}
 
 // ==========================================
 // 4. HELPER — Generate Ticket ID
@@ -165,6 +173,13 @@ async function generateIdCardAndSendEmail({ ticketId, name, college, rollNo, ema
 //   amount we set here.
 app.post("/api/register", async (req, res) => {
   try {
+    if (!razorpayInstance) {
+      return res.status(400).json({
+        success: false,
+        error: "Razorpay keys not configured on server.",
+      });
+    }
+
     const { name, email, phone, college, roll_no } = req.body;
 
     // Validate all required fields
