@@ -124,32 +124,57 @@
         width: 400px;
         gap: 15px;
         box-sizing: border-box;
-        padding: 10px;
+        padding: 24px 20px;
+        background: rgba(20, 20, 35, 0.65);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+
+        &:hover {
+          border-color: rgba(238, 160, 205, 0.5);
+          box-shadow: 0 15px 35px rgba(238, 160, 205, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
         .patnersImage {
           display: flex;
           justify-content: center;
+          align-items: center;
+          width: 100%;
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.04);
+          padding: 15px;
         }
+
         img {
-          height: 300px;
+          height: 260px;
           max-width: 100%;
           object-fit: contain;
           object-position: center;
+          filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
         }
+
         .patnersName {
           font-size: 22px;
         }
+
         .head {
-          font-size: 26px;
-          height: 64px;
+          font-size: 24px;
+          height: auto;
+          min-height: 50px;
           color: #eea0cd;
           filter: drop-shadow(0px 0px 6px #ff6868a6);
           cursor: default;
         }
+
         @media (max-width: 650px) {
           width: 300px;
           max-width: 100%;
           img {
-            height: 240px;
+            height: 200px;
             max-width: 90%;
             object-fit: contain;
             object-position: center;
@@ -158,7 +183,7 @@
             font-size: 20px;
           }
           .head {
-            font-size: 24px;
+            font-size: 22px;
             width: 100%;
           }
         }
@@ -171,11 +196,12 @@
             font-size: 20px;
           }
           .head {
-            height: 50px;
-            font-size: 24px;
+            height: auto;
+            font-size: 20px;
           }
         }
       }
+
     }
     .patnersName {
       color: white;
