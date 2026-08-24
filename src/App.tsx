@@ -25,6 +25,7 @@ import MediaPatners from "./pages/mediaPartners/MediaPartners";
 import Gallery from "./pages/gallery/Gallery";
 import BackgroundMusic from "./pages/components/backgroundMusic/BackgroundMusic";
 import useOverlayStore from "./utils/store";
+import Gatekeeper from "./pages/gatekeeper/Gatekeeper";
 
 const TRACKING_ID = "G-57YBBH7RXW";
 if (window.location.hostname.search("mohanamantra.com") !== -1) {
@@ -88,6 +89,12 @@ export default function App() {
     // returning home never prompts with the initial enter animation
     if (path !== "") {
       useOverlayStore.getState().setRemoveGif();
+    }
+
+    if (location.pathname.startsWith("/gatekeeper")) {
+      setCurrentPage("gatekeeper");
+      setIsPreloading(false);
+      return;
     }
 
     setCurrentPage(
@@ -228,6 +235,7 @@ export default function App() {
       {!isPreloading && currentPage === "comingSoon" && <ComingSoon />}
       {!isPreloading && currentPage === "sponsors" && <Sponsors />}
       {!isPreloading && currentPage === "mediaPartners" && <MediaPatners />}
+      {currentPage === "gatekeeper" && <Gatekeeper />}
       {/* 
       <Routes>
         <Route path="/" element={null} errorElement={<ComingSoon />} />
