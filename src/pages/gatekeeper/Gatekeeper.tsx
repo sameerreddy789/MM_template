@@ -35,8 +35,31 @@ const Gatekeeper: React.FC = () => {
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
 
-  const getBackendUrl = () => {
-    return import.meta.env.VITE_BACKEND_URL || "https://mohanamantra-backend.onrender.com";
+  // Smart Backend API fetcher (tries local backend first on localhost, then Render backend)
+  const fetchBackend = async (endpoint: string, options: RequestInit) => {
+    const urls: string[] = [];
+    
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      urls.push("http://localhost:4000");
+    }
+    if (import.meta.env.VITE_BACKEND_URL) {
+      urls.push(import.meta.env.VITE_BACKEND_URL);
+    }
+    urls.push("https://mohanamantra-backend.onrender.com");
+
+    const uniqueUrls = Array.from(new Set(urls));
+    let lastErr: any = null;
+
+    for (const baseUrl of uniqueUrls) {
+      try {
+        const res = await fetch(`${baseUrl}${endpoint}`, options);
+        const data = await res.json();
+        return data;
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+    throw lastErr || new Error("Failed to connect to backend server.");
   };
 
   // Check URL path or query params for token on load
@@ -60,25 +83,23 @@ const Gatekeeper: React.FC = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(`${getBackendUrl()}/api/gatekeeper/login`, {
+      const data = await fetchBackend("/api/gatekeeper/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ adminKey: inputKey, adminSecret: inputSecret }),
       });
 
-      const data = await res.json();
-
-      if (data.success) {
+      if (data && data.success) {
         sessionStorage.setItem("mm26_admin_key", inputKey);
         sessionStorage.setItem("mm26_admin_secret", inputSecret);
         setAdminKey(inputKey);
         setAdminSecret(inputSecret);
         setIsAuthenticated(true);
       } else {
-        setError(data.error || "Invalid Key-Value Pair Credentials!");
+        setError(data?.error || "Invalid Key-Value Pair Credentials!");
       }
     } catch (err: any) {
-      setError("Failed to connect to backend server. Please try again.");
+      setError("Failed to connect to backend server. Please ensure the backend is running.");
     } finally {
       setLoading(false);
     }
@@ -105,18 +126,16 @@ const Gatekeeper: React.FC = () => {
         ? { token: queryValue, adminKey, adminSecret }
         : { ticketId: queryValue.trim(), adminKey, adminSecret };
 
-      const res = await fetch(`${getBackendUrl()}/api/gatekeeper/verify`, {
+      const data = await fetchBackend("/api/gatekeeper/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
-
-      if (data.success && data.student) {
+      if (data && data.success && data.student) {
         setStudent(data.student);
       } else {
-        setError(data.error || "Invalid ticket or registration not found.");
+        setError(data?.error || "Invalid ticket or registration not found.");
       }
     } catch (err: any) {
       setError("Network error while verifying ticket.");
@@ -132,7 +151,7 @@ const Gatekeeper: React.FC = () => {
     setError(null);
 
     try {
-      const res = await fetch(`${getBackendUrl()}/api/gatekeeper/checkin`, {
+      const data = await fetchBackend("/api/gatekeeper/checkin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -142,9 +161,7 @@ const Gatekeeper: React.FC = () => {
         }),
       });
 
-      const data = await res.json();
-
-      if (data.success) {
+      if (data && data.success) {
         setCheckinSuccess(true);
         setStudent((prev) =>
           prev
@@ -156,7 +173,7 @@ const Gatekeeper: React.FC = () => {
             : null
         );
       } else {
-        setError(data.error || "Check-in failed.");
+        setError(data?.error || "Check-in failed.");
       }
     } catch (err: any) {
       setError("Failed to perform check-in.");
