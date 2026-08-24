@@ -227,6 +227,17 @@ const Gatekeeper: React.FC = () => {
     }, 200);
   };
 
+  const stopScanner = async () => {
+    if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
+      try {
+        await html5QrCodeRef.current.stop();
+      } catch (e) {
+        console.error("Stop scanner error", e);
+      }
+    }
+    setIsScanning(false);
+  };
+
   // Drag & Drop and File Input State
   const [dragActive, setDragActive] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -423,6 +434,13 @@ const Gatekeeper: React.FC = () => {
             {/* Hidden container for image QR code scanner */}
             <div id="reader-hidden" style={{ display: "none" }}></div>
           </div>
+
+          {/* CHECK-IN SUCCESS ALERT */}
+          {checkinSuccess && (
+            <div style={{ background: "rgba(46, 204, 113, 0.2)", border: "1px solid #2ecc71", color: "#2ecc71", padding: "0.8rem 1rem", borderRadius: "8px", textAlign: "center", marginBottom: "1rem" }}>
+              🎉 Check-In Successful! Student status updated in database.
+            </div>
+          )}
 
           {/* ERROR ALERT */}
           {error && <div className={styles.errorBanner}>{error}</div>}
