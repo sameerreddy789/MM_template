@@ -19,6 +19,7 @@ const crypto = require("crypto");
 const cors = require("cors");
 const helmet = require("helmet");
 const { generateIdCard } = require("./services/idcard");
+const { generateQRCode } = require("./services/qr");
 const { sendIdCardEmail } = require("./services/email");
 require("dotenv").config();
 
@@ -147,7 +148,7 @@ function generateTicketId() {
 // It's called as a background task from the webhook handler so it doesn't
 // block the webhook response to Razorpay.
 async function generateIdCardAndSendEmail({ ticketId, name, college, rollNo, email, secureToken }) {
-  console.log(`\n🎨 Starting ID card pipeline for ${name} (${ticketId})...`);
+  console.log(`\n🎨 Starting ID card & QR pipeline for ${name} (${ticketId})...`);
 
   // Step 1: Generate the ID card image
   const idCardBuffer = await generateIdCard({
@@ -160,13 +161,18 @@ async function generateIdCardAndSendEmail({ ticketId, name, college, rollNo, ema
 
   console.log(`✅ ID card image generated (${(idCardBuffer.length / 1024).toFixed(1)} KB)`);
 
-  // Step 2: Send the email with the ID card attached
+  // Step 2: Generate standalone QR code image
+  const qrBuffer = await generateQRCode(ticketId, name, secureToken);
+  console.log(`✅ Standalone QR code generated (${(qrBuffer.length / 1024).toFixed(1)} KB)`);
+
+  // Step 3: Send the email with ID card & QR code attached
   await sendIdCardEmail({
     toEmail: email,
     studentName: name,
     ticketId,
     college,
     idCardBuffer,
+    qrBuffer,
   });
 
   console.log(`✅ Full pipeline complete for ${name} (${ticketId})\n`);
@@ -341,6 +347,17 @@ app.post("/api/payment-webhook", async (req, res) => {
   // If we return an error, Razorpay will retry the webhook up to 24 hours,
   // which could create duplicate records in our database.
   res.status(200).json({ status: "ok" });
+});
+
+// ==========================================
+// ROUTE: GET /
+// ==========================================
+app.get("/", (_req, res) => {
+  res.status(200).json({
+    message: "🚀 MohanaMantra 2K26 Backend Server is Live & Healthy!",
+    health: "/api/health",
+    status: "online",
+  });
 });
 
 // ==========================================

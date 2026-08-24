@@ -9,7 +9,7 @@ const nodemailer = require("nodemailer");
 /**
  * Send the ID card email to the student
  */
-async function sendIdCardEmail({ toEmail, studentName, ticketId, college, idCardBuffer }) {
+async function sendIdCardEmail({ toEmail, studentName, ticketId, college, idCardBuffer, qrBuffer }) {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -18,23 +18,33 @@ async function sendIdCardEmail({ toEmail, studentName, ticketId, college, idCard
     },
   });
 
+  const attachments = [
+    {
+      filename: `MohanaMantra_EntryPass_${ticketId}.png`,
+      content: idCardBuffer,
+      contentType: "image/png",
+    },
+  ];
+
+  if (qrBuffer) {
+    attachments.push({
+      filename: `MohanaMantra_QRCode_${ticketId}.png`,
+      content: qrBuffer,
+      contentType: "image/png",
+    });
+  }
+
   const mailOptions = {
     from: `"MohanaMantra 2K26" <${process.env.GMAIL_USER}>`,
     to: toEmail,
-    subject: `🎉 MohanaMantra 2K26 — Your Entry Pass is Ready! (${ticketId})`,
+    subject: `🎉 MohanaMantra 2K26 — Your Entry Pass & QR Code (${ticketId})`,
     html: buildEmailHtml(studentName, ticketId, college),
-    attachments: [
-      {
-        filename: `MohanaMantra_EntryPass_${ticketId}.png`,
-        content: idCardBuffer,
-        contentType: "image/png",
-      },
-    ],
+    attachments,
   };
 
   try {
     const result = await transporter.sendMail(mailOptions);
-    console.log(`📧 Email sent to ${toEmail} — Message ID: ${result.messageId}`);
+    console.log(`📧 Email sent to ${toEmail} with ${attachments.length} attachments — Message ID: ${result.messageId}`);
     return result;
   } catch (error) {
     console.error(`❌ Email send failed for ${toEmail}:`, error.message);

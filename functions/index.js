@@ -17,6 +17,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const { generateIdCard } = require("./services/idcard");
+const { generateQRCode } = require("./services/qr");
 const { sendIdCardEmail } = require("./services/email");
 require("dotenv").config();
 
@@ -213,13 +214,17 @@ exports.onRegistrationCreated = onDocumentCreated(
         secureToken: data.secureToken,
       });
 
-      // Step 2: Send Email
+      // Step 2: Generate Standalone QR Code
+      const qrBuffer = await generateQRCode(data.ticketId, data.name, data.secureToken);
+
+      // Step 3: Send Email
       await sendIdCardEmail({
         toEmail: data.email,
         studentName: data.name,
         ticketId: data.ticketId,
         college: data.college,
         idCardBuffer,
+        qrBuffer,
       });
 
       // Step 3: Mark as processed in Firestore
