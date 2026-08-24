@@ -492,7 +492,7 @@ app.post("/api/gatekeeper/checkin", async (req, res) => {
     const nowIso = new Date().toISOString();
     await docRef.update({
       checkInStatus: "Checked In",
-      checkedInAt: admin.firestore.FieldValue.serverTimestamp(),
+      checkedInAt: FieldValue.serverTimestamp(),
     });
 
     console.log(`🎟️ Gate Check-in SUCCESS for ${student.name} (${ticketId})`);
@@ -505,7 +505,7 @@ app.post("/api/gatekeeper/checkin", async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Gatekeeper check-in error:", error);
-    return res.status(500).json({ success: false, error: "Check-in failed." });
+    return res.status(500).json({ success: false, error: error.message || "Check-in failed." });
   }
 });
 

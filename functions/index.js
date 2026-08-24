@@ -301,7 +301,7 @@ app.post("/api/gatekeeper/checkin", async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Gatekeeper check-in error:", error);
-    return res.status(500).json({ success: false, error: "Check-in failed." });
+    return res.status(500).json({ success: false, error: error.message || "Check-in failed." });
   }
 });
 
