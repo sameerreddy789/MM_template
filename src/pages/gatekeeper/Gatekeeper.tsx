@@ -227,15 +227,89 @@ const Gatekeeper: React.FC = () => {
     }, 200);
   };
 
-  const stopScanner = async () => {
-    if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
-      try {
-        await html5QrCodeRef.current.stop();
-      } catch (e) {
-        console.error("Stop scanner error", e);
+  // Drag & Drop and File Input State
+  const [dragActive, setDragActive] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Process uploaded or pasted QR image file
+  const processQRImageFile = async (file: File) => {
+    if (!file) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const html5QrCode = new Html5Qrcode("reader-hidden");
+      const decodedText = await html5QrCode.scanFile(file, true);
+
+      console.log("Decoded QR from file/paste:", decodedText);
+
+      if (decodedText.includes("/gatekeeper/verify/")) {
+        const token = decodedText.split("/gatekeeper/verify/")[1];
+        verifyTokenOrId(token, true);
+      } else if (decodedText.includes("token=")) {
+        const urlParams = new URLSearchParams(decodedText.split("?")[1]);
+        const token = urlParams.get("token");
+        if (token) verifyTokenOrId(token, true);
+      } else {
+        verifyTokenOrId(decodedText, false);
       }
+    } catch (err: any) {
+      console.error("QR File Decode Error:", err);
+      setError("Could not read a valid QR Code from the image. Please ensure the QR image is clear and undamaged.");
+    } finally {
+      setLoading(false);
     }
-    setIsScanning(false);
+  };
+
+  // Clipboard Paste Event Listener (Ctrl + V)
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      if (!isAuthenticated) return;
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf("image") !== -1) {
+          const file = items[i].getAsFile();
+          if (file) {
+            processQRImageFile(file);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [isAuthenticated]);
+
+  // Drag & Drop Handlers
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      processQRImageFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      processQRImageFile(e.target.files[0]);
+    }
   };
 
   return (
@@ -323,6 +397,31 @@ const Gatekeeper: React.FC = () => {
             </div>
 
             {isScanning && <div id="reader" className={styles.qrReaderBox}></div>}
+
+            {/* DRAG & DROP / COPY-PASTE DROPZONE */}
+            <div
+              className={`${styles.dropzone} ${dragActive ? styles.dragActive : ""}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <div className={styles.dropIcon}>📁 / 📋</div>
+              <p className={styles.dropText}>
+                Drag & Drop QR Image or Press <kbd style={{ background: "#2a1218", padding: "2px 6px", borderRadius: "4px", border: "1px solid #d4a843" }}>Ctrl + V</kbd> to Paste
+              </p>
+              <p className={styles.dropSubtext}>Click to browse and select an ID card or QR code image</p>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+            </div>
+
+            {/* Hidden container for image QR code scanner */}
+            <div id="reader-hidden" style={{ display: "none" }}></div>
           </div>
 
           {/* ERROR ALERT */}

@@ -253,6 +253,46 @@
   background: #000;
 }
 
+/* DRAG & DROP / COPY-PASTE DROPZONE */
+.dropzone {
+  margin-top: 1.2rem;
+  border: 2px dashed #b8922f;
+  border-radius: 12px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  background: rgba(20, 8, 12, 0.6);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover, &.dragActive {
+    border-color: #d4a843;
+    background: rgba(212, 168, 67, 0.12);
+    box-shadow: 0 0 15px rgba(212, 168, 67, 0.25);
+  }
+
+  .dropIcon {
+    font-size: 2.2rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .dropText {
+    color: #e5c384;
+    font-weight: 600;
+    font-size: 1rem;
+    margin: 0;
+  }
+
+  .dropSubtext {
+    color: #c4a265;
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+}
+
 /* STUDENT VERIFICATION RESULT CARD */
 .resultCard {
   background: rgba(25, 10, 14, 0.9);
