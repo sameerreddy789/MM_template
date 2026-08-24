@@ -254,6 +254,106 @@
 }
 
 /* DRAG & DROP / COPY-PASTE DROPZONE */
+.sessionBar {
+  margin-bottom: 1.5rem;
+  background: rgba(20, 8, 12, 0.7);
+  border: 1px solid rgba(212, 168, 67, 0.3);
+  padding: 1rem 1.2rem;
+  border-radius: 12px;
+
+  .sessionLabel {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #d4a843;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .sessionPills {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .sessionPill {
+    flex: 1;
+    min-width: 140px;
+    padding: 0.65rem 1rem;
+    background: rgba(30, 15, 20, 0.8);
+    border: 1px solid rgba(212, 168, 67, 0.3);
+    color: #c9b097;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: #d4a843;
+      color: #fff;
+    }
+  }
+
+  .activePill {
+    background: #d4a843 !important;
+    color: #1a0a0e !important;
+    font-weight: 700 !important;
+    border-color: #d4a843 !important;
+    box-shadow: 0 0 12px rgba(212, 168, 67, 0.4);
+  }
+}
+
+.sessionMatrix {
+  margin-top: 1.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px dashed rgba(212, 168, 67, 0.3);
+
+  .matrixTitle {
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    color: #d4a843;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+  }
+
+  .matrixGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .matrixCard {
+    background: rgba(20, 8, 12, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.75rem;
+    border-radius: 8px;
+    text-align: center;
+
+    .matrixSessionName {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #c9b097;
+      margin-bottom: 0.3rem;
+    }
+
+    .matrixStatus {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #888;
+    }
+  }
+
+  .matrixCheckedIn {
+    background: rgba(46, 204, 113, 0.15) !important;
+    border-color: rgba(46, 204, 113, 0.5) !important;
+
+    .matrixStatus {
+      color: #2ecc71 !important;
+    }
+  }
+}
+
 .dropzone {
   margin-top: 1.2rem;
   border: 2px dashed #b8922f;

@@ -447,6 +447,15 @@ app.post("/api/gatekeeper/verify", async (req, res) => {
 
     const student = docSnap.data();
 
+    const defaultSessions = {
+      day1_am: { checkedIn: false, timestamp: null },
+      day1_pm: { checkedIn: false, timestamp: null },
+      day2_am: { checkedIn: false, timestamp: null },
+      day2_pm: { checkedIn: false, timestamp: null },
+    };
+
+    const checkInSessions = student.checkInSessions || defaultSessions;
+
     return res.status(200).json({
       success: true,
       student: {
@@ -459,6 +468,7 @@ app.post("/api/gatekeeper/verify", async (req, res) => {
         paymentStatus: student.paymentStatus || "Paid",
         checkInStatus: student.checkInStatus || "Not Checked In",
         checkedInAt: student.checkedInAt ? student.checkedInAt.toDate?.() || student.checkedInAt : null,
+        checkInSessions,
       },
     });
   } catch (error) {
@@ -467,10 +477,17 @@ app.post("/api/gatekeeper/verify", async (req, res) => {
   }
 });
 
+const SESSION_NAMES = {
+  day1_am: "Day 1 Morning",
+  day1_pm: "Day 1 Evening",
+  day2_am: "Day 2 Morning",
+  day2_pm: "Day 2 Evening",
+};
+
 // ROUTE: POST /api/gatekeeper/checkin
 app.post("/api/gatekeeper/checkin", async (req, res) => {
   try {
-    const { ticketId, adminKey, adminSecret } = req.body;
+    const { ticketId, sessionKey = "day1_am", adminKey, adminSecret } = req.body;
 
     if (!isValidAdmin(adminKey, adminSecret)) {
       return res.status(401).json({ success: false, error: "Unauthorized admin credentials." });
@@ -489,27 +506,51 @@ app.post("/api/gatekeeper/checkin", async (req, res) => {
 
     const student = docSnap.data();
 
-    if (student.checkInStatus === "Checked In") {
+    const defaultSessions = {
+      day1_am: { checkedIn: false, timestamp: null },
+      day1_pm: { checkedIn: false, timestamp: null },
+      day2_am: { checkedIn: false, timestamp: null },
+      day2_pm: { checkedIn: false, timestamp: null },
+    };
+
+    const sessions = student.checkInSessions || defaultSessions;
+    const currentSession = sessions[sessionKey] || { checkedIn: false, timestamp: null };
+    const sessionName = SESSION_NAMES[sessionKey] || sessionKey;
+
+    if (currentSession.checkedIn) {
       return res.status(400).json({
         success: false,
-        error: "Student is already checked in!",
-        checkedInAt: student.checkedInAt,
+        error: `Student is already checked in for ${sessionName}!`,
+        checkedInAt: currentSession.timestamp,
+        sessionKey,
       });
     }
 
     const nowIso = new Date().toISOString();
+    const updatedSessions = {
+      ...sessions,
+      [sessionKey]: {
+        checkedIn: true,
+        timestamp: nowIso,
+        gatekeeper: adminKey,
+      },
+    };
+
     await docRef.update({
+      checkInSessions: updatedSessions,
       checkInStatus: "Checked In",
       checkedInAt: FieldValue.serverTimestamp(),
     });
 
-    console.log(`🎟️ Gate Check-in SUCCESS for ${student.name} (${ticketId})`);
+    console.log(`🎟️ Gate Check-in SUCCESS for ${student.name} (${ticketId}) - Session: ${sessionName}`);
 
     return res.status(200).json({
       success: true,
-      message: `Successfully checked in ${student.name}`,
+      message: `Successfully checked in ${student.name} for ${sessionName}`,
       ticketId,
+      sessionKey,
       checkedInAt: nowIso,
+      checkInSessions: updatedSessions,
     });
   } catch (error) {
     console.error("❌ Gatekeeper check-in error:", error);
