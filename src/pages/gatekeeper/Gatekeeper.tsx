@@ -172,6 +172,17 @@ const Gatekeeper: React.FC = () => {
               }
             : null
         );
+      } else if (data?.error?.includes("already checked in")) {
+        setStudent((prev) =>
+          prev
+            ? {
+                ...prev,
+                checkInStatus: "Checked In",
+                checkedInAt: data.checkedInAt || new Date().toISOString(),
+              }
+            : null
+        );
+        setError("⚠️ Student is already checked in!");
       } else {
         setError(data?.error || "Check-in failed.");
       }
