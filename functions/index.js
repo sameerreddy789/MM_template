@@ -177,6 +177,134 @@ app.post("/api/payment-webhook", async (req, res) => {
   return res.status(200).json({ status: "ok" });
 });
 
+// Helper to validate Admin Key-Value Credentials
+function isValidAdmin(adminKey, adminSecret) {
+  const expectedKey = process.env.ADMIN_KEY || "admin_gatekeeper";
+  const expectedSecret = process.env.ADMIN_SECRET || "MM26_Gatekeeper_Secret_99!";
+  return adminKey === expectedKey && adminSecret === expectedSecret;
+}
+
+// POST /api/gatekeeper/login
+app.post("/api/gatekeeper/login", (req, res) => {
+  const { adminKey, adminSecret } = req.body;
+  if (!adminKey || !adminSecret || !isValidAdmin(adminKey, adminSecret)) {
+    return res.status(401).json({
+      success: false,
+      error: "Invalid Admin Key or Secret. Access denied.",
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Admin authentication successful",
+    adminKey,
+  });
+});
+
+// POST /api/gatekeeper/verify
+app.post("/api/gatekeeper/verify", async (req, res) => {
+  try {
+    const { token, ticketId, adminKey, adminSecret } = req.body;
+
+    if (!isValidAdmin(adminKey, adminSecret)) {
+      return res.status(401).json({ success: false, error: "Unauthorized admin credentials." });
+    }
+
+    let targetTicketId = ticketId;
+
+    if (token) {
+      try {
+        const jwt = require("jsonwebtoken");
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || "mohanamantra2k26_super_secret_jwt_key_change_me");
+        targetTicketId = decoded.tid;
+      } catch (jwtErr) {
+        return res.status(400).json({ success: false, error: "Invalid or forged QR token signature." });
+      }
+    }
+
+    if (!targetTicketId) {
+      return res.status(400).json({ success: false, error: "Ticket ID or token required." });
+    }
+
+    const docRef = db.collection("registrations").doc(targetTicketId);
+    const docSnap = await docRef.get();
+
+    if (!docSnap.exists) {
+      return res.status(404).json({ success: false, error: `No registration found for Ticket ID: ${targetTicketId}` });
+    }
+
+    const student = docSnap.data();
+
+    return res.status(200).json({
+      success: true,
+      student: {
+        ticketId: student.ticketId,
+        name: student.name,
+        college: student.college,
+        rollNo: student.rollNo,
+        email: student.email,
+        phone: student.phone,
+        paymentStatus: student.paymentStatus || "Paid",
+        checkInStatus: student.checkInStatus || "Not Checked In",
+        checkedInAt: student.checkedInAt ? student.checkedInAt.toDate?.() || student.checkedInAt : null,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Gatekeeper verify error:", error);
+    return res.status(500).json({ success: false, error: "Failed to verify ticket." });
+  }
+});
+
+// POST /api/gatekeeper/checkin
+app.post("/api/gatekeeper/checkin", async (req, res) => {
+  try {
+    const { ticketId, adminKey, adminSecret } = req.body;
+
+    if (!isValidAdmin(adminKey, adminSecret)) {
+      return res.status(401).json({ success: false, error: "Unauthorized admin credentials." });
+    }
+
+    if (!ticketId) {
+      return res.status(400).json({ success: false, error: "Ticket ID is required for check-in." });
+    }
+
+    const docRef = db.collection("registrations").doc(ticketId);
+    const docSnap = await docRef.get();
+
+    if (!docSnap.exists) {
+      return res.status(404).json({ success: false, error: "Ticket not found." });
+    }
+
+    const student = docSnap.data();
+
+    if (student.checkInStatus === "Checked In") {
+      return res.status(400).json({
+        success: false,
+        error: "Student is already checked in!",
+        checkedInAt: student.checkedInAt,
+      });
+    }
+
+    const nowIso = new Date().toISOString();
+    await docRef.update({
+      checkInStatus: "Checked In",
+      checkedInAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    console.log(`🎟️ Gate Check-in SUCCESS for ${student.name} (${ticketId})`);
+
+    return res.status(200).json({
+      success: true,
+      message: `Successfully checked in ${student.name}`,
+      ticketId,
+      checkedInAt: nowIso,
+    });
+  } catch (error) {
+    console.error("❌ Gatekeeper check-in error:", error);
+    return res.status(500).json({ success: false, error: "Check-in failed." });
+  }
+});
+
 // ==========================================
 // EXPORT 1: Unified Express API Function
 // Endpoint: https://<region>-<project>.cloudfunctions.net/api
