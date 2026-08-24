@@ -110,6 +110,14 @@ app.use(
   })
 );
 
+// Handle malformed JSON body errors gracefully
+app.use((err, _req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+    return res.status(400).json({ success: false, error: "Invalid or malformed JSON payload." });
+  }
+  next(err);
+});
+
 // ==========================================
 // 3. RAZORPAY INSTANCE
 // ==========================================
