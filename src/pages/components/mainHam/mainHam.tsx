@@ -41,15 +41,6 @@ export default function MainHam({ goToPage }: MainHamProps) {
     },
   ];
 
-  const secondaryNavItems = [
-    { title: "Home", url: "/" },
-    { title: "Register", url: "/register" },
-    { title: "About Us", url: "/aboutus" },
-    { title: "Contact", url: "/contact" },
-    { title: "Rocktaves", url: "https://rocktaves.mohanamantra.com/", external: true },
-    { title: "Media Partners", url: "/mediaPartners" },
-  ];
-
   const socialLinks = [
     {
       name: "YouTube",
@@ -212,27 +203,6 @@ export default function MainHam({ goToPage }: MainHamProps) {
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Secondary Quick Links */}
-        <div className={styles.secondarySection}>
-          <div className={styles.secondaryHeader}>
-            <span className={styles.secLine} />
-            <span className={styles.secTitle}>EXPLORE MORE</span>
-            <span className={styles.secLine} />
-          </div>
-          <div className={styles.secondaryLinksList}>
-            {secondaryNavItems.map((sec) => (
-              <button
-                key={sec.title}
-                type="button"
-                className={styles.secLinkBtn}
-                onClick={() => handleNavClick(sec.url, sec.external)}
-              >
-                {sec.title}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Bottom Social Links & Traditional Footer */}
