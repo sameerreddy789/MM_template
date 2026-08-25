@@ -173,40 +173,90 @@ export default function Navbar({
         tabIndex={0}
         aria-label="Open Navigation Menu"
       >
-        <img src={moon} alt="moon" className={styles.moon} />
-        <img src={moonHam} alt="moonHam" className={styles.moonHam} />
-        <div className={styles.hamLine} aria-hidden="true" />
-        <div className={styles.clouds}>
-          <img
-            src={cloud1}
-            alt="Cloud1"
-            className={`${styles.cloud1} ${styles.cloud}`}
-          />
-          <img
-            src={cloud2}
-            alt="Cloud2"
-            className={`${styles.cloud2} ${styles.cloud}`}
-          />
-          <img
-            src={cloud3}
-            alt="Cloud3"
-            className={`${styles.cloud3} ${styles.cloud}`}
-          />
-          <img
-            src={cloud4}
-            alt="Cloud4"
-            className={`${styles.cloud4} ${styles.cloud}`}
-          />
-          <img
-            src={cloud5}
-            alt="Cloud5"
-            className={`${styles.cloud5} ${styles.cloud}`}
-          />
-          <img
-            src={cloud6}
-            alt="Cloud6"
-            className={`${styles.cloud6} ${styles.cloud}`}
-          />
+        <div className={styles.desktopHamElements}>
+          <img src={moon} alt="moon" className={styles.moon} />
+          <img src={moonHam} alt="moonHam" className={styles.moonHam} />
+          <div className={styles.hamLine} aria-hidden="true" />
+          <div className={styles.clouds}>
+            <img
+              src={cloud1}
+              alt="Cloud1"
+              className={`${styles.cloud1} ${styles.cloud}`}
+            />
+            <img
+              src={cloud2}
+              alt="Cloud2"
+              className={`${styles.cloud2} ${styles.cloud}`}
+            />
+            <img
+              src={cloud3}
+              alt="Cloud3"
+              className={`${styles.cloud3} ${styles.cloud}`}
+            />
+            <img
+              src={cloud4}
+              alt="Cloud4"
+              className={`${styles.cloud4} ${styles.cloud}`}
+            />
+            <img
+              src={cloud5}
+              alt="Cloud5"
+              className={`${styles.cloud5} ${styles.cloud}`}
+            />
+            <img
+              src={cloud6}
+              alt="Cloud6"
+              className={`${styles.cloud6} ${styles.cloud}`}
+            />
+          </div>
+        </div>
+
+        {/* Indian Festive Mobile Hamburger Badge */}
+        <div className={styles.mobileIndianHamIcon} aria-hidden="true">
+          <svg viewBox="0 0 52 52" className={styles.indianHamSvg}>
+            {/* Outer ornate mandala/sunburst dotted ring */}
+            <circle
+              cx="26"
+              cy="26"
+              r="23"
+              stroke="#c0b063"
+              strokeWidth="1.5"
+              strokeDasharray="3 2"
+              fill="none"
+              opacity="0.85"
+            />
+            <circle
+              cx="26"
+              cy="26"
+              r="20"
+              stroke="#f59e0b"
+              strokeWidth="1"
+              fill="none"
+              opacity="0.5"
+            />
+
+            {/* Indian Toran / Arch Petals at cardinal points */}
+            <path d="M26 3 L28.5 7 L23.5 7 Z" fill="#f59e0b" />
+            <path d="M26 49 L28.5 45 L23.5 45 Z" fill="#f59e0b" />
+            <path d="M3 26 L7 28.5 L7 23.5 Z" fill="#f59e0b" />
+            <path d="M49 26 L45 28.5 L45 23.5 Z" fill="#f59e0b" />
+
+            {/* 3 Indian Royal Stylized Gold Bars with Diamond Center */}
+            <g className={styles.barGroup}>
+              {/* Top Bar */}
+              <rect x="13" y="16" width="26" height="2.5" rx="1.25" fill="#f2dd7c" />
+              <polygon points="26,14.5 28,17.25 26,20 24,17.25" fill="#f59e0b" />
+
+              {/* Middle Bar */}
+              <rect x="10" y="24.75" width="32" height="2.5" rx="1.25" fill="#fff7d6" />
+              <polygon points="26,23 28.5,26 26,29 23.5,26" fill="#f59e0b" />
+              <circle cx="26" cy="26" r="1.2" fill="#fff" />
+
+              {/* Bottom Bar */}
+              <rect x="13" y="33.5" width="26" height="2.5" rx="1.25" fill="#f2dd7c" />
+              <polygon points="26,32 28,34.75 26,37.5 24,34.75" fill="#f59e0b" />
+            </g>
+          </svg>
         </div>
       </div>
       <div className={styles.navItemsContainer}>

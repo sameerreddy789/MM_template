@@ -213,6 +213,9 @@ body {
     }
   }
   }
+  .mobileIndianHamIcon {
+    display: none;
+  }
 }
 .aboutVariant {
   ul{
@@ -222,76 +225,75 @@ body {
     }
   }
 }
-@media (max-width: 800px) {
-  .nav {
-    .hamMenuBtn {
-      display: grid;
-    }
-  }
-}
 
-@media (aspect-ratio < 8/12), (max-width: 730px) {
+// Mobile Indian Ornate Hamburger Button
+@media (max-width: 800px) {
   .nav {
     justify-content: flex-end;
     padding-left: 0px;
-    padding-right: 25px;
-    ul {
-      display: none;
+    padding-right: 20px;
+
+    .desktopHamElements {
+      display: none !important;
     }
+
     .hamMenuBtn {
-      display: flex;
-      .moon,
-      .moonHam,
-      .clouds {
-        display: none !important;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, rgba(68, 18, 18, 0.9) 0%, rgba(28, 6, 6, 0.96) 100%);
+      border: 1.5px solid #c0b063;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6), 0 0 16px rgba(245, 158, 11, 0.45), inset 0 0 8px rgba(192, 176, 99, 0.3);
+      padding: 0;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      -webkit-tap-highlight-color: transparent;
+      animation: indianHamPulse 4s ease-in-out infinite;
+
+      .mobileIndianHamIcon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+
+        .indianHamSvg {
+          width: 38px;
+          height: 38px;
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+          transition: transform 0.3s ease;
+        }
       }
-      &::before,
-      &::after,
-      .hamLine {
-        background: #c0b063;
+
+      &:hover,
+      &:focus-visible {
+        border-color: #f59e0b;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7), 0 0 22px rgba(245, 158, 11, 0.75), inset 0 0 10px rgba(245, 158, 11, 0.4);
+        transform: scale(1.06) rotate(3deg);
+
+        .indianHamSvg {
+          transform: scale(1.05);
+        }
+      }
+
+      &:active {
+        transform: scale(0.94);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 12px rgba(245, 158, 11, 0.6);
       }
     }
   }
 }
 
-// Indian temple-styled mobile hamburger - replaces moon/clouds Japanese motif
-// Only targets mobile sizing; web version untouched
-@media (max-width: 800px) {
-  .nav {
-    .hamMenuBtn {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 5px;
-      padding: 6px;
-      border: 1.5px solid rgba(192, 176, 99, 0.5);
-      border-radius: 4px;
-      background: transparent;
-      transition: border-color 0.3s ease;
-
-      .moon,
-      .moonHam,
-      .clouds {
-        display: none !important;
-      }
-
-      // Indian temple-styled hamburger lines (gold on dark)
-      &::before,
-      &::after,
-      .hamLine {
-        content: '';
-        display: block;
-        width: 22px;
-        height: 2px;
-        background: #c0b063;
-        border-radius: 1px;
-        transition: all 0.3s ease;
-      }
-
-      &:hover {
-        border-color: #c0b063;
-      }
-    }
+@keyframes indianHamPulse {
+  0%, 100% {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6), 0 0 14px rgba(245, 158, 11, 0.4), inset 0 0 8px rgba(192, 176, 99, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.65), 0 0 22px rgba(245, 158, 11, 0.65), inset 0 0 10px rgba(245, 158, 11, 0.45);
   }
 }
