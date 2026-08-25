@@ -792,7 +792,7 @@ body {
         (max-width: 730px) {
           .treeContainer {
             .tree {
-              margin-top: clamp(0svh, 100svh - 58svw, 100svh);
+              margin-top: clamp(0svh, 100svh - 55svw, 100svh);
 
               img {
                 scale: 1.2;
@@ -819,7 +819,7 @@ body {
         @media (max-width: 500px) {
           .treeContainer {
             .tree {
-              margin-top: clamp(0svh, 100svh - 62svw - 1.5rem, 100svh);
+              margin-top: clamp(0svh, 100svh - 59svw - 1.5rem, 100svh);
             }
           }
         }
@@ -828,12 +828,12 @@ body {
       @media (aspect-ratio < 8/12),
       (max-width: 730px) {
         .registerBtnContainer {
-          width: 300px;
-          left: 50%;
-          bottom: 30px;
+          width: 180px;
+          left: 15px;
+          bottom: 110px;
           top: auto;
           right: auto;
-          transform: translateX(-50%);
+          transform: none;
 
           .registerBtn {
             display: none;
