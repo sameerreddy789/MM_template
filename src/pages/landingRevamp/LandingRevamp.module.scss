@@ -248,7 +248,7 @@ body {
         width: 100dvw;
         height: 100svh;
         object-fit: cover;
-        object-position: center;
+        object-position: center 65%;
         position: fixed;
         bottom: 0;
         z-index: -1;
@@ -310,8 +310,8 @@ body {
 
     @media screen and (max-width: 730px) {
       // Back to the corner on mobile, where the header collapses to a hamburger.
-      bottom: 30px;
-      right: 20px;
+      bottom: 75px;
+      right: 15px;
       left: auto;
       margin-inline: 0;
       top: unset;
@@ -797,7 +797,7 @@ body {
         (max-width: 730px) {
           .treeContainer {
             .tree {
-              margin-top: clamp(0svh, 100svh - 80svw, 100svh);
+              margin-top: clamp(0svh, 100svh - 72svw, 100svh);
 
               img {
                 scale: 1.2;
@@ -835,7 +835,7 @@ body {
         .registerBtnContainer {
           width: 300px;
           left: 50%;
-          transform: translateX(-50%) translateY(-100%);
+          transform: translateX(-50%) translateY(-135%);
 
           .registerBtn {
             display: none;
