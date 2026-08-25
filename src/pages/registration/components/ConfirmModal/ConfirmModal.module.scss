@@ -146,13 +146,13 @@
     width: 80vw;
 
     .heading {
-      font: 400 4.3vw "DM Serif Text";
+      font: 400 max(16px, 4.3vw) "DM Serif Text";
     }
     .content {
       .noEventsSelected {
         height: 60svh;
         p {
-          font: 400 4vw "DM Serif Text";
+          font: 400 max(15px, 4vw) "DM Serif Text";
         }
       }
       ul {
@@ -160,7 +160,7 @@
         height: 60svh;
         padding: 4vw 0;
         li {
-          font: 400 3vw "DM Serif Text";
+          font: 400 max(14px, 3vw) "DM Serif Text";
         }
       }
       .scrollBarContainer {
@@ -172,12 +172,20 @@
     }
     .buttonsContainer {
       .cancelButton {
-        font: 400 3vw "DM Serif Text";
-        padding: 0.5vw 4vw;
+        font: 400 max(14px, 3vw) "DM Serif Text";
+        padding: 10px 24px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       .confirmButton {
-        font: 400 3vw "DM Serif Text";
-        padding: 0.5vw 4vw;
+        font: 400 max(14px, 3vw) "DM Serif Text";
+        padding: 10px 24px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
       }
     }
@@ -187,7 +195,7 @@
     gap: 4vw;
     p {
       color: #fff;
-      font: 400 3.5vw "DM Serif Text";
+      font: 400 max(14px, 3.5vw) "DM Serif Text";
     }
   }
 }
@@ -201,13 +209,13 @@
     width: 80vw;
 
     .heading {
-      font: 400 4.3vw "DM Serif Text";
+      font: 400 max(16px, 4.3vw) "DM Serif Text";
     }
     .content {
       .noEventsSelected {
         height: 60svh;
         p {
-          font: 400 5vw "DM Serif Text";
+          font: 400 max(15px, 5vw) "DM Serif Text";
         }
       }
       ul {
@@ -215,18 +223,26 @@
         height: 60svh;
 
         li {
-          font: 400 4vw "DM Serif Text";
+          font: 400 max(14px, 4vw) "DM Serif Text";
         }
       }
     }
     .buttonsContainer {
       .cancelButton {
-        font: 400 4vw "DM Serif Text";
-        padding: 0.5vw 4vw;
+        font: 400 max(14px, 4vw) "DM Serif Text";
+        padding: 10px 24px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       .confirmButton {
-        font: 400 4vw "DM Serif Text";
-        padding: 0.5vw 4vw;
+        font: 400 max(14px, 4vw) "DM Serif Text";
+        padding: 10px 24px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
       }
     }
@@ -236,7 +252,7 @@
     gap: 4vw;
     p {
       color: #fff;
-      font: 400 4vw "DM Serif Text";
+      font: 400 max(14px, 4vw) "DM Serif Text";
     }
   }
 }

@@ -8,15 +8,10 @@ import mmLogo from "/images/logo.webp";
 import { useHamStore } from "../../../utils/store";
 
 const navItems = [
-  { label: "Home", katakana: "ホーム", links: "/", icon: homeIcon },
-  {
-    label: "About Us",
-    katakana: "アバウト・アス",
-    links: "/aboutus",
-    icon: aboutusIcon,
-  },
-  { label: "Contact", katakana: "コンタクト", links: "/contact", icon: phone },
-  { label: "Events", katakana: "イベンツ", links: "/events", icon: eventIcon },
+  { label: "Home", links: "/", icon: homeIcon },
+  { label: "About Us", links: "/aboutus", icon: aboutusIcon },
+  { label: "Contact", links: "/contact", icon: phone },
+  { label: "Events", links: "/events", icon: eventIcon },
 ];
 export default function Ham({
   goToPage,

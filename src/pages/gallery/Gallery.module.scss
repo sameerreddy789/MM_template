@@ -198,9 +198,11 @@
                 }
 
                 @media (max-width: 768px) {
-                    .cycleButtonIcon {font-size: 1.2rem;}
-                    height: 1.5rem;
-                    width: 1.5rem;
+                    .cycleButtonIcon {font-size: 1.4rem;}
+                    height: 2.8rem;
+                    width: 2.8rem;
+                    min-height: 44px;
+                    min-width: 44px;
                 }
             }
         }

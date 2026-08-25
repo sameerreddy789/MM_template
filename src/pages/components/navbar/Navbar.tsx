@@ -1,10 +1,18 @@
 import styles from "./Navbar.module.scss";
 import { useEffect, useContext, useRef } from "react";
-import { useNavVisibilityStore } from "../../../utils/store";
+import { useNavVisibilityStore, useMainHamStore } from "../../../utils/store";
 import { navContext } from "../../../App";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion } from "framer-motion";
+import moon from "/svgs/landing/moon1.svg";
+import moonHam from "/svgs/landing/moonHam.svg";
+import cloud1 from "/svgs/landing/hamClouds/cloud1.min.svg";
+import cloud2 from "/svgs/landing/hamClouds/cloud2.min.svg";
+import cloud3 from "/svgs/landing/hamClouds/cloud3.min.svg";
+import cloud4 from "/svgs/landing/hamClouds/cloud4.min.svg";
+import cloud5 from "/svgs/landing/hamClouds/cloud5.min.svg";
+import cloud6 from "/svgs/landing/hamClouds/cloud6.min.svg";
 // import debouncedHandler from "../../../utils/debounce";
 // import { rect } from "framer-motion/client";
 
@@ -23,8 +31,7 @@ export default function Navbar({
   variant?: "default" | "about";
 }) {
   const { goToPage } = useContext(navContext);
-
-  // const setHamOpen = useHamStore((state) => state.setHamOpen);
+  const setMainHamOpen = useMainHamStore((state) => state.setMainHamOpen);
   const navRef = useRef<HTMLElement>(null);
   // Published to the store so the music player can hide alongside the header.
   const navShow = useNavVisibilityStore((state) => state.isNavVisible);
@@ -159,6 +166,49 @@ export default function Navbar({
         variant === "about" ? styles.aboutVariant : ""
       }`}
     >
+      <div
+        className={styles.hamMenuBtn}
+        onClick={() => setMainHamOpen(true)}
+        role="button"
+        tabIndex={0}
+        aria-label="Open Navigation Menu"
+      >
+        <img src={moon} alt="moon" className={styles.moon} />
+        <img src={moonHam} alt="moonHam" className={styles.moonHam} />
+        <div className={styles.hamLine} aria-hidden="true" />
+        <div className={styles.clouds}>
+          <img
+            src={cloud1}
+            alt="Cloud1"
+            className={`${styles.cloud1} ${styles.cloud}`}
+          />
+          <img
+            src={cloud2}
+            alt="Cloud2"
+            className={`${styles.cloud2} ${styles.cloud}`}
+          />
+          <img
+            src={cloud3}
+            alt="Cloud3"
+            className={`${styles.cloud3} ${styles.cloud}`}
+          />
+          <img
+            src={cloud4}
+            alt="Cloud4"
+            className={`${styles.cloud4} ${styles.cloud}`}
+          />
+          <img
+            src={cloud5}
+            alt="Cloud5"
+            className={`${styles.cloud5} ${styles.cloud}`}
+          />
+          <img
+            src={cloud6}
+            alt="Cloud6"
+            className={`${styles.cloud6} ${styles.cloud}`}
+          />
+        </div>
+      </div>
       <div className={styles.navItemsContainer}>
         <ul>
           {navItems.slice(0, 2).map((item) => (

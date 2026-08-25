@@ -16,10 +16,9 @@ import insta from "/svgs/landing/insta.svg";
 import instaLamp from "/svgs/landing/instaLamp.svg";
 import youtube from "/svgs/landing/youtube.svg";
 import youtubeLamp from "/svgs/landing/youtubeLamp.svg";
-import mobileBackground from "/svgs/landing/mobileBackground.svg";
+import mobileBackground from "/images/hero_mobile.png";
 import mobileRegisterBtn from "/svgs/landing/mobileRegisterBtn.svg";
 import registerBtn from "/svgs/landing/registerBtn.svg";
-import eventsBtn from "/svgs/landing/mobileEventsBtn.svg";
 import wire from "/svgs/landing/wire.svg";
 import logo from "/images/logo.webp";
 import mobileCloud from "/images/landing/cloud_1.png";
@@ -92,7 +91,6 @@ export default function LandingRevamp({
   const setRemoveGif = useOverlayStore((state) => state.setRemoveGif);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const registerButtonRef = useRef<HTMLDivElement>(null);
-  const eventsButtonRef = useRef<HTMLDivElement>(null);
   const landingRef = useRef<HTMLImageElement>(null);
   const landingMobileRef = useRef<HTMLImageElement>(null);
   const treeContainerRef = useRef<HTMLDivElement>(null);
@@ -272,21 +270,6 @@ export default function LandingRevamp({
       }
     );
 
-    gsap.fromTo(
-      eventsButtonRef.current,
-      { autoAlpha: 1 },
-      {
-        autoAlpha: 0,
-        ease: "power2.inOut",
-        scrollTrigger: {
-          trigger: wrapperRef.current,
-          start: "50vh",
-          end: "+=145vh",
-          scrub: true,
-        },
-      }
-    );
-
 
 
     // The logo sits above the tree now, so it also has to leave with the hero,
@@ -363,17 +346,6 @@ export default function LandingRevamp({
       >
         <Navbar />
 
-        <div className={styles.mobileEventsBtnContainer} ref={eventsButtonRef}>
-          <img
-            src={eventsBtn}
-            className={styles.mobileEventsBtn}
-            onClick={() => goToPage("/events")}
-            alt="Events Button"
-          />
-
-          <div className={styles.mobileEventsBtnText}>Events</div>
-        </div>
-
         <div
           className={
             isMainHamOpen
@@ -413,7 +385,7 @@ export default function LandingRevamp({
             />
             <img
               src={mobileBackground}
-              alt="mobile"
+              alt="mobile hero"
               className={styles.mobileBackground}
             />
 

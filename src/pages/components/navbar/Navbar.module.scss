@@ -23,14 +23,18 @@ body {
   z-index: 1000;
 
   .hamMenuBtn {
+    display: none;
     transform: translateY(5px);
     width: 48px;
-    display: grid;
+    height: 48px;
+    min-width: 44px;
+    min-height: 44px;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     align-items: center;
     justify-items: center;
     position: relative;
+    cursor: pointer;
 
     .moon {
       width: 100%;
@@ -49,6 +53,9 @@ body {
       transform: translate(-35%, -80%);
 
       transition: rotate 0.3s ease-in-out;
+    }
+    .hamLine {
+      display: none; // hidden on desktop; shown on mobile as middle hamburger line
     }
     .clouds {
       width: 100%;
@@ -215,23 +222,75 @@ body {
     }
   }
 }
+@media (max-width: 800px) {
+  .nav {
+    .hamMenuBtn {
+      display: grid;
+    }
+  }
+}
+
 @media (aspect-ratio < 8/12), (max-width: 730px) {
   .nav {
     justify-content: flex-end;
     padding-left: 0px;
-    padding-right: 30px;
+    padding-right: 25px;
     ul {
       display: none;
     }
     .hamMenuBtn {
-      .moon {
-        rotate: 0deg;
-      }
+      display: flex;
+      .moon,
+      .moonHam,
       .clouds {
-        .cloud {
-          opacity: 1;
-          rotate: 0deg;
-        }
+        display: none !important;
+      }
+      &::before,
+      &::after,
+      .hamLine {
+        background: #c0b063;
+      }
+    }
+  }
+}
+
+// Indian temple-styled mobile hamburger - replaces moon/clouds Japanese motif
+// Only targets mobile sizing; web version untouched
+@media (max-width: 800px) {
+  .nav {
+    .hamMenuBtn {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      padding: 6px;
+      border: 1.5px solid rgba(192, 176, 99, 0.5);
+      border-radius: 4px;
+      background: transparent;
+      transition: border-color 0.3s ease;
+
+      .moon,
+      .moonHam,
+      .clouds {
+        display: none !important;
+      }
+
+      // Indian temple-styled hamburger lines (gold on dark)
+      &::before,
+      &::after,
+      .hamLine {
+        content: '';
+        display: block;
+        width: 22px;
+        height: 2px;
+        background: #c0b063;
+        border-radius: 1px;
+        transition: all 0.3s ease;
+      }
+
+      &:hover {
+        border-color: #c0b063;
       }
     }
   }

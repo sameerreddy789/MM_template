@@ -3,614 +3,570 @@
 .mainHam {
   height: 100dvh;
   width: 100dvw;
-  background-color: #340d0d;
+  background: radial-gradient(circle at 50% 25%, #380d0d 0%, #200606 65%, #0f0202 100%);
   position: relative;
   top: 0;
   left: 0;
   z-index: 1000;
-  color: white;
+  color: #fff;
   background-image: url("/svgs/landing/crumpled-black-paper-texture.webp");
   background-size: cover;
   background-position: center;
   pointer-events: all;
   display: flex;
-  overflow: hidden;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border-top: 3px solid #c0b063;
+  box-shadow: inset 0 3px 12px rgba(192, 176, 99, 0.4), inset 0 -3px 12px rgba(192, 176, 99, 0.2);
 
-  .topRightDragon {
+  // Background Indian Mandala Watermark
+  .mandalaWatermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(85vw, 550px);
+    height: min(85vw, 550px);
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.8;
+    animation: slowMandalaSpin 120s linear infinite;
+
+    .mandalaSvg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 15px rgba(192, 176, 99, 0.25));
+    }
+  }
+
+  // Top Indian Toran / Arch Accent
+  .topToran {
     position: absolute;
     top: 0;
-    right: 0;
-    height: 130px;
-    width: auto;
-
-    @media (max-width: 1200px) {
-      height: 100px;
-    }
-
-    @media (max-width: 1000px) {
-      height: 80px;
-    }
-
-    @media (max-width: 730px) {
-      height: 60px;
-    }
-  }
-
-  .bottomLeftDragon {
-    position: absolute;
-    bottom: 0;
     left: 0;
-    height: 100px;
-    width: auto;
+    width: 100%;
+    height: 45px;
+    pointer-events: none;
+    z-index: 2;
 
-    @media (max-width: 1200px) {
-      height: 80px;
-    }
-
-    @media (max-width: 1000px) {
-      height: 60px;
-    }
-
-    @media (max-width: 730px) {
-      height: 40px;
+    .toranSvg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
     }
   }
 
-  .hamDragonContainer {
+  // Close Button with Indian Gold Mandala Ring
+  .closeBtn {
     position: absolute;
-    top: 48%;
-    left: 54.5%;
-    transform: translate(-50%, -50%);
-
-    .hamDragon {
-      transform: scale(0.8);
-      transform-origin: center;
-       &.hamOpen{
-        mask-image: url("/videos/dragon-reveal.webp");
-        mask-size: contain;
-        mask-position: 12% center;
-        mask-repeat: no-repeat;
-
-        -webkit-mask-image: url("/videos/dragon-reveal.webp");
-        -webkit-mask-size: contain;
-        -webkit-mask-position: 12% center;
-        -webkit-mask-repeat: no-repeat;
-      }
-    }
-
-    .devDiv {
-      position: absolute;
-      top: 24%;
-      left: 31%;
-      cursor: pointer;
-      transition: transform 0.3s ease;
-
-      &:hover {
-        transform: scale(1.05);
-      }
-
-      .devCloud {
-        width: auto;
-        height: 210px;
-      }
-
-      .devText {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-60%, -30%);
-        font-family: $primaryFont;
-        font-size: 1.5em;
-        color: #2d1810;
-        text-align: center;
-        pointer-events: none;
-      }
-    }
-
-    .mediaPartnersDiv {
-      position: absolute;
-      top: 27.5%;
-      right: 29%;
-      cursor: pointer;
-      transition: transform 0.3s ease;
-
-      &:hover {
-        transform: scale(1.05);
-      }
-
-      .mediaPartnersCloud {
-        width: auto;
-        height: 200px;
-      }
-
-      .mediaPartnersText {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-62%, -50%);
-        font-family: $primaryFont;
-        font-size: 1.5em;
-        color: #2d1810;
-        text-align: center;
-        pointer-events: none;
-        line-height: 1.1;
-      }
-    }
-
-    .galleryDiv {
-      position: absolute;
-      top: 50%;
-      right: 35%;
-      transform: translate(-50%, -50%);
-      cursor: pointer;
-      transition: transform 0.3s ease;
-
-      &:hover {
-        transform: translate(-50%, -50%) scale(1.05);
-      }
-
-      .galleryCloud {
-        width: auto;
-        height: 190px;
-      }
-
-      .galleryText {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-60%, -30%);
-        font-family: $primaryFont;
-        font-size: 1.5em;
-        color: #2d1810;
-        text-align: center;
-        pointer-events: none;
-      }
-    }
-
-    .sponsDiv {
-      position: absolute;
-      bottom: 21%;
-      left: 32.5%;
-      cursor: pointer;
-      transition: transform 0.3s ease;
-
-      &:hover {
-        transform: scale(1.05);
-      }
-
-      .sponsCloud {
-        width: auto;
-        height: 200px;
-      }
-
-      .sponsText {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-60%, -50%);
-        font-family: $primaryFont;
-        font-size: 1.5em;
-        color: #2d1810;
-        text-align: center;
-        pointer-events: none;
-      }
-    }
-
-    .wallMagDiv {
-      position: absolute;
-      bottom: 29%;
-      right: 22.5%;
-      cursor: pointer;
-      transition: transform 0.3s ease;
-      &:hover {
-        transform: scale(1.05);
-      }
-
-      .wallMagCloud {
-        width: auto;
-        height: 200px;
-      }
-
-      .wallMagText {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-60%, -50%);
-        font-family: $primaryFont;
-        font-size: 1.5em;
-        color: #2d1810;
-        text-align: center;
-        pointer-events: none;
-        white-space: nowrap;
-      }
-    }
-
-    @media (max-width: 1200px) {
-      .hamDragon {
-        transform: scale(0.7);
-      }
-
-      .devDiv {
-        top: 27%;
-        left: 33.5%;
-
-        .devCloud {
-          width: auto;
-          height: 180px;
-        }
-
-        .devText {
-          font-family: $primaryFont;
-          font-size: 1.3em;
-        }
-      }
-
-      .mediaPartnersDiv {
-        top: 30%;
-        right: 32%;
-
-        .mediaPartnersCloud {
-          width: auto;
-          height: 175px;
-        }
-
-        .mediaPartnersText {
-          transform: translate(-62%, -50%);
-          font-size: 1.3em;
-        }
-      }
-
-      .galleryDiv {
-        top: 51%;
-        right: 36%;
-        transform: translate(-50%, -50%);
-
-        &:hover {
-          transform: translate(-50%, -50%) scale(1.05);
-        }
-
-        .galleryCloud {
-          width: auto;
-          height: 170px;
-        }
-
-        .galleryText {
-          transform: translate(-65%, -30%);
-          font-size: 1.3em;
-        }
-      }
-
-      .sponsDiv {
-        bottom: 25%;
-        left: 34.5%;
-
-        .sponsCloud {
-          width: auto;
-          height: 175px;
-        }
-
-        .sponsText {
-          transform: translate(-60%, -40%);
-          font-size: 1.3em;
-        }
-      }
-
-      .wallMagDiv {
-        bottom: 32%;
-        right: 26%;
-
-        .wallMagCloud {
-          width: auto;
-          height: 175px;
-        }
-
-        .wallMagText {
-          transform: translate(-60%, -50%);
-          font-size: 1.3em;
-        }
-      }
-    }
-
-    @media (max-width: 1000px) {
-      .hamDragon {
-        transform: scale(0.5);
-      }
-
-      .devDiv {
-        top: 33%;
-        left: 38%;
-
-        .devCloud {
-          width: auto;
-          height: 135px;
-        }
-
-        .devText {
-          font-family: $primaryFont;
-          font-size: 1em;
-        }
-      }
-
-      .mediaPartnersDiv {
-        top: 35.5%;
-        right: 37%;
-
-        .mediaPartnersCloud {
-          width: auto;
-          height: 130px;
-        }
-
-        .mediaPartnersText {
-          font-size: 1em;
-        }
-      }
-
-      .galleryDiv {
-        top: 50%;
-        right: 40%;
-        transform: translate(-50%, -50%);
-
-        &:hover {
-          transform: translate(-50%, -50%) scale(1.05);
-        }
-
-        .galleryCloud {
-          width: auto;
-          height: 125px;
-        }
-
-        .galleryText {
-          font-size: 1em;
-        }
-      }
-
-      .sponsDiv {
-        bottom: 32%;
-        left: 38.5%;
-
-        .sponsCloud {
-          width: auto;
-          height: 130px;
-        }
-
-        .sponsText {
-          font-size: 1em;
-        }
-      }
-
-      .wallMagDiv {
-        bottom: 36.5%;
-        right: 32.5%;
-
-        .wallMagCloud {
-          width: auto;
-          height: 130px;
-        }
-
-        .wallMagText {
-          transform: translate(-65%, -40%);
-          font-size: 1em;
-        }
-      }
-    }
-
-    @media (max-width: 730px) {
-      .hamDragon {
-        rotate: 40deg;
-        scale: 0.8;
-      }
-
-      .devDiv {
-        top: 32%;
-        left: 45.5%;
-
-        .devCloud {
-          width: auto;
-          height: 120px;
-        }
-
-        .devText {
-          font-family: $primaryFont;
-          font-size: 1em;
-        }
-      }
-
-      .mediaPartnersDiv {
-        top: 48%;
-        right: 38%;
-
-        .mediaPartnersCloud {
-          width: auto;
-          height: 105px;
-        }
-
-        .mediaPartnersText {
-          transform: translate(-62%, -50%);
-          font-size: 1em;
-        }
-      }
-
-      .galleryDiv {
-        top: 50%;
-        right: 41.5%;
-        transform: translate(-50%, -50%);
-
-        &:hover {
-          transform: translate(-50%, -50%) scale(1.05);
-        }
-
-        .galleryCloud {
-          width: auto;
-          height: 110px;
-        }
-
-        .galleryText {
-          transform: translate(-60%, -30%);
-          font-size: 1em;
-        }
-      }
-
-      .sponsDiv {
-        bottom: 42%;
-        left: 37.5%;
-
-        .sponsCloud {
-          width: auto;
-          height: 115px;
-        }
-
-        .sponsText {
-          transform: translate(-60%, -40%);
-          font-size: 1em;
-        }
-      }
-
-      .wallMagDiv {
-        bottom: 30.5%;
-        right: 40%;
-
-        .wallMagCloud {
-          width: auto;
-          height: 105px;
-        }
-
-        .wallMagText {
-          transform: translate(-60%, -50%);
-          font-size: 1em;
-        }
-      }
-    }
-
-    @media (max-width: 550px) {
-      .hamDragon {
-        rotate: 50deg;
-        scale: 0.6;
-      }
-
-      .devDiv {
-        top: 35.5%;
-        left: 47.5%;
-
-        .devCloud {
-          width: auto;
-          height: 100px;
-        }
-
-        .devText {
-          font-family: $primaryFont;
-          font-size: 0.8em;
-        }
-      }
-
-      .mediaPartnersDiv {
-        top: 49%;
-        right: 41%;
-
-        .mediaPartnersCloud {
-          width: auto;
-          height: 85px;
-        }
-
-        .mediaPartnersText {
-          transform: translate(-62%, -50%);
-          font-size: 0.8em;
-        }
-      }
-
-      .galleryDiv {
-        top: 49.5%;
-        right: 44%;
-        transform: translate(-50%, -50%);
-
-        &:hover {
-          transform: translate(-50%, -50%) scale(1.05);
-        }
-
-        .galleryCloud {
-          width: auto;
-          height: 85px;
-        }
-
-        .galleryText {
-          transform: translate(-60%, -30%);
-          font-size: 0.8em;
-        }
-      }
-
-      .sponsDiv {
-        bottom: 43%;
-        left: 40%;
-
-        .sponsCloud {
-          width: auto;
-          height: 90px;
-        }
-
-        .sponsText {
-          transform: translate(-60%, -50%);
-          font-size: 0.8em;
-        }
-      }
-
-      .wallMagDiv {
-        bottom: 33.75%;
-        right: 44%;
-
-        .wallMagCloud {
-          width: auto;
-          height: 85px;
-        }
-
-        .wallMagText {
-          transform: translate(-60%, -50%);
-          font-size: 0.8em;
-        }
-      }
-    }
-  }
-
-  .backBtn {
+    top: 18px;
+    right: 18px;
+    z-index: 20;
+    background: transparent;
+    border: none;
     cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
 
-    .backIcon {
-      z-index: 5;
-      position: absolute;
-      top: 45px;
-      left: 30px;
-      width: 58px;
-      height: 58px;
-      background: transparent;
-      transition: filter 0.3s ease;
+    .closeCircle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(43, 11, 11, 0.7);
+      border: 1px solid rgba(192, 176, 99, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), 0 0 10px rgba(192, 176, 99, 0.2);
+      transition: all 0.3s ease;
 
-      @media (max-width: 730px) {
-        top: 45px;
-        right: 22px;
-        left: auto;
-        z-index: 4001;
+      .closeIconSvg {
+        width: 32px;
+        height: 32px;
+        transition: transform 0.4s ease;
       }
+    }
 
-      &:hover {
-        filter: drop-shadow(1px 0px 9px rgba(208, 176, 99, 0.4));
+    &:hover,
+    &:active {
+      .closeCircle {
+        border-color: #f59e0b;
+        background: rgba(60, 15, 15, 0.9);
+        box-shadow: 0 0 15px rgba(245, 158, 11, 0.45);
+
+        .closeIconSvg {
+          transform: rotate(90deg) scale(1.08);
+        }
       }
     }
   }
 
-  .mwd {
-    position: absolute;
-    bottom: 1vw;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #d69b65;
-    font-size: 1.4em;
-    font-family: $hamFooterFont;
+  // Scrollable Menu Content
+  .menuContent {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 540px;
+    padding: 35px 20px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+    box-sizing: border-box;
+    margin: auto 0;
+  }
 
-    @media screen and (max-width: 1200px) {
-      bottom: 1.5vw;
+  // Festival Header
+  .brandHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.3s ease;
+    margin-top: 5px;
+
+    &:hover {
+      transform: scale(1.02);
     }
 
-    @media screen and (max-width: 550px) {
-      bottom: 5vw;
-      font-size: 1em;
+    .logoFrame {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(192, 176, 99, 0.2) 0%, rgba(35, 8, 8, 0.6) 80%);
+      border: 1.5px solid #c0b063;
+      box-shadow: 0 0 14px rgba(192, 176, 99, 0.35), inset 0 0 8px rgba(192, 176, 99, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      margin-bottom: 8px;
+
+      .brandLogo {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+      }
+    }
+
+    .brandTitles {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+
+      .festName {
+        font-family: $primaryFont;
+        font-size: 1.85rem;
+        letter-spacing: 2px;
+        background: linear-gradient(180deg, #fff7d6 0%, #f5d77f 50%, #c0b063 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+      }
+
+      .festYear {
+        font-family: $regFont;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 3px;
+        color: #d69b65;
+        text-transform: uppercase;
+      }
+    }
+
+    .ornamentalDivider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 180px;
+      margin-top: 6px;
+
+      .dividerLine {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(192, 176, 99, 0.6), transparent);
+      }
+
+      .dividerLotus {
+        color: #c0b063;
+        font-size: 0.75rem;
+        letter-spacing: 2px;
+      }
+    }
+  }
+
+  // Primary Navigation Grid (Events, Brochure, Sponsors, Gallery)
+  .primaryNavGrid {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .navCard {
+      position: relative;
+      width: 100%;
+      background: linear-gradient(135deg, rgba(60, 15, 15, 0.82) 0%, rgba(35, 8, 8, 0.9) 100%);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(192, 176, 99, 0.35);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 245, 200, 0.1);
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      -webkit-tap-highlight-color: transparent;
+
+      // Decorative corner accents (Indian Temple architecture inspired)
+      .cardCornerTL,
+      .cardCornerBR {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        pointer-events: none;
+      }
+
+      .cardCornerTL {
+        top: 2px;
+        left: 2px;
+        border-top: 1.5px solid #c0b063;
+        border-left: 1.5px solid #c0b063;
+      }
+
+      .cardCornerBR {
+        bottom: 2px;
+        right: 2px;
+        border-bottom: 1.5px solid #c0b063;
+        border-right: 1.5px solid #c0b063;
+      }
+
+      .cardBorderAccent {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, #f59e0b, #c0b063);
+        opacity: 0.6;
+        transition: opacity 0.3s ease, width 0.3s ease;
+      }
+
+      .cardIconWrapper {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background: radial-gradient(circle, rgba(192, 176, 99, 0.25) 0%, rgba(25, 5, 5, 0.6) 100%);
+        border: 1px solid rgba(192, 176, 99, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #f2dd7c;
+        flex-shrink: 0;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+
+        .cardIcon {
+          width: 22px;
+          height: 22px;
+          filter: drop-shadow(0 0 4px rgba(192, 176, 99, 0.5));
+        }
+      }
+
+      .cardBody {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2px;
+        min-width: 0;
+
+        .cardTitle {
+          font-family: $primaryFont;
+          font-size: 1.5rem;
+          letter-spacing: 1.5px;
+          color: #fef0c7;
+          line-height: 1.1;
+          filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
+          transition: color 0.2s ease;
+        }
+
+        .cardSubtitle {
+          font-family: $regFont;
+          font-size: 0.78rem;
+          font-weight: 400;
+          color: #d69b65;
+          letter-spacing: 0.5px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+
+      .cardArrow {
+        width: 24px;
+        height: 24px;
+        color: rgba(192, 176, 99, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.25s ease, color 0.25s ease;
+        flex-shrink: 0;
+
+        .arrowSvg {
+          width: 18px;
+          height: 18px;
+        }
+      }
+
+      &:hover,
+      &:focus-visible {
+        border-color: rgba(245, 158, 11, 0.75);
+        background: linear-gradient(135deg, rgba(75, 18, 18, 0.9) 0%, rgba(45, 10, 10, 0.95) 100%);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), 0 0 12px rgba(192, 176, 99, 0.25);
+        transform: translateY(-2px);
+
+        .cardBorderAccent {
+          opacity: 1;
+          width: 6px;
+        }
+
+        .cardBody .cardTitle {
+          color: #fff9e6;
+        }
+
+        .cardArrow {
+          transform: translateX(4px);
+          color: #f59e0b;
+        }
+      }
+
+      &:active {
+        transform: scale(0.985);
+      }
+    }
+  }
+
+  // Secondary Quick Links Section
+  .secondarySection {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+
+    .secondaryHeader {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+
+      .secLine {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(192, 176, 99, 0.4), transparent);
+      }
+
+      .secTitle {
+        font-family: $regFont;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 2.5px;
+        color: #c0b063;
+        text-transform: uppercase;
+      }
+    }
+
+    .secondaryLinksList {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+
+      .secLinkBtn {
+        background: rgba(45, 12, 12, 0.6);
+        border: 1px solid rgba(192, 176, 99, 0.25);
+        border-radius: 20px;
+        padding: 6px 14px;
+        color: #e5c158;
+        font-family: $regFont;
+        font-size: 0.82rem;
+        font-weight: 500;
+        letter-spacing: 0.6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        outline: none;
+
+        &:hover,
+        &:focus-visible {
+          background: rgba(70, 18, 18, 0.85);
+          border-color: #c0b063;
+          color: #fff7d6;
+          box-shadow: 0 0 8px rgba(192, 176, 99, 0.3);
+          transform: translateY(-1px);
+        }
+
+        &:active {
+          transform: scale(0.96);
+        }
+      }
+    }
+  }
+
+  // Footer Section
+  .menuFooter {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+
+    .socialRow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+
+      .socialPill {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 14px;
+        background: rgba(35, 8, 8, 0.65);
+        border: 1px solid rgba(192, 176, 99, 0.3);
+        border-radius: 16px;
+        text-decoration: none;
+        color: #d69b65;
+        transition: all 0.25s ease;
+
+        .socialLamp {
+          width: 16px;
+          height: auto;
+          filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.5));
+        }
+
+        .socialIcon {
+          width: 16px;
+          height: 16px;
+        }
+
+        .socialName {
+          font-family: $regFont;
+          font-size: 0.78rem;
+          font-weight: 500;
+          color: #f2dd7c;
+        }
+
+        &:hover {
+          border-color: #f59e0b;
+          background: rgba(55, 14, 14, 0.85);
+          box-shadow: 0 0 10px rgba(245, 158, 11, 0.35);
+          transform: translateY(-1px);
+        }
+      }
+    }
+
+    .footerAuspicious {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      text-align: center;
+
+      .traditionalTagline {
+        font-family: $regFont;
+        font-size: 0.72rem;
+        color: #c0b063;
+        letter-spacing: 0.8px;
+        opacity: 0.85;
+      }
+
+      .mbuTag {
+        font-family: $regFont;
+        font-size: 0.68rem;
+        color: #8c5b38;
+        letter-spacing: 1px;
+      }
+    }
+  }
+}
+
+@keyframes slowMandalaSpin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+// Media queries for smaller mobile heights/widths
+@media (max-height: 700px) {
+  .mainHam {
+    .menuContent {
+      padding: 25px 16px 20px;
+      gap: 16px;
+    }
+
+    .brandHeader {
+      .logoFrame {
+        width: 54px;
+        height: 54px;
+      }
+
+      .brandTitles .festName {
+        font-size: 1.55rem;
+      }
+    }
+
+    .primaryNavGrid .navCard {
+      padding: 10px 14px;
+
+      .cardBody .cardTitle {
+        font-size: 1.3rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 380px) {
+  .mainHam {
+    .menuContent {
+      padding: 25px 12px 20px;
+    }
+
+    .primaryNavGrid .navCard {
+      padding: 10px 12px;
+      gap: 10px;
+
+      .cardIconWrapper {
+        width: 34px;
+        height: 34px;
+
+        .cardIcon {
+          width: 18px;
+          height: 18px;
+        }
+      }
+
+      .cardBody .cardTitle {
+        font-size: 1.3rem;
+      }
     }
   }
 }

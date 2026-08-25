@@ -238,7 +238,7 @@
     position: relative;
 
     input::placeholder {
-      font-size: 2.8vw;
+      font-size: max(14px, 2.8vw);
     }
 
     input:-webkit-autofill,
@@ -246,7 +246,7 @@
     input:-webkit-autofill:focus,
     textarea:-webkit-autofill,
     select:-webkit-autofill {
-      font: 500 3.2vw $regFont !important;
+      font: 500 max(16px, 3.2vw) $regFont !important;
     }
 
     .registrationForm {
@@ -290,15 +290,16 @@
               width: 6vw;
             }
             input {
-              font: 500 3.2vw $regFont;
+              font: 500 max(16px, 3.2vw) $regFont;
             }
           }
           .error {
             position: relative;
             margin-top: -0.5vw;
             font-family: $regFont;
-            font-size: 2.2vw;
+            font-size: max(13px, 2.6vw);
             font-weight: 500;
+            color: #ff6b6b;
             text-align: center;
           }
           .sameline {
@@ -317,12 +318,13 @@
     .confirmButton {
       padding: 2vw 3vw;
       font-family: $primaryFont;
-      font-size: 3.6vw;
+      font-size: max(16px, 3.6vw);
       letter-spacing: 1px;
       justify-content: center;
       gap: 1.5vw;
       width: 78vw;
       min-width: unset;
+      min-height: 48px;
       white-space: nowrap;
     }
   }
@@ -331,7 +333,7 @@
 @media (max-width: 1200px) and (max-aspect-ratio: 0.75) {
   .registerContainer {
     input::placeholder {
-      font-size: 3.8vw;
+      font-size: max(14px, 3.8vw);
     }
 
     input:-webkit-autofill,
@@ -339,7 +341,7 @@
     input:-webkit-autofill:focus,
     textarea:-webkit-autofill,
     select:-webkit-autofill {
-      font: 500 4.2vw $regFont !important;
+      font: 500 max(16px, 4.2vw) $regFont !important;
     }
     .registrationForm {
       max-height: 75svh;
@@ -358,15 +360,16 @@
               width: 6.5vw;
             }
             input {
-              font: 500 4vw $regFont;
+              font: 500 max(16px, 4vw) $regFont;
             }
           }
           .error {
             position: relative;
             margin-top: -1vw;
             font-family: $regFont;
-            font-size: 2.8vw;
+            font-size: max(13px, 3.2vw);
             font-weight: 500;
+            color: #ff6b6b;
             text-align: center;
           }
           .sameline {
@@ -388,9 +391,10 @@
       bottom: 5vw;
       padding: 2.8vw 3vw;
       font-family: $primaryFont;
-      font-size: 4.8vw;
+      font-size: max(16px, 4.8vw);
       letter-spacing: 1px;
       min-width: unset;
+      min-height: 48px;
       white-space: nowrap;
     }
   }

@@ -149,47 +149,7 @@ body {
   //   }
   // }
 
-  .mobileEventsBtnContainer {
-    position: fixed;
-    top: 40px;
-    left: 20px;
-    width: 150px;
-    height: 60px;
-    z-index: 1000;
-    cursor: pointer;
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr;
-    align-items: center;
-    justify-items: center;
 
-    @media (max-width: 731px) or (aspect-ratio <=8/12) {
-      transform: translateY(12px);
-    }
-
-    @media (min-width: 731px) and (aspect-ratio >=8/12) {
-      display: none;
-    }
-
-    .mobileEventsBtn {
-      width: 100%;
-      height: 100%;
-      grid-row: 1/2;
-      grid-column: 1/2;
-    }
-
-    .mobileEventsBtnText {
-      font-family: $primaryFont;
-      font-size: 1.2rem;
-      color: #ffdfd0;
-      text-align: center;
-      grid-row: 1/2;
-      grid-column: 1/2;
-      z-index: 1001;
-      transform: translateY(1px);
-      pointer-events: none;
-    }
-  }
 
   .mainHamContainer {
     position: fixed;
@@ -295,14 +255,19 @@ body {
       }
 
       .mobileMountains {
-        width: 100svw;
+        display: none; // hero_mobile.png contains the full scene
+        width: 100%;
+        min-width: 100vw;
+        height: 75svh;
+        max-height: 85svh;
         object-fit: cover;
-        object-position: right;
+        object-position: center bottom;
         position: fixed;
         bottom: 0;
-        right: 0;
-        height: 70svh;
-        margin-bottom: calc(5svw);
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        margin-bottom: 0;
       }
 
       .mobileCloud {
@@ -317,8 +282,10 @@ body {
     @media (aspect-ratio < 5/8) {
       .mobileBackgroundContainer {
         .mobileMountains {
-          right: -10svw;
-          width: auto;
+          width: 100%;
+          min-width: 100vw;
+          height: 72svh;
+          object-position: center bottom;
         }
       }
     }
@@ -514,9 +481,8 @@ body {
     .logoContainer {
       left: 50%;
       transform: translateX(-50%);
-      top: 90px;
-      // 300px + 20%
-      width: 360px;
+      top: 85px;
+      width: min(340px, 80vw);
     }
 
   }
