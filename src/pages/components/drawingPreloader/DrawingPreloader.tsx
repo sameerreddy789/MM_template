@@ -10,29 +10,17 @@ const imagesToPreload = [
   "/images/doors/Door3.webp",
   "/images/doors/Door4.webp",
   "/videos/ink-spread-5.gif",
-  "/svgs/landing/hamClouds/cloud1.min.svg",
-  "/svgs/landing/hamClouds/cloud2.min.svg",
-  "/svgs/landing/hamClouds/cloud3.min.svg",
-  "/svgs/landing/hamClouds/cloud4.min.svg",
-  "/svgs/landing/hamClouds/cloud5.min.svg",
-  "/svgs/landing/hamClouds/cloud6.min.svg",
   "/svgs/landing/insta.svg",
-  "/svgs/landing/linkden.svg",
   "/svgs/landing/moon1.svg",
   "/svgs/landing/moonHam.svg",
   "/images/hero_hills.webp",
   "/images/landing/new tree.webp",
-  "/svgs/landing/insta.svg",
-  "/svgs/landing/x.svg",
-  "/svgs/landing/linkden.svg",
   "/svgs/landing/wire.svg",
   "/svgs/landing/instaLamp.svg",
-  "/svgs/landing/linkdenLamp.svg",
-  "/svgs/landing/mobileBackground.svg",
   "/svgs/landing/mobileRegisterBtn.svg",
   "/svgs/landing/registerBtn.svg",
   "/images/logo.webp",
-  "/images/landing/mobileCloud.png",
+  "/images/landing/cloud_1.png",
   "/images/registration/reg-banner.webp",
   "/svgs/registration/bg-extended.svg",
   "/svgs/registration/bg-mobile.svg",
@@ -66,10 +54,7 @@ const imagesToPreload = [
   "/svgs/aboutus/linkedin.svg",
   "/svgs/aboutus/yticon.svg",
   "/svgs/aboutus/abtus.svg",
-  "/images/aboutus/background.jpg",
-  "/images/aboutus/backg.webp",
-  "/images/aboutus/abtbck.webp",
-  "/videos/dragon-reveal.webp",
+  "/images/mediaPartners/bg1.webp",
 ];
 
 const soundsToPreload: string[] = [];
@@ -93,79 +78,69 @@ export default function DrawingPreloader({
 
   useEffect(() => {
     let loadedAssets = 0;
+    const totalAssets = Math.max(1, imagesToPreload.length + soundsToPreload.length);
+
+    const updateProgress = () => {
+      loadedAssets++;
+      const currentPct = Math.min(99, Math.round((loadedAssets / totalAssets) * 99));
+      setProgress((prev) => Math.max(prev, currentPct));
+    };
 
     const preloadImage = (src: string) => {
       return new Promise((resolve) => {
         const img = new Image();
         img.src = src;
         img.onload = () => {
-          loadedAssets++;
-          setProgress(
-            (loadedAssets / (imagesToPreload.length + soundsToPreload.length)) *
-              99
-          );
-          const canvas = document.createElement("canvas");
-          canvas.width = img.naturalWidth;
-          canvas.height = img.naturalHeight;
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            ctx.drawImage(img, 0, 0);
-          }
+          updateProgress();
           resolve(img);
         };
-        img.onerror = (err) => {
-          console.error("Image failed to load", err, img);
-          loadedAssets++;
-          setProgress(
-            (loadedAssets / (imagesToPreload.length + soundsToPreload.length)) *
-              99
-          );
-          resolve(img);
-        };
-      });
-    };
-    const preloadSound = (src: string) => {
-      return new Promise((resolve) => {
-        const audio = new Audio(src);
-        audio.onloadeddata = () => {
-          loadedAssets++;
-          setProgress(
-            (loadedAssets / (imagesToPreload.length + soundsToPreload.length)) *
-              99
-          );
-          resolve(audio);
-        };
-        audio.onerror = (err) => {
-          console.error("Audio failed to load", err, audio);
-          loadedAssets++;
-          setProgress(
-            (loadedAssets / (imagesToPreload.length + soundsToPreload.length)) *
-              99
-          );
-          resolve(audio);
+        img.onerror = () => {
+          updateProgress();
+          resolve(null);
         };
       });
     };
 
+    const preloadSound = (src: string) => {
+      return new Promise((resolve) => {
+        const audio = new Audio(src);
+        audio.onloadeddata = () => {
+          updateProgress();
+          resolve(audio);
+        };
+        audio.onerror = () => {
+          updateProgress();
+          resolve(null);
+        };
+      });
+    };
+
+    // Smooth baseline timer to guarantee visual progress even on fast/cached loads
+    const smoothTimer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 99) {
+          clearInterval(smoothTimer);
+          return 99;
+        }
+        return Math.min(99, prev + 4);
+      });
+    }, 120);
+
     Promise.all([
-      ...imagesToPreload.map((src, i) =>
-        preloadImage(src).then(async (img) => {
-          await new Promise((resolve) => setTimeout(resolve, 1000 * i));
-          return img;
-        })
-      ),
-      ...soundsToPreload.map((src, i) =>
-        preloadSound(src).then(async (audio) => {
-          await new Promise((resolve) => setTimeout(resolve, 1000 * i));
-          return audio;
-        })
-      ),
+      ...imagesToPreload.map((src) => preloadImage(src)),
+      ...soundsToPreload.map((src) => preloadSound(src)),
     ])
-      .then(() => {})
+      .then(() => {
+        setProgress(99);
+        clearInterval(smoothTimer);
+      })
       .catch((err) => {
         console.error("Error preloading images:", err);
+        setProgress(99);
+        clearInterval(smoothTimer);
       });
-    console.log("Preloading images completed");
+
+    return () => clearInterval(smoothTimer);
   }, []);
 
   // Measure each path once and prime it as "not yet drawn"
@@ -275,14 +250,21 @@ export default function DrawingPreloader({
       />
       {isAnimating ? (
         <div className={styles.loadingContainer}>
-          <div className={styles.loader}></div>
-          <div className={styles.progressBar}>
-            <div
-              className={styles.progressFill}
-              style={{ width: `${progress}%` }}
-            ></div>
+          <div className={styles.loadingPill}>
+            <div className={styles.loaderRing}>
+              <div className={styles.spinner} />
+              <span className={styles.percentageText}>{Math.round(progress)}%</span>
+            </div>
+            <div className={styles.loadingDetails}>
+              <span className={styles.loadingTitle}>MohanaMantra 2K26</span>
+              <div className={styles.progressBar}>
+                <div
+                  className={styles.progressFill}
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
           </div>
-          <div className={styles.percentage}>{Math.round(progress)}%</div>
         </div>
       ) : (
         <div className={styles.infoContainer}>
