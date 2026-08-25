@@ -30,7 +30,7 @@ function generateVerificationToken(ticketId, studentName, secureToken) {
   };
 
   // Sign with our secret. Token never expires (we check status in DB instead)
-  const token = jwt.sign(payload, process.env.JWT_SECRET || "mohanamantra2k26_fallback_secret");
+  const token = jwt.sign(payload, process.env.JWT_SECRET || "mohanamantra2k26_super_secret_jwt_key_change_me");
   return token;
 }
 

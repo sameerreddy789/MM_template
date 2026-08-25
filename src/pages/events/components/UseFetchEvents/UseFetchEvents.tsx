@@ -1,53 +1,63 @@
 import { useEffect, useState } from "react";
 
 const categoryAliases: Record<string, string[]> = {
-  kalakshetra: ["kalakshetra", "kalakshera", "drama & theatre", "drama and theatre", "drama", "dance"],
-  technoholic: ["technoholic", "music", "tech"],
+  kalakshetra: ["kalakshetra", "kalakshera", "drama & theatre", "drama and theatre", "drama"],
+  technoholic: ["technoholic", "tech"],
   "spot events": ["spot events", "photography", "spot"],
   "pro shows": ["pro shows", "por shows", "proshow"],
-  misc: ["misc", "fashion"],
+  misc: ["misc", "music", "fashion"],
 };
 
 const dummyEventsData = [
   {
     category_name: "Kalakshetra",
     events: [
-      { name: "Let's Naacho", club_name: "Dance Club", venue: "Main Stage", description: "Show off your dance moves.", image_url: "https://via.placeholder.com/400x300?text=Lets+Naacho" },
-      { name: "Band Battle", club_name: "Music Club", venue: "Main Auditorium", description: "Battle of the bands.", image_url: "https://via.placeholder.com/400x300?text=Band+Battle" },
-      { name: "PUBG", club_name: "E-Sports Club", venue: "CS Lab", description: "Intense battle royale.", image_url: "https://via.placeholder.com/400x300?text=PUBG" },
-      { name: "Push-Up Challenge", club_name: "Fitness Club", venue: "Open Ground", description: "Test your strength.", image_url: "https://via.placeholder.com/400x300?text=Push-Up+Challenge" }
+      { name: "Fusion Dance", club_name: "Dance Club", venue: "Main Stage", description: "Combine dance styles and showcase your energy on stage.", image_url: "/images/logo.webp" },
+      { name: "Band Battle", club_name: "Music Club", venue: "Main Auditorium", description: "Battle of the musical bands.", image_url: "/images/logo.webp" },
+      { name: "Push-up Challenge", club_name: "Fitness Club", venue: "Open Ground", description: "Test your ultimate upper body strength.", image_url: "/images/logo.webp" },
+      { name: "Dedicate a song", club_name: "Music Club", venue: "Campus Radio", description: "Dedicate your favorite song to someone special.", image_url: "/images/logo.webp" },
+      { name: "Shoot and Edit", club_name: "Media Club", venue: "Campus Wide", description: "Capture reels & videos and edit them on the spot.", image_url: "/images/logo.webp" },
+      { name: "Spot Photography", club_name: "Photography Club", venue: "Campus Wide", description: "Capture spontaneous aesthetics across campus.", image_url: "/images/logo.webp" },
+      { name: "Traditional Dressing Competition", club_name: "Cultural Club", venue: "Main Stage", description: "Flaunt authentic traditional attire and grace.", image_url: "/images/logo.webp" },
+      { name: "Folk Dance", club_name: "Dance Club", venue: "Main Stage", description: "Celebrate cultural roots through vibrant folk dance.", image_url: "/images/logo.webp" },
+      { name: "Solo and Group Singing", club_name: "Music Club", venue: "Main Auditorium", description: "Melodious vocal performances in solo & group categories.", image_url: "/images/logo.webp" },
+      { name: "Talent show", club_name: "Cultural Club", venue: "Open Air Theatre", description: "Showcase your unique skills and extraordinary talents.", image_url: "/images/logo.webp" }
     ]
   },
   {
     category_name: "Technoholic",
     events: [
-      { name: "Tech Exhibition", club_name: "Tech Club", venue: "Seminar Hall", description: "Showcasing the latest tech innovations.", image_url: "https://via.placeholder.com/400x300?text=Tech+Exhibition" },
-      { name: "Code Sprint", club_name: "Coding Club", venue: "CS Lab", description: "Fast-paced coding competition.", image_url: "https://via.placeholder.com/400x300?text=Code+Sprint" },
-      { name: "Hackathon", club_name: "Tech Club", venue: "Main Lab", description: "24-hour hackathon.", image_url: "https://via.placeholder.com/400x300?text=Hackathon" },
-      { name: "Workshop on AR/VR", club_name: "Tech Club", venue: "Seminar Hall", description: "Learn about AR and VR.", image_url: "https://via.placeholder.com/400x300?text=Workshop+on+AR/VR" },
-      { name: "Robo War", club_name: "Robotics Club", venue: "Open Ground", description: "Battle of the robots.", image_url: "https://via.placeholder.com/400x300?text=Robo+War" }
+      { name: "Water Rocket Launch", club_name: "Aerospace Club", venue: "Open Ground", description: "Design, build, and launch water-powered rockets into the sky.", image_url: "/images/logo.webp" },
+      { name: "Tech Exhibition", club_name: "Tech Club", venue: "Seminar Hall", description: "Showcasing cutting-edge student projects and tech innovations.", image_url: "/images/logo.webp" },
+      { name: "Hackathon", club_name: "Coding Club", venue: "Main Lab", description: "Intense coding and innovation marathon.", image_url: "/images/logo.webp" },
+      { name: "Robo Race", club_name: "Robotics Club", venue: "Open Track", description: "High-speed autonomous and manual bot racing.", image_url: "/images/logo.webp" },
+      { name: "Agri Plex", club_name: "Agri-Tech Club", venue: "Exhibition Pavilion", description: "Exploring agricultural technology and smart farming solutions.", image_url: "/images/logo.webp" },
+      { name: "CADathon", club_name: "Design Club", venue: "CAD Lab", description: "Speed 3D modeling and computer-aided design challenge.", image_url: "/images/logo.webp" },
+      { name: "Life Saver Workshop", club_name: "Health & First-Aid Club", venue: "Main Auditorium", description: "Hands-on emergency medical response and CPR training.", image_url: "/images/logo.webp" }
     ]
   },
   {
     category_name: "Spot Events",
     events: [
-      { name: "Spot Photography", club_name: "Photography Club", venue: "Campus", description: "Capture the moment.", image_url: "https://via.placeholder.com/400x300?text=Spot+Photography" },
-      { name: "Jenga", club_name: "Fun Club", venue: "Food Court", description: "Don't let the tower fall.", image_url: "https://via.placeholder.com/400x300?text=Jenga" },
-      { name: "Tug of War", club_name: "Sports Club", venue: "Ground", description: "Show your team strength.", image_url: "https://via.placeholder.com/400x300?text=Tug+of+War" }
+      { name: "Spot Photography", club_name: "Photography Club", venue: "Campus", description: "Capture the moment.", image_url: "/images/logo.webp" },
+      { name: "Jenga", club_name: "Fun Club", venue: "Food Court", description: "Don't let the tower fall.", image_url: "/images/logo.webp" },
+      { name: "Tug of War", club_name: "Sports Club", venue: "Ground", description: "Show your team strength.", image_url: "/images/logo.webp" }
     ]
   },
   {
     category_name: "Pro Shows",
     events: [
-      { name: "Band Night", club_name: "Cultural Club", venue: "Main Stage", description: "Live band performances.", image_url: "https://via.placeholder.com/400x300?text=Band+Night" },
-      { name: "DJ Nights", club_name: "Cultural Club", venue: "Main Stage", description: "Dance to the beats.", image_url: "https://via.placeholder.com/400x300?text=DJ+Nights" }
+      { name: "The Band Night", club_name: "Cultural Club", venue: "Main Stage", description: "Electrifying live musical band performance.", image_url: "/images/logo.webp" },
+      { name: "The DJ Night", club_name: "Cultural Club", venue: "Main Stage", description: "High-energy EDM and DJ tracks to light up the night.", image_url: "/images/logo.webp" },
+      { name: "Stunt show", club_name: "Sports & Adventure Club", venue: "Outdoor Arena", description: "Thrilling professional bike and stunt performances.", image_url: "/images/logo.webp" },
+      { name: "Talk Show", club_name: "Media & Cultural Club", venue: "Main Auditorium", description: "Interactive talk show and Q&A session with popular guests.", image_url: "/images/logo.webp" }
     ]
   },
   {
     category_name: "Misc",
     events: [
-      { name: "Fashion Show", club_name: "Fashion Club", venue: "Main Stage", description: "Walk the ramp in style.", image_url: "https://via.placeholder.com/400x300?text=Fashion+Show" },
-      { name: "Treasure Hunt", club_name: "Adventure Club", venue: "Campus Wide", description: "Find the hidden treasures.", image_url: "https://via.placeholder.com/400x300?text=Treasure+Hunt" }
+      { name: "Fashion Show", club_name: "Fashion Club", venue: "Main Stage", description: "Walk the ramp in style.", image_url: "/images/logo.webp" },
+      { name: "Treasure Hunt", club_name: "Adventure Club", venue: "Campus Wide", description: "Find the hidden treasures.", image_url: "/images/logo.webp" }
     ]
   }
 ];

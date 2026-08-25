@@ -21,7 +21,7 @@ function generateVerificationToken(ticketId, studentName, secureToken) {
     stk: secureToken,
   };
 
-  const secret = process.env.JWT_SECRET || "mohanamantra2k26_fallback_secret";
+  const secret = process.env.JWT_SECRET || "mohanamantra2k26_super_secret_jwt_key_change_me";
   return jwt.sign(payload, secret);
 }
 

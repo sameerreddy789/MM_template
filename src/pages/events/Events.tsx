@@ -36,20 +36,20 @@ const fanImages: FanImage[] = [
   {
     src: drama,
     mobileSrc: dramaMobile,
-    alt: "Kalakshetra",
+    alt: "Technoholic",
     className: styles.quizzes,
     shape: "quizzes"
   },
-  { src: music, mobileSrc: musicMobile, alt: "Technoholic", className: styles.music, shape: "music" },
+  { src: music, mobileSrc: musicMobile, alt: "Misc", className: styles.music, shape: "music" },
   {
     src: photography,
     mobileSrc: photographyMobile,
-    alt: "Spot Events",
+    alt: "Pro Shows",
     className: styles.photography,
     shape: "photography"
   },
-  { src: dance, mobileSrc: danceMobile, alt: "Pro Shows", className: styles.dance, shape: "dance" },
-  { src: misc, mobileSrc: miscMobile, alt: "Misc", className: styles.misc, shape: "misc" },
+  { src: dance, mobileSrc: danceMobile, alt: "Kalakshetra", className: styles.dance, shape: "dance" },
+  { src: misc, mobileSrc: miscMobile, alt: "Spot Events", className: styles.misc, shape: "misc" },
 ];
 // const speed = 500; // constant speed in pixels/second
 // delay factor per degree
