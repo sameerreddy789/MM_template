@@ -75,7 +75,7 @@ const assetList = {
     },
     "events": {
         "images": [
-            './images/events/backg.webp',
+            './images/events/backg1.png',
             './images/events/dance.webp',
             './images/events/DanceMobile.webp',
             './images/events/down.jpg.png',

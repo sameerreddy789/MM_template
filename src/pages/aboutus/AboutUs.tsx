@@ -84,8 +84,8 @@ const AboutUs = ({ isBackBtn = true }: AboutUsProps) => {
     window.matchMedia("(max-width: 1200px) and (max-aspect-ratio: 0.75) ")
       .matches
   );
-const { isPlaying, nextVideo, prevVideo, togglePlayPause } = useYouTubePlayer(videos, playerContainerRef);
- useFanAnimation(fan1Ref, fan2Ref, isMobile, iconImages, styles);
+  const { isPlaying, nextVideo, prevVideo, togglePlayPause } = useYouTubePlayer(videos, playerContainerRef);
+  useFanAnimation(fan1Ref, fan2Ref, isMobile, iconImages, styles);
 
 
   useEffect(() => {
@@ -112,9 +112,8 @@ const { isPlaying, nextVideo, prevVideo, togglePlayPause } = useYouTubePlayer(vi
         className={styles.AboutContainer}
         ref={AboutRef}
         style={{
-          backgroundImage: `url("${
-            isMobile ? aboutPageBGMobile : aboutPageBG
-          }")`,
+          backgroundImage: `url("${isMobile ? aboutPageBGMobile : aboutPageBG
+            }")`,
         }}
       >
         <VideoMetaData
