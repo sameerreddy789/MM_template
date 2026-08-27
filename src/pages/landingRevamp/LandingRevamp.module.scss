@@ -305,14 +305,17 @@ body {
     align-items: center;
     gap: 15px;
 
-    @media screen and (max-width: 730px) {
-      // Mobile: top-left, opposite hamburger
-      top: 15px;
-      left: 12px;
+    @media screen and (max-width: 730px), (aspect-ratio < 8/12) {
+      // Mobile: top-left, aligned with navbar hamburger
+      top: 16px;
+      left: 16px;
       right: auto;
       bottom: auto;
       margin-inline: 0;
       transform: none;
+      height: 44px;
+      display: flex;
+      align-items: center;
     }
   }
 
@@ -382,7 +385,7 @@ body {
       height: 40px;
       transform: scale(1.05);
 
-      .mobileOrnateFrame {
+      .mobileOctagonFrame {
         display: none;
       }
 
@@ -396,34 +399,34 @@ body {
 
       @media screen and (max-width: 730px), (aspect-ratio < 8/12) {
         transform: none;
-        clip-path: none;
-        border-radius: 26px;
-        overflow: visible;
-        height: 46px;
-        padding: 0 14px;
-        background: linear-gradient(135deg, rgba(6, 14, 30, 0.94) 0%, rgba(10, 24, 52, 0.9) 50%, rgba(5, 12, 26, 0.96) 100%);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        border: 1.5px solid rgba(242, 221, 124, 0.75);
+        // True Elongated Octagon Geometry (8-sided polygon with 45deg chamfers)
+        clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+        border: none;
+        border-radius: 0;
+        height: 44px;
+        padding: 0 12px;
+        background: linear-gradient(135deg, rgba(6, 14, 30, 0.94) 0%, rgba(10, 24, 52, 0.9) 50%, rgba(6, 14, 30, 0.96) 100%);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         box-shadow: 
-          0 6px 22px rgba(0, 0, 0, 0.7),
-          0 0 14px rgba(56, 189, 248, 0.25),
-          inset 0 0 14px rgba(242, 221, 124, 0.16);
+          0 8px 24px rgba(0, 0, 0, 0.75),
+          0 0 16px rgba(56, 189, 248, 0.2),
+          inset 0 0 12px rgba(242, 221, 124, 0.12);
 
-        .mobileOrnateFrame {
+        .mobileOctagonFrame {
           display: block;
           position: absolute;
-          inset: -1px;
+          inset: 0;
           pointer-events: none;
           z-index: 2;
-          width: calc(100% + 2px);
-          height: calc(100% + 2px);
+          width: 100%;
+          height: 100%;
 
-          .ornateFrameSvg {
+          .octagonFrameSvg {
             width: 100%;
             height: 100%;
             display: block;
-            filter: drop-shadow(0 0 2px rgba(242, 221, 124, 0.4));
+            filter: drop-shadow(0 0 2px rgba(242, 221, 124, 0.5));
           }
         }
 
@@ -435,8 +438,8 @@ body {
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          width: 38px;
-          height: 38px;
+          width: 36px;
+          height: 36px;
           pointer-events: none;
           z-index: 1;
 
@@ -462,7 +465,7 @@ body {
         @media screen and (max-width: 730px), (aspect-ratio < 8/12) {
           width: 1px;
           height: 22px;
-          margin: 0 6px;
+          margin: 0 5px;
           background: linear-gradient(180deg, rgba(242, 221, 124, 0.1), rgba(242, 221, 124, 0.85), rgba(56, 189, 248, 0.5), rgba(242, 221, 124, 0.1));
           box-shadow: 0 0 4px rgba(56, 189, 248, 0.3);
 
@@ -508,12 +511,12 @@ body {
         }
 
         @media screen and (max-width: 730px), (aspect-ratio < 8/12) {
-          padding: 6px 8px;
+          padding: 6px 7px;
           color: #f2dd7c;
 
           svg, .btnSvg {
-            width: 18px;
-            height: 18px;
+            width: 17px;
+            height: 17px;
             filter: drop-shadow(0 0 4px rgba(242, 221, 124, 0.6));
           }
 
@@ -523,15 +526,15 @@ body {
           }
 
           &.centerPlayBtn {
-            width: 42px;
-            height: 42px;
+            width: 38px;
+            height: 38px;
             padding: 0;
             margin: 0 2px;
             color: #fff7d6;
 
             svg, .btnSvg {
-              width: 18px;
-              height: 18px;
+              width: 17px;
+              height: 17px;
               filter: drop-shadow(0 0 5px rgba(242, 221, 124, 0.85));
             }
 
@@ -557,10 +560,10 @@ body {
         opacity: 0.3;
 
         @media screen and (max-width: 730px), (aspect-ratio < 8/12) {
-          inset: auto 24px 4px 24px;
-          height: 12px;
+          inset: auto 20px 3px 20px;
+          height: 11px;
           padding: 0;
-          opacity: 0.4;
+          opacity: 0.42;
           z-index: 1;
         }
 
@@ -609,6 +612,9 @@ body {
     }
   }
 
+  @media (max-width: 1300px) {
+  }
+
   @media (max-width: 1100px) {
   }
 
@@ -627,8 +633,8 @@ body {
     .logoContainer {
       left: 50%;
       transform: translateX(-50%);
-      top: 50px;
-      width: min(280px, 65vw);
+      top: clamp(80px, 12.5vh, 115px);
+      width: min(260px, 60vw);
     }
 
   }

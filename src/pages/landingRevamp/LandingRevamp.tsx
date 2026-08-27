@@ -412,66 +412,45 @@ export default function LandingRevamp({
             style={{ pointerEvents: isNavVisible ? "auto" : "none" }}
           >
             <div className={styles.playerMain}>
-              {/* Ornate Indian decorative background frame / filigree SVG */}
-              <div className={styles.mobileOrnateFrame} aria-hidden="true">
+              {/* Elongated Octagon SVG Vector Frame */}
+              <div className={styles.mobileOctagonFrame} aria-hidden="true">
                 <svg
                   viewBox="0 0 160 44"
-                  className={styles.ornateFrameSvg}
+                  className={styles.octagonFrameSvg}
                   preserveAspectRatio="none"
                 >
                   <defs>
-                    <linearGradient id="playerGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <linearGradient id="octGoldCyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="#f59e0b" />
-                      <stop offset="50%" stopColor="#fff7d6" />
-                      <stop offset="100%" stopColor="#c0b063" />
+                      <stop offset="30%" stopColor="#f2dd7c" />
+                      <stop offset="50%" stopColor="#38bdf8" />
+                      <stop offset="70%" stopColor="#f2dd7c" />
+                      <stop offset="100%" stopColor="#d4af37" />
                     </linearGradient>
                   </defs>
 
-                  {/* Left Lotus / Arch Finial Motif */}
-                  <path
-                    d="M 12 22 C 8 16, 2 20, 2 22 C 2 24, 8 28, 12 22 Z"
-                    fill="url(#playerGoldGrad)"
-                    opacity="0.85"
-                  />
-                  <circle cx="8" cy="22" r="1.5" fill="#38bdf8" />
-
-                  {/* Right Lotus / Arch Finial Motif */}
-                  <path
-                    d="M 148 22 C 152 16, 158 20, 158 22 C 158 24, 152 28, 148 22 Z"
-                    fill="url(#playerGoldGrad)"
-                    opacity="0.85"
-                  />
-                  <circle cx="152" cy="22" r="1.5" fill="#38bdf8" />
-
-                  {/* Decorative Dotted Gold Filigree Borders */}
-                  <line
-                    x1="20"
-                    y1="3"
-                    x2="140"
-                    y2="3"
-                    stroke="url(#playerGoldGrad)"
-                    strokeWidth="1"
-                    strokeDasharray="2 3"
-                    opacity="0.75"
-                  />
-                  <line
-                    x1="20"
-                    y1="41"
-                    x2="140"
-                    y2="41"
-                    stroke="url(#playerGoldGrad)"
-                    strokeWidth="1"
-                    strokeDasharray="2 3"
-                    opacity="0.75"
+                  {/* Elongated Octagon Perimeter Path */}
+                  <polygon
+                    points="10,1.5 150,1.5 158.5,10 158.5,34 150,42.5 10,42.5 1.5,34 1.5,10"
+                    fill="none"
+                    stroke="url(#octGoldCyanGrad)"
+                    strokeWidth="1.5"
+                    strokeLinejoin="miter"
                   />
 
-                  {/* Diamond Toran Accents at Top & Bottom Centers */}
-                  <polygon points="80,1 82.5,3.5 80,6 77.5,3.5" fill="#38bdf8" />
-                  <polygon points="80,38 82.5,40.5 80,43 77.5,40.5" fill="#38bdf8" />
+                  {/* 4 Corner Chamfer Diamond Jewels */}
+                  <polygon points="10,1.5 12,3.5 10,5.5 8,3.5" fill="#38bdf8" />
+                  <polygon points="150,1.5 152,3.5 150,5.5 148,3.5" fill="#38bdf8" />
+                  <polygon points="150,42.5 152,40.5 150,38.5 148,40.5" fill="#38bdf8" />
+                  <polygon points="10,42.5 12,40.5 10,38.5 8,40.5" fill="#38bdf8" />
+
+                  {/* Subtle Accent Dots */}
+                  <circle cx="80" cy="2" r="1" fill="#f2dd7c" opacity="0.8" />
+                  <circle cx="80" cy="42" r="1" fill="#f2dd7c" opacity="0.8" />
                 </svg>
               </div>
 
-              {/* Prev Button with Ornate Indian Arrow */}
+              {/* Prev Button with Clean Stylized Indian Arrow */}
               <button
                 className={`${styles.playBtn} ${styles.prevBtn}`}
                 onClick={onPrev}
@@ -479,13 +458,13 @@ export default function LandingRevamp({
               >
                 <svg viewBox="0 0 24 24" fill="none" className={styles.btnSvg}>
                   <path
-                    d="M6 5V19M6 12L17 5V19L6 12Z"
+                    d="M6 5V19M6 12L18 5V19L6 12Z"
                     fill="currentColor"
                     stroke="currentColor"
                     strokeWidth="0.5"
                     strokeLinejoin="round"
                   />
-                  <polygon points="12,12 14,10 14,14" fill="#08142a" />
+                  <polygon points="12,12 14,10 14,14" fill="#060e1e" />
                 </svg>
               </button>
 
@@ -494,7 +473,7 @@ export default function LandingRevamp({
                 <div className={styles.dividerDiamond} />
               </div>
 
-              {/* Center Play/Pause Button with Sunburst Medallion */}
+              {/* Center Play/Pause Button */}
               <button
                 className={`${styles.playBtn} ${styles.centerPlayBtn} ${
                   isPlaying ? styles.isPlaying : ""
@@ -505,39 +484,32 @@ export default function LandingRevamp({
               >
                 <div className={styles.medallionRing} aria-hidden="true">
                   <svg viewBox="0 0 40 40" className={styles.medallionSvg}>
-                    <circle
-                      cx="20"
-                      cy="20"
-                      r="18"
-                      stroke="url(#playerGoldGrad)"
+                    <polygon
+                      points="12,2 28,2 38,12 38,28 28,38 12,38 2,28 2,12"
+                      stroke="url(#octGoldCyanGrad)"
                       strokeWidth="1"
                       strokeDasharray="2 2"
                       fill="none"
-                      opacity="0.8"
+                      opacity="0.85"
                     />
                     <circle
                       cx="20"
                       cy="20"
-                      r="15"
+                      r="14"
                       stroke="#38bdf8"
                       strokeWidth="0.8"
                       fill="none"
-                      opacity="0.5"
+                      opacity="0.4"
                     />
-                    {/* 4 Cardinal Sunburst Diamonds */}
-                    <polygon points="20,1 21.5,3.5 20,5 18.5,3.5" fill="#f59e0b" />
-                    <polygon points="20,35 21.5,37.5 20,39 18.5,37.5" fill="#f59e0b" />
-                    <polygon points="1,20 3.5,21.5 5,20 3.5,18.5" fill="#f59e0b" />
-                    <polygon points="35,20 37.5,21.5 39,20 37.5,18.5" fill="#f59e0b" />
                   </svg>
                 </div>
 
                 {isPlaying ? (
                   <svg viewBox="0 0 24 24" fill="none" className={styles.btnSvg}>
-                    <rect x="6.5" y="5.5" width="3.5" height="13" rx="1.75" fill="currentColor" />
-                    <rect x="14" y="5.5" width="3.5" height="13" rx="1.75" fill="currentColor" />
-                    <circle cx="8.25" cy="12" r="0.8" fill="#08142a" />
-                    <circle cx="15.75" cy="12" r="0.8" fill="#08142a" />
+                    <rect x="6.5" y="5.5" width="3.5" height="13" rx="1.5" fill="currentColor" />
+                    <rect x="14" y="5.5" width="3.5" height="13" rx="1.5" fill="currentColor" />
+                    <circle cx="8.25" cy="12" r="0.75" fill="#060e1e" />
+                    <circle cx="15.75" cy="12" r="0.75" fill="#060e1e" />
                   </svg>
                 ) : (
                   <svg viewBox="0 0 24 24" fill="none" className={styles.btnSvg}>
@@ -548,7 +520,7 @@ export default function LandingRevamp({
                       strokeWidth="0.5"
                       strokeLinejoin="round"
                     />
-                    <circle cx="11" cy="12" r="1" fill="#08142a" />
+                    <circle cx="11" cy="12" r="0.9" fill="#060e1e" />
                   </svg>
                 )}
               </button>
@@ -558,7 +530,7 @@ export default function LandingRevamp({
                 <div className={styles.dividerDiamond} />
               </div>
 
-              {/* Next Button with Ornate Indian Arrow */}
+              {/* Next Button with Clean Stylized Indian Arrow */}
               <button
                 className={`${styles.playBtn} ${styles.nextBtn}`}
                 onClick={onNext}
@@ -566,13 +538,13 @@ export default function LandingRevamp({
               >
                 <svg viewBox="0 0 24 24" fill="none" className={styles.btnSvg}>
                   <path
-                    d="M18 5V19M18 12L7 5V19L18 12Z"
+                    d="M18 5V19M18 12L6 5V19L18 12Z"
                     fill="currentColor"
                     stroke="currentColor"
                     strokeWidth="0.5"
                     strokeLinejoin="round"
                   />
-                  <polygon points="12,12 10,10 10,14" fill="#08142a" />
+                  <polygon points="12,12 10,10 10,14" fill="#060e1e" />
                 </svg>
               </button>
 
