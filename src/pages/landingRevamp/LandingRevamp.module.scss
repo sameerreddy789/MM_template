@@ -347,6 +347,24 @@ body {
     }
   }
 
+  @keyframes medallionSpin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes medallionPulse {
+    0%, 100% {
+      filter: drop-shadow(0 0 4px rgba(242, 221, 124, 0.7)) drop-shadow(0 0 10px rgba(56, 189, 248, 0.4));
+    }
+    50% {
+      filter: drop-shadow(0 0 9px rgba(242, 221, 124, 0.95)) drop-shadow(0 0 16px rgba(56, 189, 248, 0.7));
+    }
+  }
+
   .customMusicControls {
     display: flex;
     align-items: center;
@@ -364,21 +382,71 @@ body {
       height: 40px;
       transform: scale(1.05);
 
+      .mobileOrnateFrame {
+        display: none;
+      }
+
+      .medallionRing {
+        display: none;
+      }
+
+      .dividerDiamond {
+        display: none;
+      }
+
       @media screen and (max-width: 730px), (aspect-ratio < 8/12) {
         transform: none;
         clip-path: none;
-        border-radius: 9999px;
-        overflow: hidden;
-        height: 42px;
-        padding: 0 8px;
-        background: linear-gradient(135deg, rgba(8, 20, 42, 0.88) 0%, rgba(12, 28, 58, 0.82) 100%);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(242, 221, 124, 0.6);
+        border-radius: 26px;
+        overflow: visible;
+        height: 46px;
+        padding: 0 14px;
+        background: linear-gradient(135deg, rgba(6, 14, 30, 0.94) 0%, rgba(10, 24, 52, 0.9) 50%, rgba(5, 12, 26, 0.96) 100%);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1.5px solid rgba(242, 221, 124, 0.75);
         box-shadow: 
-          0 4px 16px rgba(0, 0, 0, 0.55),
-          0 0 12px rgba(56, 189, 248, 0.22),
-          inset 0 0 10px rgba(242, 221, 124, 0.12);
+          0 6px 22px rgba(0, 0, 0, 0.7),
+          0 0 14px rgba(56, 189, 248, 0.25),
+          inset 0 0 14px rgba(242, 221, 124, 0.16);
+
+        .mobileOrnateFrame {
+          display: block;
+          position: absolute;
+          inset: -1px;
+          pointer-events: none;
+          z-index: 2;
+          width: calc(100% + 2px);
+          height: calc(100% + 2px);
+
+          .ornateFrameSvg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            filter: drop-shadow(0 0 2px rgba(242, 221, 124, 0.4));
+          }
+        }
+
+        .medallionRing {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 38px;
+          height: 38px;
+          pointer-events: none;
+          z-index: 1;
+
+          .medallionSvg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 4px rgba(242, 221, 124, 0.6));
+            transition: transform 0.4s ease;
+          }
+        }
       }
 
       .verticalDivider {
@@ -389,14 +457,27 @@ body {
         box-shadow: 0 0 8px #ffd700;
         // Above the visualiser layer
         position: relative;
-        z-index: 1;
+        z-index: 3;
 
         @media screen and (max-width: 730px), (aspect-ratio < 8/12) {
           width: 1px;
-          height: 20px;
-          margin: 0 4px;
-          background: linear-gradient(180deg, rgba(242, 221, 124, 0.15), rgba(242, 221, 124, 0.6), rgba(56, 189, 248, 0.35));
-          box-shadow: 0 0 4px rgba(56, 189, 248, 0.25);
+          height: 22px;
+          margin: 0 6px;
+          background: linear-gradient(180deg, rgba(242, 221, 124, 0.1), rgba(242, 221, 124, 0.85), rgba(56, 189, 248, 0.5), rgba(242, 221, 124, 0.1));
+          box-shadow: 0 0 4px rgba(56, 189, 248, 0.3);
+
+          .dividerDiamond {
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            width: 4px;
+            height: 4px;
+            background: #38bdf8;
+            border-radius: 0.5px;
+            box-shadow: 0 0 4px #38bdf8;
+          }
         }
       }
 
@@ -412,10 +493,10 @@ body {
         transition: transform 0.2s, filter 0.2s;
         // Above the visualiser layer
         position: relative;
-        z-index: 1;
+        z-index: 3;
         -webkit-tap-highlight-color: transparent;
 
-        svg {
+        svg, .btnSvg {
           width: 20px;
           height: 20px;
           filter: drop-shadow(0 0 5px #ffd700);
@@ -430,45 +511,61 @@ body {
           padding: 6px 8px;
           color: #f2dd7c;
 
-          svg {
+          svg, .btnSvg {
             width: 18px;
             height: 18px;
-            filter: drop-shadow(0 0 4px rgba(242, 221, 124, 0.5));
+            filter: drop-shadow(0 0 4px rgba(242, 221, 124, 0.6));
           }
 
           &:active {
             transform: scale(0.88);
-            filter: brightness(1.4) drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
+            filter: brightness(1.4) drop-shadow(0 0 8px rgba(56, 189, 248, 0.7));
+          }
+
+          &.centerPlayBtn {
+            width: 42px;
+            height: 42px;
+            padding: 0;
+            margin: 0 2px;
+            color: #fff7d6;
+
+            svg, .btnSvg {
+              width: 18px;
+              height: 18px;
+              filter: drop-shadow(0 0 5px rgba(242, 221, 124, 0.85));
+            }
+
+            &.isPlaying {
+              .medallionRing .medallionSvg {
+                animation: medallionSpin 12s linear infinite, medallionPulse 3s ease-in-out infinite;
+              }
+            }
           }
         }
       }
 
-      // Background visualiser: fills the frame behind the transport controls
-      // rather than sitting in the flex row.
+      // Background visualiser: refined bottom edge rhythm wave on mobile
       .songWave {
         position: absolute;
         inset: 0;
         z-index: 0;
         display: flex;
-        // Bars grow up off a shared baseline the way an equaliser does, rather
-        // than expanding from the middle in both directions.
         align-items: flex-end;
         justify-content: space-between;
         padding: 0 6px 6px;
         pointer-events: none;
-        // Low enough to sit under the icons as texture rather than competing.
         opacity: 0.3;
 
         @media screen and (max-width: 730px), (aspect-ratio < 8/12) {
-          padding: 0 10px 5px;
-          opacity: 0.35;
+          inset: auto 24px 4px 24px;
+          height: 12px;
+          padding: 0;
+          opacity: 0.4;
+          z-index: 1;
         }
 
         span {
           display: block;
-          // Fixed hairline width: space-between then spreads them edge to edge,
-          // so the wave spans the frame whatever its width without the bars
-          // fattening up to fill it.
           flex: 0 0 2px;
           height: 58%;
           background: #ffd700;
@@ -476,18 +573,20 @@ body {
           box-shadow: 0 0 4px rgba(255, 215, 0, 0.7);
           transform: scaleY(0.22);
           transform-origin: bottom;
-          // When playback stops the animation is removed and each bar eases back
-          // down to the flat idle state instead of snapping.
           transition: transform 0.4s ease;
 
           @media screen and (max-width: 730px), (aspect-ratio < 8/12) {
+            flex: 0 0 1.5px;
+            height: 100%;
+            border-radius: 1px;
+
             &:nth-child(odd) {
               background: #38bdf8;
-              box-shadow: 0 0 5px rgba(56, 189, 248, 0.75);
+              box-shadow: 0 0 4px rgba(56, 189, 248, 0.8);
             }
             &:nth-child(even) {
               background: #f2dd7c;
-              box-shadow: 0 0 5px rgba(242, 221, 124, 0.65);
+              box-shadow: 0 0 4px rgba(242, 221, 124, 0.7);
             }
           }
         }

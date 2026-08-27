@@ -1,36 +1,34 @@
-# Design Document: Mobile Music Player Redesign (Subtle Blue & Gold)
+# Design Document: Mobile Music Player Redesign (Elevated Ornate Indian Blue & Gold)
 
 ## 1. Project & Feature Overview
-Redesign the floating music player on mobile devices for the Mohana Mantra web application with a premium, subtle blue and gold glassmorphic aesthetic. The player maintains responsive parity with desktop while elevating mobile ergonomics, visual depth, and aesthetic harmony with the Indian ornate mobile hamburger navigation.
+Redesign the mobile music player from a generic pill into an elevated, designer-grade **Ornate Royal Indian & Cyber-Mythic HUD Player**. The widget pairs with the ornate mobile hamburger button, incorporating traditional temple toran finials, lotus/chakra motifs, sacred geometric gold lattice, a central sunburst medallion for the play button, and an ultra-refined glowing audio wave.
 
 ---
 
-## 2. Page & Component Structure
+## 2. Visual Architecture & SVG Design System
 
-### Landing Page (`LandingRevamp.tsx`) — Mobile Viewport (`<= 730px` / `max-aspect-ratio < 8/12`)
+### 2.1 Outer Frame & Filigree Borders
+- **Silhouette**: Elegant beveled cartridge / ornate stepped architectural cartouche with temple bracket corner notches.
+- **Flanking Motifs (Left & Right Wings)**: Detailed SVG filigree featuring sacred lotus petals, gold chevron accents, and miniature sapphire gems.
+- **Glassmorphism Backdrop**: Multi-stop deep cosmic navy glass (`linear-gradient(135deg, rgba(6, 14, 30, 0.94) 0%, rgba(10, 24, 52, 0.88) 50%, rgba(5, 12, 26, 0.96) 100%)`) with `14px` blur.
+- **Border Trim**: Double-line metallic gold filigree (`linear-gradient(90deg, #d4af37, #fff2a8, #d4af37, #38bdf8, #d4af37)`) with etched corner brackets (`border-image` / SVG vector overlays).
 
-#### Floating Music Player Widget
-- **Purpose**: Provide seamless ambient background audio controls (Play/Pause, Next, Previous) with dynamic visualizer feedback on mobile screens.
-- **Placement**: Fixed top-left viewport corner (`top: 15px; left: 12px;`), harmoniously balanced with the top-right ornate hamburger button.
-- **Visual Container (Capsule Glassmorphism)**:
-  - **Backdrop**: Deep frosted midnight-sapphire glass (`rgba(8, 18, 38, 0.82)`) with `backdrop-filter: blur(10px)`.
-  - **Border & Trim**: Delicate 1px - 1.5px metallic gold hairline frame (`linear-gradient(135deg, rgba(242, 221, 124, 0.7), rgba(184, 134, 11, 0.4), rgba(56, 189, 248, 0.3))`).
-  - **Shadow & Glow**: Soft dual ambient halo (`box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(56, 189, 248, 0.15), inset 0 0 8px rgba(242, 221, 124, 0.1)`).
-  - **Shape**: Rounded capsule / sleek pill geometry (`border-radius: 9999px` / `24px`) with polished inner padding.
-- **Controls & Typography**:
-  - **Previous / Next Buttons**: Subtle brushed gold glyphs (`#f2dd7c` / `#d4af37`) with smooth tactile active scaling (`transform: scale(0.9)` on tap).
-  - **Play / Pause Central Button**: Highlighted gold glyph with a subtle cyan/gold accent glow (`filter: drop-shadow(0 0 6px rgba(242, 221, 124, 0.6))`).
-  - **Dividers**: Refined translucent dual-tone vertical dividers (`rgba(242, 221, 124, 0.3)`).
-- **Dynamic Dual-Tone Equalizer Wave (`.songWave`)**:
-  - Background audio visualizer layered subtly beneath the buttons.
-  - Staggered hairline equalizer bars alternating in subtle royal blue (`#38bdf8` / `#0284c7`) and warm gold (`#f2dd7c` / `#eab308`).
-  - Smooth compositor-driven `scaleY` CSS animation that rests gracefully when paused and animates when playing.
+### 2.2 Central Sunburst Medallion (Play / Pause)
+- **Central Focus**: A circular golden chakra/mandala halo surrounding the play/pause button.
+- **State Changes**:
+  - *Playing*: Medallion glows with a warm sapphire & gold aura (`drop-shadow(0 0 10px rgba(242, 221, 124, 0.75))`) and subtle slow rotation/pulsing rhythm.
+  - *Paused*: Soft metallic gold sheen.
+- **Icons**: Custom sharp, royal Indian stylized Play and Pause vectors with diamond cuts.
+
+### 2.3 Flanking Transport Controls (Prev & Next)
+- **Vectors**: Custom carved arrowhead glyphs with toran diamond notches.
+- **Interactions**: Tactile active press response (`transform: scale(0.88)`) with shimmering cyan-gold spark.
+
+### 2.4 Ultra-Refined Micro-Equalizer (`.songWave`)
+- **Integration**: Refined, hairline soundwave array recessed gracefully along the lower trim with rounded tops, glowing from royal cyan (`#38bdf8`) into warm imperial gold (`#f2dd7c`), ensuring zero visual clutter behind icons.
 
 ---
 
-## 3. User Flow & Interactions
-1. **Initial State**: Player rests elegantly on top-left of mobile viewport in idle/playing state.
-2. **Scroll Interaction**: Automatically animates smoothly upward with spring physics alongside the navbar when scrolling down, and glides back into view when scrolling up or at top of page.
-3. **Play/Pause Toggle**: Instant audio toggle via Zustand music store with reactive visualizer bar animation trigger.
-4. **Track Navigation**: Previous/Next triggers track skip in the store with immediate haptic-like button scaling feedback.
-5. **Touch Ergonomics**: Minimum 40px+ touch target heights with `-webkit-tap-highlight-color: transparent` to prevent mobile browser tap flashes.
+## 3. Component Flow & Interactions
+- Seamless sync with navigation scroll physics.
+- Haptic-like visual scaling and zero tap highlight latency.

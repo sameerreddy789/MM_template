@@ -412,43 +412,167 @@ export default function LandingRevamp({
             style={{ pointerEvents: isNavVisible ? "auto" : "none" }}
           >
             <div className={styles.playerMain}>
+              {/* Ornate Indian decorative background frame / filigree SVG */}
+              <div className={styles.mobileOrnateFrame} aria-hidden="true">
+                <svg
+                  viewBox="0 0 160 44"
+                  className={styles.ornateFrameSvg}
+                  preserveAspectRatio="none"
+                >
+                  <defs>
+                    <linearGradient id="playerGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#f59e0b" />
+                      <stop offset="50%" stopColor="#fff7d6" />
+                      <stop offset="100%" stopColor="#c0b063" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Left Lotus / Arch Finial Motif */}
+                  <path
+                    d="M 12 22 C 8 16, 2 20, 2 22 C 2 24, 8 28, 12 22 Z"
+                    fill="url(#playerGoldGrad)"
+                    opacity="0.85"
+                  />
+                  <circle cx="8" cy="22" r="1.5" fill="#38bdf8" />
+
+                  {/* Right Lotus / Arch Finial Motif */}
+                  <path
+                    d="M 148 22 C 152 16, 158 20, 158 22 C 158 24, 152 28, 148 22 Z"
+                    fill="url(#playerGoldGrad)"
+                    opacity="0.85"
+                  />
+                  <circle cx="152" cy="22" r="1.5" fill="#38bdf8" />
+
+                  {/* Decorative Dotted Gold Filigree Borders */}
+                  <line
+                    x1="20"
+                    y1="3"
+                    x2="140"
+                    y2="3"
+                    stroke="url(#playerGoldGrad)"
+                    strokeWidth="1"
+                    strokeDasharray="2 3"
+                    opacity="0.75"
+                  />
+                  <line
+                    x1="20"
+                    y1="41"
+                    x2="140"
+                    y2="41"
+                    stroke="url(#playerGoldGrad)"
+                    strokeWidth="1"
+                    strokeDasharray="2 3"
+                    opacity="0.75"
+                  />
+
+                  {/* Diamond Toran Accents at Top & Bottom Centers */}
+                  <polygon points="80,1 82.5,3.5 80,6 77.5,3.5" fill="#38bdf8" />
+                  <polygon points="80,38 82.5,40.5 80,43 77.5,40.5" fill="#38bdf8" />
+                </svg>
+              </div>
+
+              {/* Prev Button with Ornate Indian Arrow */}
               <button
-                className={styles.playBtn}
+                className={`${styles.playBtn} ${styles.prevBtn}`}
                 onClick={onPrev}
                 aria-label="Previous track"
               >
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <rect x="7" y="6" width="2" height="12" />
-                  <polygon points="17,6 9,12 17,18" />
+                <svg viewBox="0 0 24 24" fill="none" className={styles.btnSvg}>
+                  <path
+                    d="M6 5V19M6 12L17 5V19L6 12Z"
+                    fill="currentColor"
+                    stroke="currentColor"
+                    strokeWidth="0.5"
+                    strokeLinejoin="round"
+                  />
+                  <polygon points="12,12 14,10 14,14" fill="#08142a" />
                 </svg>
               </button>
-              <div className={styles.verticalDivider} />
+
+              {/* Ornate Divider with Diamond Center */}
+              <div className={styles.verticalDivider}>
+                <div className={styles.dividerDiamond} />
+              </div>
+
+              {/* Center Play/Pause Button with Sunburst Medallion */}
               <button
-                className={styles.playBtn}
+                className={`${styles.playBtn} ${styles.centerPlayBtn} ${
+                  isPlaying ? styles.isPlaying : ""
+                }`}
                 onClick={onToggle}
                 aria-label={isPlaying ? "Pause music" : "Play music"}
                 aria-pressed={isPlaying}
               >
+                <div className={styles.medallionRing} aria-hidden="true">
+                  <svg viewBox="0 0 40 40" className={styles.medallionSvg}>
+                    <circle
+                      cx="20"
+                      cy="20"
+                      r="18"
+                      stroke="url(#playerGoldGrad)"
+                      strokeWidth="1"
+                      strokeDasharray="2 2"
+                      fill="none"
+                      opacity="0.8"
+                    />
+                    <circle
+                      cx="20"
+                      cy="20"
+                      r="15"
+                      stroke="#38bdf8"
+                      strokeWidth="0.8"
+                      fill="none"
+                      opacity="0.5"
+                    />
+                    {/* 4 Cardinal Sunburst Diamonds */}
+                    <polygon points="20,1 21.5,3.5 20,5 18.5,3.5" fill="#f59e0b" />
+                    <polygon points="20,35 21.5,37.5 20,39 18.5,37.5" fill="#f59e0b" />
+                    <polygon points="1,20 3.5,21.5 5,20 3.5,18.5" fill="#f59e0b" />
+                    <polygon points="35,20 37.5,21.5 39,20 37.5,18.5" fill="#f59e0b" />
+                  </svg>
+                </div>
+
                 {isPlaying ? (
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="6" y="5" width="4" height="14" />
-                    <rect x="14" y="5" width="4" height="14" />
+                  <svg viewBox="0 0 24 24" fill="none" className={styles.btnSvg}>
+                    <rect x="6.5" y="5.5" width="3.5" height="13" rx="1.75" fill="currentColor" />
+                    <rect x="14" y="5.5" width="3.5" height="13" rx="1.75" fill="currentColor" />
+                    <circle cx="8.25" cy="12" r="0.8" fill="#08142a" />
+                    <circle cx="15.75" cy="12" r="0.8" fill="#08142a" />
                   </svg>
                 ) : (
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <polygon points="8,5 19,12 8,19" />
+                  <svg viewBox="0 0 24 24" fill="none" className={styles.btnSvg}>
+                    <path
+                      d="M8 5.5V18.5L18.5 12L8 5.5Z"
+                      fill="currentColor"
+                      stroke="currentColor"
+                      strokeWidth="0.5"
+                      strokeLinejoin="round"
+                    />
+                    <circle cx="11" cy="12" r="1" fill="#08142a" />
                   </svg>
                 )}
               </button>
-              <div className={styles.verticalDivider} />
+
+              {/* Ornate Divider with Diamond Center */}
+              <div className={styles.verticalDivider}>
+                <div className={styles.dividerDiamond} />
+              </div>
+
+              {/* Next Button with Ornate Indian Arrow */}
               <button
-                className={styles.playBtn}
+                className={`${styles.playBtn} ${styles.nextBtn}`}
                 onClick={onNext}
                 aria-label="Next track"
               >
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <polygon points="7,6 15,12 7,18" />
-                  <rect x="15" y="6" width="2" height="12" />
+                <svg viewBox="0 0 24 24" fill="none" className={styles.btnSvg}>
+                  <path
+                    d="M18 5V19M18 12L7 5V19L18 12Z"
+                    fill="currentColor"
+                    stroke="currentColor"
+                    strokeWidth="0.5"
+                    strokeLinejoin="round"
+                  />
+                  <polygon points="12,12 10,10 10,14" fill="#08142a" />
                 </svg>
               </button>
 
