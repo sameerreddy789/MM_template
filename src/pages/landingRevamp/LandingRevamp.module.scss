@@ -364,9 +364,21 @@ body {
       height: 40px;
       transform: scale(1.05);
 
-      @media screen and (max-width: 730px) {
-        transform: scale(0.92);
-        transform-origin: left center;
+      @media screen and (max-width: 730px), (aspect-ratio < 8/12) {
+        transform: none;
+        clip-path: none;
+        border-radius: 9999px;
+        overflow: hidden;
+        height: 42px;
+        padding: 0 8px;
+        background: linear-gradient(135deg, rgba(8, 20, 42, 0.88) 0%, rgba(12, 28, 58, 0.82) 100%);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(242, 221, 124, 0.6);
+        box-shadow: 
+          0 4px 16px rgba(0, 0, 0, 0.55),
+          0 0 12px rgba(56, 189, 248, 0.22),
+          inset 0 0 10px rgba(242, 221, 124, 0.12);
       }
 
       .verticalDivider {
@@ -378,6 +390,14 @@ body {
         // Above the visualiser layer
         position: relative;
         z-index: 1;
+
+        @media screen and (max-width: 730px), (aspect-ratio < 8/12) {
+          width: 1px;
+          height: 20px;
+          margin: 0 4px;
+          background: linear-gradient(180deg, rgba(242, 221, 124, 0.15), rgba(242, 221, 124, 0.6), rgba(56, 189, 248, 0.35));
+          box-shadow: 0 0 4px rgba(56, 189, 248, 0.25);
+        }
       }
 
       .playBtn {
@@ -393,6 +413,7 @@ body {
         // Above the visualiser layer
         position: relative;
         z-index: 1;
+        -webkit-tap-highlight-color: transparent;
 
         svg {
           width: 20px;
@@ -404,11 +425,26 @@ body {
           transform: scale(1.1);
           filter: brightness(1.3);
         }
+
+        @media screen and (max-width: 730px), (aspect-ratio < 8/12) {
+          padding: 6px 8px;
+          color: #f2dd7c;
+
+          svg {
+            width: 18px;
+            height: 18px;
+            filter: drop-shadow(0 0 4px rgba(242, 221, 124, 0.5));
+          }
+
+          &:active {
+            transform: scale(0.88);
+            filter: brightness(1.4) drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
+          }
+        }
       }
 
       // Background visualiser: fills the frame behind the transport controls
-      // rather than sitting in the flex row. .playerMain's clip-path trims it to
-      // the bevelled frame shape, so no extra masking is needed.
+      // rather than sitting in the flex row.
       .songWave {
         position: absolute;
         inset: 0;
@@ -422,6 +458,11 @@ body {
         pointer-events: none;
         // Low enough to sit under the icons as texture rather than competing.
         opacity: 0.3;
+
+        @media screen and (max-width: 730px), (aspect-ratio < 8/12) {
+          padding: 0 10px 5px;
+          opacity: 0.35;
+        }
 
         span {
           display: block;
@@ -438,6 +479,17 @@ body {
           // When playback stops the animation is removed and each bar eases back
           // down to the flat idle state instead of snapping.
           transition: transform 0.4s ease;
+
+          @media screen and (max-width: 730px), (aspect-ratio < 8/12) {
+            &:nth-child(odd) {
+              background: #38bdf8;
+              box-shadow: 0 0 5px rgba(56, 189, 248, 0.75);
+            }
+            &:nth-child(even) {
+              background: #f2dd7c;
+              box-shadow: 0 0 5px rgba(242, 221, 124, 0.65);
+            }
+          }
         }
 
         // Per-bar duration and delay come from inline styles (see WAVE_BARS) so

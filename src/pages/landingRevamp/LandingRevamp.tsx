@@ -412,7 +412,11 @@ export default function LandingRevamp({
             style={{ pointerEvents: isNavVisible ? "auto" : "none" }}
           >
             <div className={styles.playerMain}>
-              <button className={styles.playBtn} onClick={onPrev}>
+              <button
+                className={styles.playBtn}
+                onClick={onPrev}
+                aria-label="Previous track"
+              >
                 <svg viewBox="0 0 24 24" fill="currentColor">
                   <rect x="7" y="6" width="2" height="12" />
                   <polygon points="17,6 9,12 17,18" />
@@ -437,7 +441,11 @@ export default function LandingRevamp({
                 )}
               </button>
               <div className={styles.verticalDivider} />
-              <button className={styles.playBtn} onClick={onNext}>
+              <button
+                className={styles.playBtn}
+                onClick={onNext}
+                aria-label="Next track"
+              >
                 <svg viewBox="0 0 24 24" fill="currentColor">
                   <polygon points="7,6 15,12 7,18" />
                   <rect x="15" y="6" width="2" height="12" />
