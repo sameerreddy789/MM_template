@@ -157,8 +157,8 @@ Two paths are configured:
 ## Contributors
 
 - **Monish Reddy**
-- Vedium Sameer Reddy
-- chaitanya03456
+- **Vedium Sameer Reddy**
+- **Krishna Chaitanya Kakucham**
 
 ---
 
