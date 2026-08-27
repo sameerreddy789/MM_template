@@ -36,51 +36,53 @@ export default function Navbar({
   // Published to the store so the music player can hide alongside the header.
   const navShow = useNavVisibilityStore((state) => state.isNavVisible);
   const setNavShow = useNavVisibilityStore((state) => state.setNavVisible);
-  const lastScrollY = useRef<number>(0);
 
   useEffect(() => {
+    let lastY = window.scrollY;
+    let accumulatedDelta = 0;
     let ticking = false;
-    const threshold = 20;
-
-    const isPhone = () =>
-      window.matchMedia("(max-width: 1200px) and (max-aspect-ratio: 1.45)")
-        .matches;
 
     const handleScroll = () => {
-      if (isPhone()) {
-        setNavShow(true);
-        return;
-      }
-
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const currentY = window.scrollY;
-          const diff = currentY - lastScrollY.current;
+          const delta = currentY - lastY;
+          lastY = currentY;
 
-          if (diff > threshold && currentY > 80) {
+          // Always visible at the very top of the page
+          if (currentY <= 40) {
+            accumulatedDelta = 0;
+            setNavShow(true);
+            ticking = false;
+            return;
+          }
+
+          // Reset accumulator on direction change
+          if ((delta > 0 && accumulatedDelta < 0) || (delta < 0 && accumulatedDelta > 0)) {
+            accumulatedDelta = 0;
+          }
+
+          accumulatedDelta += delta;
+
+          // Scrolling down accumulated past threshold
+          if (accumulatedDelta > 8 && currentY > 40) {
             setNavShow(false);
-          } else if (diff < 9 - threshold) {
+          }
+          // Scrolling up accumulated past threshold
+          else if (accumulatedDelta < -8) {
             setNavShow(true);
           }
 
-          lastScrollY.current = currentY;
           ticking = false;
         });
         ticking = true;
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
-    const handleResize = () => {
-      if (isPhone()) {
-        setNavShow(true);
-      }
-    };
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleResize);
     };
   }, [setNavShow]);
 
@@ -158,9 +160,10 @@ export default function Navbar({
 
   return (
     <motion.nav
-      initial={{ y: 0 }}
-      animate={{ y: navShow ? 0 : -120 }}
+      initial={{ y: 0, opacity: 1 }}
+      animate={{ y: navShow ? 0 : -140, opacity: navShow ? 1 : 0 }}
       transition={{ type: "spring", stiffness: 80, damping: 20 }}
+      style={{ pointerEvents: navShow ? "auto" : "none" }}
       ref={navRef}
       className={`${styles.nav} ${
         variant === "about" ? styles.aboutVariant : ""

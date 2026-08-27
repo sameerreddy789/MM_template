@@ -54,7 +54,7 @@ const imagesToPreload = [
   "/svgs/aboutus/linkedin.svg",
   "/svgs/aboutus/yticon.svg",
   "/svgs/aboutus/abtus.svg",
-  "/images/mediaPartners/bg1.webp",
+  "/images/mediaPartners/bg2.png",
 ];
 
 const soundsToPreload: string[] = [];
