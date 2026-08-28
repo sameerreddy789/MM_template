@@ -98,7 +98,22 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
       return () => subscription.unsubscribe();
     }, [watch]);
 
-    const onSubmit = (data: FormData) => {
+    const loadRazorpayScript = (): Promise<boolean> => {
+      return new Promise((resolve) => {
+        if (typeof (window as any).Razorpay !== "undefined") {
+          resolve(true);
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+      });
+    };
+
+    const onSubmit = async (data: FormData) => {
       const registrationPayload = {
         ...data,
         is_mbu: "",
@@ -114,6 +129,7 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
       // =====================================================
       // Direct Razorpay Checkout Integration
       // =====================================================
+      await loadRazorpayScript();
       if (typeof (window as any).Razorpay !== "undefined") {
         const options: any = {
           key: keyId,
