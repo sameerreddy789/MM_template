@@ -273,12 +273,14 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
               <div className={styles.name}>
                 <div className={styles.sameline}>
                   <img src={Left} alt="Glow" />
-                  <label>Full Name</label>
+                  <label htmlFor="reg-name">Full Name</label>
                   <img src={Right} alt="Glow" />
                 </div>
                 <div className={styles.clouds}>
                   <img src={Field} alt="Field" className={styles.fieldImg} />
                   <input
+                    id="reg-name"
+                    autoComplete="name"
                     placeholder="Enter your full name"
                     {...register("name")}
                   />
@@ -290,12 +292,13 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
               <div className={styles.email}>
                 <div className={styles.sameline}>
                   <img src={Left} alt="Glow" />
-                  <label>Email Address</label>
+                  <label htmlFor="reg-email">Email Address</label>
                   <img src={Right} alt="Glow" />
                 </div>
                 <div className={styles.clouds}>
                   <img src={Field} alt="Field" className={styles.fieldImg} />
                   <input
+                    id="reg-email"
                     type="email"
                     autoComplete="email"
                     placeholder="Enter your email address"
@@ -309,12 +312,14 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
               <div className={styles.rollNo}>
                 <div className={styles.sameline}>
                   <img src={Left} alt="Glow" />
-                  <label>Roll Number</label>
+                  <label htmlFor="reg-rollno">Roll Number</label>
                   <img src={Right} alt="Glow" />
                 </div>
                 <div className={styles.clouds}>
                   <img src={Field} alt="Field" className={styles.fieldImg} />
                   <input
+                    id="reg-rollno"
+                    autoComplete="off"
                     placeholder="Enter your roll number"
                     {...register("roll_no")}
                   />
@@ -326,12 +331,14 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
               <div className={styles.college}>
                 <div className={styles.sameline}>
                   <img src={Left} alt="Glow" />
-                  <label>College Name</label>
+                  <label htmlFor="reg-college">College Name</label>
                   <img src={Right} alt="Glow" />
                 </div>
                 <div className={styles.clouds}>
                   <img src={Field} alt="Field" className={styles.fieldImg} />
                   <input
+                    id="reg-college"
+                    autoComplete="organization"
                     placeholder="Enter your college name"
                     {...register("college_id")}
                   />
@@ -343,13 +350,15 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
               <div className={styles.mobile}>
                 <div className={styles.sameline}>
                   <img src={Left} alt="Glow" />
-                  <label>Phone Number (WhatsApp)</label>
+                  <label htmlFor="reg-phone">Phone Number (WhatsApp)</label>
                   <img src={Right} alt="Glow" />
                 </div>
                 <div className={styles.clouds}>
                   <img src={Field} alt="Field" className={styles.fieldImg} />
                   <input
+                    id="reg-phone"
                     type="tel"
+                    autoComplete="tel"
                     placeholder="10-digit WhatsApp number"
                     {...register("phone")}
                   />
