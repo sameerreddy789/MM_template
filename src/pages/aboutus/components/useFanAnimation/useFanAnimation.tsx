@@ -170,7 +170,6 @@ export function useFanAnimation(
     };
 
     const stopSpawning = () => {
-      console.log("Cleared interval: ", intervalId);
       if (intervalId) window.clearInterval(intervalId);
     };
 

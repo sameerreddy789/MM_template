@@ -70,7 +70,6 @@ export default function App() {
       ? location.pathname.replace("/", "")
       : "home"
   );
-  console.log("Current Page:", currentPage);
 
   const [doorPhase, setDoorPhase] = useState<
     "idle" | "closing" | "waiting" | "opening"
