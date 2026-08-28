@@ -2,9 +2,14 @@ import styles from "./Events.module.scss";
 import Text from "/images/events/text.png";
 import dance from "/images/events/dancef.webp";
 import drama from "/images/events/dramaf.webp";
+import dramaMobile from "/images/events/DramaMobilef.png";
 import music from "/images/events/music1.webp";
 import misc from "/images/events/misc1.webp";
 import photography from "/images/events/proshow.webp";
+import danceMobile from "/images/events/DanceMobilef.png";
+import musicMobile from "/images/events/MusicMobilef.png";
+import miscMobile from "/images/events/MiscMobilef.png";
+import photographyMobile from "/images/events/PhotographyMobilef.png";
 import Eventspage from "./components/Eventspage";
 import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
@@ -28,19 +33,21 @@ interface FanImage {
 const fanImages: FanImage[] = [
   {
     src: drama,
+    mobileSrc: dramaMobile,
     alt: "Technoholic",
     className: styles.quizzes,
     shape: "quizzes"
   },
-  { src: music, alt: "Music", className: styles.music, shape: "music" },
+  { src: music, mobileSrc: musicMobile, alt: "Music", className: styles.music, shape: "music" },
   {
     src: photography,
+    mobileSrc: photographyMobile,
     alt: "Pro Shows",
     className: styles.photography,
     shape: "photography"
   },
-  { src: dance, alt: "Kalakshetra", className: styles.dance, shape: "dance" },
-  { src: misc, alt: "Spot Events", className: styles.misc, shape: "misc" },
+  { src: dance, mobileSrc: danceMobile, alt: "Kalakshetra", className: styles.dance, shape: "dance" },
+  { src: misc, mobileSrc: miscMobile, alt: "Spot Events", className: styles.misc, shape: "misc" },
 ];
 // const speed = 500; // constant speed in pixels/second
 // delay factor per degree
@@ -303,7 +310,7 @@ const Events: React.FC = () => {
               <EventFrame
                 key={i}
                 shape={img.shape}
-                frameSrc={img.src}
+                frameSrc={isMobile && img.mobileSrc ? img.mobileSrc : img.src}
                 innerImageSrc={img.innerImageSrc}
                 objectPosition={img.objectPosition}
                 scale={img.scale}
