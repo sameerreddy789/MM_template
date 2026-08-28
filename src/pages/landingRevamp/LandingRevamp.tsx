@@ -745,7 +745,21 @@ export default function LandingRevamp({
         </div>
       </main>
       <Helmet>
-        <title>MohanaMantra 2K26 | MBU</title>
+        <title>MohanaMantra 2K26 | MBU — Grand Cultural Festival</title>
+        <meta name="description" content="MohanaMantra 2K26 is the flagship cultural festival of Mohan Babu University (MBU). Experience music, dance, drama, tech events, pro shows, and more." />
+        <link rel="canonical" href="https://www.mohanamantra.com/" />
+        <meta name="robots" content="index, follow" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="MohanaMantra 2K26 | MBU — Grand Cultural Festival" />
+        <meta property="og:description" content="MohanaMantra 2K26 is the flagship cultural festival of Mohan Babu University. Music, dance, drama, tech, and pro shows await you." />
+        <meta property="og:image" content="https://www.mohanamantra.com/images/logo.webp" />
+        <meta property="og:url" content="https://www.mohanamantra.com/" />
+        <meta property="og:site_name" content="MohanaMantra 2K26 | MBU" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="MohanaMantra 2K26 | MBU — Grand Cultural Festival" />
+        <meta name="twitter:description" content="The flagship cultural festival of Mohan Babu University. Music, dance, drama, tech, and pro shows." />
+        <meta name="twitter:image" content="https://www.mohanamantra.com/images/logo.webp" />
+        <meta name="twitter:site" content="@Mohana_Mantra" />
       </Helmet>
     </>
   );

@@ -1,5 +1,4 @@
-import Back from "/images/events/backg.webp";
-import MobileBack from "/images/events/evenback.webp";
+import Back from "/images/events/backg1.png";
 import styles from "./Eventspage.module.scss";
 import cl1 from "/svgs/events/cl1.svg";
 import cl2 from "/svgs/events/cl2.svg";
@@ -52,7 +51,7 @@ const events = useFetchEvents(category);
       <div
         className={styles.page}
         style={{
-          backgroundImage: `url("${isMobile ? MobileBack : Back}")`,
+          backgroundImage: `url("${Back}")`,
         }}
       >
         <img src={cl1} alt="Clouds" className={styles.cl1} />

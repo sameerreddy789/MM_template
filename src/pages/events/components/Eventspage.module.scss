@@ -745,18 +745,18 @@
     border-image-source: url('/images/events/image.png');
     border-image-slice: 40;
     box-sizing: border-box;
-    width: 60vw;
-    height: 50svh;
+    width: min(60vw, 850px);
+    height: min(52svh, 480px);
+    aspect-ratio: 16 / 9;
     display: flex;
     justify-content: center;
     align-items: center;
 
     .imagenewFull, .imagenewpreviewFull {
       position: absolute;
-      width: calc(100% - 10px);
-      height: calc(100% - 10px);
-      object-fit: contain;
-      padding: 4px;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
   }
 
@@ -917,7 +917,7 @@
       height: 100%;
       max-width: 100%;
       max-height: 100%;
-      object-fit: contain;
+      object-fit: cover;
       filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.7));
     }
   }

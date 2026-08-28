@@ -2,16 +2,9 @@ import styles from "./Events.module.scss";
 import Text from "/images/events/text.png";
 import dance from "/images/events/dancef.webp";
 import drama from "/images/events/dramaf.webp";
-import dramaMobile from "/images/events/DramaMobilef.png";
 import music from "/images/events/music1.webp";
 import misc from "/images/events/misc1.webp";
 import photography from "/images/events/proshow.webp";
-// import quizzes from "/images/events/quizzes.webp";
-import danceMobile from "/images/events/DanceMobilef.png";
-import musicMobile from "/images/events/MusicMobilef.png";
-import miscMobile from "/images/events/MiscMobilef.png";
-import photographyMobile from "/images/events/PhotographyMobilef.png";
-// import quizzesMobile from "/images/events/QuizzesMobile.png";
 import Eventspage from "./components/Eventspage";
 import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
@@ -35,21 +28,19 @@ interface FanImage {
 const fanImages: FanImage[] = [
   {
     src: drama,
-    mobileSrc: dramaMobile,
     alt: "Technoholic",
     className: styles.quizzes,
     shape: "quizzes"
   },
-  { src: music, mobileSrc: musicMobile, alt: "Misc", className: styles.music, shape: "music" },
+  { src: music, alt: "Music", className: styles.music, shape: "music" },
   {
     src: photography,
-    mobileSrc: photographyMobile,
     alt: "Pro Shows",
     className: styles.photography,
     shape: "photography"
   },
-  { src: dance, mobileSrc: danceMobile, alt: "Kalakshetra", className: styles.dance, shape: "dance" },
-  { src: misc, mobileSrc: miscMobile, alt: "Spot Events", className: styles.misc, shape: "misc" },
+  { src: dance, alt: "Kalakshetra", className: styles.dance, shape: "dance" },
+  { src: misc, alt: "Spot Events", className: styles.misc, shape: "misc" },
 ];
 // const speed = 500; // constant speed in pixels/second
 // delay factor per degree
@@ -110,16 +101,14 @@ const Events: React.FC = () => {
   const [showImages, setShowImages] = useState(true);
   const [showEventPage, setShowEventPage] = useState(false);
   const [foldFan, setFoldFan] = useState(false);
-  // const [origins, setOrigins] = useState<{ x: number; y: number }[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
-  // const [durations, setDurations] = useState<number[]>([]);
-  // const [delays, setDelays] = useState<number[]>([]);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const EventRef = useRef<HTMLDivElement>(null);
   const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
+
   useEffect(() => {
-    if (!canHover) return; // skip for mobile/touch
+    if (!canHover) return;
 
     const cleanups: (() => void)[] = [];
 
@@ -132,8 +121,7 @@ const Events: React.FC = () => {
         duration: 0.2,
         ease: "power1.out",
         paused: true,
-        // overwrite: true,
-        startAt: { filter: "saturate(1) " }, // initial value
+        startAt: { filter: "saturate(1)" },
       });
 
       const onEnter = () => hoverTween.play();
@@ -142,44 +130,29 @@ const Events: React.FC = () => {
       img.addEventListener("mouseenter", onEnter);
       img.addEventListener("mouseleave", onLeave);
       img.addEventListener("click", onLeave);
-      // push cleanup for this img
+
       cleanups.push(() => {
         img.removeEventListener("mouseenter", onEnter);
         img.removeEventListener("mouseleave", onLeave);
       });
     });
 
-    // Cleanup all listeners
     return () => {
       cleanups.forEach((fn) => fn());
     };
   }, [canHover]);
 
   useEffect(() => {
-    // const radius = isMobile ? window.innerHeight / 2 : window.innerWidth / 2;
-
-    // const delayAngleFactor = isMobile ? 0.0016 : 0.01505;
-    // const delayAngleFactor = 1000;
-    // const speed = isMobile ? 800 : 1000;
-    // const time= 2;
-    // const computedDurations = rotationAngles.map((angle) => {
-    //   // const angleRad = Math.abs((angle * Math.PI) / 180);
-    //   // const arcLength = angleRad * radius;
-    //   return  time;
-    // });
-
-    // setDurations([2,2,2,2,2]);
-
-    // const angleDiffs = rotationAngles.map((angle) =>
-    //   Math.abs(angle - rotationAngles[0])
-    // );
-    // const maxDiff = Math.max(...angleDiffs);
-    // const computedDelays = angleDiffs.map(
-    //   (diff) => 0
-    //   // (diff) => diff + 10000
-    // );
-
-    // setDelays([0,0,0,0,0]);
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      imageRefs.current.forEach((img) => {
+        if (img) {
+          gsap.killTweensOf(img);
+        }
+      });
+    };
   }, []);
 
   const handleImageClick = (alt: string) => {
@@ -188,12 +161,17 @@ const Events: React.FC = () => {
     imageRefs.current.forEach((img) => {
       if (!img) return;
       gsap.killTweensOf(img);
-      img.style.filter = "saturate(1) "; // reset if needed
-      img.style.scale = "1";  // optional: reset transforms
+      img.style.filter = "saturate(1)";
+      img.style.scale = "1";
     });
-    setTimeout(() => {
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
       setShowImages(false);
-    }, 2000);
+    }, 1800);
+
     setShowEventPage(true);
 
     const mm = gsap.matchMedia();
@@ -217,24 +195,16 @@ const Events: React.FC = () => {
             };
           })();
 
-          //  reset transforms before animation
           gsap.killTweensOf(imgEl);
           gsap.set(imgEl, { scale: 1 });
-
-
           imgEl.style.transformOrigin = `${origin.x}px ${origin.y}px`;
 
           gsap.to(imgEl, {
             rotate: rotationAngles[orderIndex],
-            duration: 2,
-            delay: 10,
-            scaleX: [1, 2].includes(originalIndex) ? 0.2 : 1, // X scale for index 1,2,3
+            duration: 1.7,
+            scaleX: [1, 2].includes(originalIndex) ? 0.2 : 1,
             scaleY: [0, 3, 4].includes(originalIndex) ? 0.2 : 1,
-            // pointerEvents:"none",
-            // scale:"1",
-            // filter:"drop-shadow(0px 0px 30px rgba(0, 0,  0,1))",
             ease: "linear",
-            // zIndex: alt === fanImages[originalIndex].alt ? 5 : 2, // clicked image on top
           });
         });
       });
@@ -264,11 +234,9 @@ const Events: React.FC = () => {
           gsap.to(imgEl, {
             rotate: rotationAngles[i],
             duration: 1.7,
-            delay: 10,
-            scaleX: [1, 2, 3].includes(i) ? 0.2 : 1, // X scale for index 1,2,3
+            scaleX: [1, 2, 3].includes(i) ? 0.2 : 1,
             scaleY: [0, 4].includes(i) ? 0.2 : 1,
             ease: "linear",
-            // zIndex: 2,
           });
         });
       });
@@ -276,6 +244,15 @@ const Events: React.FC = () => {
   };
 
   const handleBackFromCategory = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    imageRefs.current.forEach((img) => {
+      if (!img) return;
+      gsap.killTweensOf(img);
+      gsap.set(img, { clearProps: "all" });
+    });
     setShowEventPage(false);
     setSelectedCategory(null);
     setFoldFan(false);
@@ -292,9 +269,21 @@ const Events: React.FC = () => {
         <title>Events | MohanaMantra 2K26 | MBU</title>
         <meta
           name="description"
-          content="Explore the diverse events at MohanaMantra 2K26 including Drama, Music, Dance, Photography, and more!"
+          content="Explore the diverse events at MohanaMantra 2K26 — Kalakshetra, Technoholic, Music, Pro Shows, and Spot Events across dance, drama, tech, and more."
         />
         <link rel="canonical" href="https://www.mohanamantra.com/events" />
+        <meta name="robots" content="index, follow" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Events | MohanaMantra 2K26 | MBU" />
+        <meta property="og:description" content="Explore Kalakshetra, Technoholic, Music, Pro Shows, and Spot Events at MohanaMantra 2K26." />
+        <meta property="og:image" content="https://www.mohanamantra.com/images/logo.webp" />
+        <meta property="og:url" content="https://www.mohanamantra.com/events" />
+        <meta property="og:site_name" content="MohanaMantra 2K26 | MBU" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Events | MohanaMantra 2K26 | MBU" />
+        <meta name="twitter:description" content="Kalakshetra, Technoholic, Music, Pro Shows & Spot Events at MohanaMantra 2K26." />
+        <meta name="twitter:image" content="https://www.mohanamantra.com/images/logo.webp" />
+        <meta name="twitter:site" content="@Mohana_Mantra" />
       </Helmet>
       <BreadCrumb data={breadcrumbJsonLd} />
       {!showEventPage && (
@@ -314,7 +303,7 @@ const Events: React.FC = () => {
               <EventFrame
                 key={i}
                 shape={img.shape}
-                frameSrc={isMobile && img.mobileSrc ? img.mobileSrc : img.src}
+                frameSrc={img.src}
                 innerImageSrc={img.innerImageSrc}
                 objectPosition={img.objectPosition}
                 scale={img.scale}

@@ -6,6 +6,7 @@ import Back from "/svgs/registration/back.svg";
 import { useContext, useEffect } from "react";
 import { navContext } from "../../App";
 import { motion, type Variants } from "framer-motion";
+import { Helmet } from "react-helmet-async";
 
 
 const mediaPatners = [
@@ -116,6 +117,23 @@ const MediaPatners = () => {
         <img src={Back} alt="Back Button" />
       </motion.button>
 
+      <Helmet>
+        <title>Media Partners | MohanaMantra 2K26 | MBU</title>
+        <meta name="description" content="Official media and vlogging partners of MohanaMantra 2K26, the grand cultural festival at Mohan Babu University." />
+        <link rel="canonical" href="https://www.mohanamantra.com/mediaPartners" />
+        <meta name="robots" content="index, follow" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Media Partners | MohanaMantra 2K26 | MBU" />
+        <meta property="og:description" content="Official media and vlogging partners of MohanaMantra 2K26 at MBU." />
+        <meta property="og:image" content="https://www.mohanamantra.com/images/logo.webp" />
+        <meta property="og:url" content="https://www.mohanamantra.com/mediaPartners" />
+        <meta property="og:site_name" content="MohanaMantra 2K26 | MBU" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Media Partners | MohanaMantra 2K26 | MBU" />
+        <meta name="twitter:description" content="Official media partners of MohanaMantra 2K26 at MBU." />
+        <meta name="twitter:image" content="https://www.mohanamantra.com/images/logo.webp" />
+        <meta name="twitter:site" content="@Mohana_Mantra" />
+      </Helmet>
       <div className={styles.backgroundImage}>
         <img src={background} alt="background image" draggable={false} />
       </div>

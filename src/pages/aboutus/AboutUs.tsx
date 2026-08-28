@@ -106,7 +106,20 @@ const AboutUs = ({ isBackBtn = true }: AboutUsProps) => {
     <div>
       <Helmet>
         <title>About Us | MohanaMantra 2K26 | MBU</title>
+        <meta name="description" content="Learn about MohanaMantra 2K26, the flagship cultural festival of Mohan Babu University. Discover our history, vision, and the team behind the fest." />
+        <link rel="canonical" href="https://www.mohanamantra.com/aboutus" />
         <meta name="robots" content="index, follow" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="About Us | MohanaMantra 2K26 | MBU" />
+        <meta property="og:description" content="Learn about MohanaMantra 2K26, the flagship cultural festival of Mohan Babu University." />
+        <meta property="og:image" content="https://www.mohanamantra.com/images/logo.webp" />
+        <meta property="og:url" content="https://www.mohanamantra.com/aboutus" />
+        <meta property="og:site_name" content="MohanaMantra 2K26 | MBU" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="About Us | MohanaMantra 2K26 | MBU" />
+        <meta name="twitter:description" content="The story, vision, and team behind MohanaMantra 2K26 at MBU." />
+        <meta name="twitter:image" content="https://www.mohanamantra.com/images/logo.webp" />
+        <meta name="twitter:site" content="@Mohana_Mantra" />
       </Helmet>
       <div
         className={styles.AboutContainer}

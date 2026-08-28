@@ -6,7 +6,7 @@ import Registration from "./pages/registration/Registration";
 import DoorTransition from "./pages/components/page-transition/DoorTransition";
 import AboutUs from "./pages/aboutus/AboutUs";
 import Contact from "./pages/contact/ContactPage";
-import ComingSoon from "./pages/comingSoon/ComingSoon";
+
 import assetList from "./assetList";
 import useCanonicalUrl from "./UseCanonicalUrl";
 
@@ -62,13 +62,13 @@ export default function App() {
   ];
 
   const [currentPage, setCurrentPage] = useState<
-    (typeof pageList)[number] | "comingSoon"
+    (typeof pageList)[number]
   >(
     location.pathname === "/"
       ? "home"
       : pageList.includes(location.pathname.replace("/", ""))
       ? location.pathname.replace("/", "")
-      : "comingSoon"
+      : "home"
   );
   console.log("Current Page:", currentPage);
 
@@ -100,9 +100,7 @@ export default function App() {
     setCurrentPage(
       pageList.includes(path)
         ? (path as typeof currentPage)
-        : path === ""
-        ? "home"
-        : "comingSoon"
+        : "home"
     );
     setIsPreloading(Object.keys(assetList).includes(path));
   }, [location.pathname]);
@@ -232,20 +230,9 @@ export default function App() {
       {!isPreloading && currentPage === "contact" && <Contact />}
       {!isPreloading && currentPage === "brochure" && <Brochure />}
       {!isPreloading && currentPage === "gallery" && <Gallery />}
-      {!isPreloading && currentPage === "comingSoon" && <ComingSoon />}
       {!isPreloading && currentPage === "sponsors" && <Sponsors />}
       {!isPreloading && currentPage === "mediaPartners" && <MediaPatners />}
       {currentPage === "gatekeeper" && <Gatekeeper />}
-      {/* 
-      <Routes>
-        <Route path="/" element={null} errorElement={<ComingSoon />} />
-        <Route path="/events" element={null} errorElement={<ComingSoon />} />
-        <Route path="/register" element={null} />
-        <Route path="/events" element={null} />
-        <Route path="/contact" element={null} />
-        <Route path="/aboutus" element={null} />
-        <Route path="/comingSoon" element={null} />
-      </Routes> */}
     </navContext.Provider>
   );
 }
