@@ -234,8 +234,29 @@
   .registerContainer {
     margin: 0 0 5vw 0;
     width: 100%;
-    height: 100svh;
+    // Was `height: 100svh`. Stacked under the banner inside a viewport-height
+    // parent, a full-height container put its own bottom - and the pay button
+    // pinned to it - below the fold with nothing able to scroll there. It sizes to
+    // its content now and the page scrolls instead.
+    height: auto;
     position: relative;
+
+    // Keyboard clearance, added only while a field is focused.
+    //
+    // A phone keyboard hides roughly the bottom 40% of the screen. Where it only
+    // shrinks the visual viewport and leaves the layout viewport alone - iOS
+    // Safari's behaviour, and the fallback anywhere the viewport meta's
+    // interactive-widget key is ignored - the page's scroll range is unchanged, and
+    // measured against the last field that range comes up about 70px short. The
+    // browser then scrolls as far as it can and the WhatsApp field still sits
+    // behind the keyboard.
+    //
+    // Tying the slack to :focus-within means the scroll range grows exactly when
+    // the keyboard is up and collapses again afterwards, so the page does not
+    // carry 40svh of dead space below the pay button the rest of the time.
+    &:focus-within {
+      padding-bottom: 42svh;
+    }
 
     input::placeholder {
       font-size: max(14px, 2.8vw);
@@ -249,31 +270,20 @@
       font: 500 max(16px, 3.2vw) $regFont !important;
     }
 
+    // In the page flow now, not an absolutely positioned scroll box. The old
+    // `position: absolute; max-height: 62svh; overflow-y: scroll` set up a nested
+    // scroller whose own window started below the banner and so ran past the
+    // bottom of the screen, and its edge mask plus hidden scrollbar gave no hint
+    // that it was scrollable at all. The mask is dropped with it - fading the top
+    // and bottom of a region that no longer has its own edges just dimmed fields.
     .registrationForm {
-      max-height: 62svh;
-      bottom: auto;
-      top: 0%;
-      transform: translateY(0%);
-      overflow-y: scroll;
-      scrollbar-width: none;
+      position: static;
+      max-height: none;
+      overflow-y: visible;
+      transform: none;
       padding: 4vw 0;
-      &::-webkit-scrollbar {
-        display: none;
-      }
-      mask-image: linear-gradient(
-        to bottom,
-        transparent 0%,
-        #000 7%,
-        #000 93%,
-        transparent 100%
-      );
-      --webkit-mask-image: linear-gradient(
-        to bottom,
-        transparent 0%,
-        #000 7%,
-        #000 93%,
-        transparent 100%
-      );
+      mask-image: none;
+      --webkit-mask-image: none;
 
       .formColumns {
         flex-direction: column;
@@ -315,7 +325,15 @@
         }
       }
     }
+    // Follows the form down the page instead of being pinned to the bottom of a
+    // container taller than the screen, which is where it used to end up out of
+    // reach. `.registerContainer` centres its flex children, so dropping the
+    // `left: 50%` / `translateX(-50%)` pair keeps it centred; the hover and active
+    // states have to give up that same translate or they would shunt it sideways.
     .confirmButton {
+      position: static;
+      transform: none;
+      margin: 6vw 0 2vw 0;
       padding: 2vw 3vw;
       font-family: $primaryFont;
       font-size: max(16px, 3.6vw);
@@ -326,6 +344,14 @@
       min-width: unset;
       min-height: 48px;
       white-space: nowrap;
+
+      &:hover {
+        transform: scale(1.02);
+      }
+
+      &:active {
+        transform: scale(0.98);
+      }
     }
   }
 }
@@ -344,8 +370,23 @@
       font: 500 max(16px, 4.2vw) $regFont !important;
     }
     .registrationForm {
-      max-height: 75svh;
-      padding: 4vw 0 32vw 0;
+      // `max-height: 75svh` would re-clip the form that the wider mobile block
+      // just freed.
+      //
+      // The deep bottom padding here (18vw, then raised to 32vw in 205e0d5 to buy
+      // the form more clearance) goes with it. That padding was propping up the
+      // nested scroll box this rule used to describe: the form was an absolutely
+      // positioned `overflow-y: scroll` island and the pay button floated over its
+      // lower edge, so the only way to keep the last field clear of the button was
+      // to pad the scroller from the inside. The page scrolls as a document now and
+      // the button sits in the flow with its own margin, so that clearance comes
+      // from the layout instead, and 32vw would just be ~125px of dead space in the
+      // middle of the form. Keyboard clearance is handled by the :focus-within rule
+      // on .registerContainer above.
+      //
+      // The 4vw top padding is kept from 205e0d5.
+      max-height: none;
+      padding: 4vw 0 2vw 0;
 
       .formColumns {
         gap: 6vw;
@@ -388,7 +429,7 @@
     .confirmButton {
       width: 90vw;
       gap: 1.5vw;
-      bottom: 5vw;
+      margin: 8vw 0 2vw 0;
       padding: 2.8vw 3vw;
       font-family: $primaryFont;
       font-size: max(16px, 4.8vw);

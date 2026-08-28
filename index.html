@@ -10,7 +10,16 @@
       content="u_D4irk99rP4PM6hQYcHiNDbZAvwjoduuU3eZeo5hA8"
     />
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- interactive-widget=resizes-content: when the on-screen keyboard opens,
+         shrink the layout viewport rather than only the visual one. That is what
+         lets svh units and the page's scroll range react to the keyboard, so a
+         focused field can actually be scrolled clear of it - the registration form
+         depends on this on Android/Chrome. Browsers that do not support the key
+         ignore it and fall back to their own visual-viewport handling. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content"
+    />
     <meta name="application-name" content="MohanaMantra 2K26 | MBU" />
 
     <meta
