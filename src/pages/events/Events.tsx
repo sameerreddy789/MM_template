@@ -15,7 +15,7 @@ import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import TextMobile from "/images/events/TextMobile.png";
 import BackButton from "../components/backButton/BackButton";
-import { Helmet } from "react-helmet-async";
+import SEO from "../../components/SEO";
 import BreadCrumb from "../components/breadCrumb/BreadCrumb";
 import EventFrame from "./components/EventFrame/EventFrame";
 
@@ -76,13 +76,13 @@ const Events: React.FC = () => {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://www.mohanamantra.com/",
+        item: "https://mm-template.vercel.app/",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Events",
-        item: "https://www.mohanamantra.com/events",
+        item: "https://mm-template.vercel.app/events",
       },
     ],
   };
@@ -272,26 +272,11 @@ const Events: React.FC = () => {
       ref={EventRef}
     >
       <div className={styles.background}></div>
-      <Helmet>
-        <title>Events | MohanaMantra 2K26 | MBU</title>
-        <meta
-          name="description"
-          content="Explore the diverse events at MohanaMantra 2K26 — Kalakshetra, Technoholic, Music, Pro Shows, and Spot Events across dance, drama, tech, and more."
-        />
-        <link rel="canonical" href="https://www.mohanamantra.com/events" />
-        <meta name="robots" content="index, follow" />
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content="Events | MohanaMantra 2K26 | MBU" />
-        <meta property="og:description" content="Explore Kalakshetra, Technoholic, Music, Pro Shows, and Spot Events at MohanaMantra 2K26." />
-        <meta property="og:image" content="https://www.mohanamantra.com/images/logo.webp" />
-        <meta property="og:url" content="https://www.mohanamantra.com/events" />
-        <meta property="og:site_name" content="MohanaMantra 2K26 | MBU" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Events | MohanaMantra 2K26 | MBU" />
-        <meta name="twitter:description" content="Kalakshetra, Technoholic, Music, Pro Shows & Spot Events at MohanaMantra 2K26." />
-        <meta name="twitter:image" content="https://www.mohanamantra.com/images/logo.webp" />
-        <meta name="twitter:site" content="@Mohana_Mantra" />
-      </Helmet>
+      <SEO
+        title="Events | MohanaMantra 2K26 | MBU"
+        description="Explore the diverse events at MohanaMantra 2K26 — Kalakshetra, Technoholic, Music, Pro Shows, and Spot Events across dance, drama, tech, and more."
+        canonicalUrl="https://mm-template.vercel.app/events"
+      />
       <BreadCrumb data={breadcrumbJsonLd} />
       {!showEventPage && (
         <div>

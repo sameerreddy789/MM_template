@@ -1,5 +1,8 @@
 User-agent: *
 Allow: /
 Disallow: /gatekeeper
+Disallow: /gatekeeper/*
+Disallow: /scanner
+Disallow: /admin
 
-Sitemap: https://www.mohanamantra.com/sitemap.xml
+Sitemap: https://mm-template.vercel.app/sitemap.xml

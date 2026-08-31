@@ -21,7 +21,7 @@ import letter6 from "/svgs/aboutus/letter6.svg";
 import letter7 from "/svgs/aboutus/letter7.svg";
 import letter8 from "/svgs/aboutus/letter8.svg";
 import VideoMetaData from "./components/VideoMetaData";
-import { Helmet } from "react-helmet-async";
+import SEO from "../../components/SEO";
 import SocialLinks from "./components/SocialLinks/SocialLinks";
 import AboutText from "./components/AboutText/AboutText";
 import { useYouTubePlayer } from "./components/useYoutubePlayer/useYoutubePlayer";
@@ -104,23 +104,11 @@ const AboutUs = ({ isBackBtn = true }: AboutUsProps) => {
 
   return (
     <div>
-      <Helmet>
-        <title>About Us | MohanaMantra 2K26 | MBU</title>
-        <meta name="description" content="Learn about MohanaMantra 2K26, the flagship cultural festival of Mohan Babu University. Discover our history, vision, and the team behind the fest." />
-        <link rel="canonical" href="https://www.mohanamantra.com/aboutus" />
-        <meta name="robots" content="index, follow" />
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content="About Us | MohanaMantra 2K26 | MBU" />
-        <meta property="og:description" content="Learn about MohanaMantra 2K26, the flagship cultural festival of Mohan Babu University." />
-        <meta property="og:image" content="https://www.mohanamantra.com/images/logo.webp" />
-        <meta property="og:url" content="https://www.mohanamantra.com/aboutus" />
-        <meta property="og:site_name" content="MohanaMantra 2K26 | MBU" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="About Us | MohanaMantra 2K26 | MBU" />
-        <meta name="twitter:description" content="The story, vision, and team behind MohanaMantra 2K26 at MBU." />
-        <meta name="twitter:image" content="https://www.mohanamantra.com/images/logo.webp" />
-        <meta name="twitter:site" content="@Mohana_Mantra" />
-      </Helmet>
+      <SEO
+        title="About Us | MohanaMantra 2K26 | MBU"
+        description="Learn about MohanaMantra 2K26, the flagship cultural festival of Mohan Babu University. Discover our history, vision, and the team behind the fest."
+        canonicalUrl="https://mm-template.vercel.app/aboutus"
+      />
       <div
         className={styles.AboutContainer}
         ref={AboutRef}

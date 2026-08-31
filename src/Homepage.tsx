@@ -2,7 +2,7 @@
 import DrawingPreloader from "./pages/components/drawingPreloader/DrawingPreloader";
 import useOverlayStore from "./utils/store";
 import LandingRevamp from "./pages/landingRevamp/LandingRevamp";
-import { Helmet } from "react-helmet-async";
+import SEO from "./components/SEO";
 import BreadCrumb from "./pages/components/breadCrumb/BreadCrumb";
 import { useMusicStore } from "./utils/store";
 export default function Homepage({
@@ -18,7 +18,7 @@ export default function Homepage({
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://www.mohanamantra.com/",
+        item: "https://mm-template.vercel.app/",
       },
     ],
   };
@@ -33,38 +33,11 @@ export default function Homepage({
 
   return (
     <div>
-      <Helmet>
-        <title>MohanaMantra 2K26 | MBU</title>
-        <meta
-          name="description"
-          content="The official website of MohanaMantra 2K26 | MBU. A grand cultural festival celebrating art, music, and creativity."
-        />
-        <link rel="canonical" href="https://www.mohanamantra.com/" />
-        {/* Open Graph */}
-        <meta property="og:title" content="MohanaMantra 2K26 | MBU" />
-        <meta
-          property="og:description"
-          content="The official website of MohanaMantra 2K26 | MBU. A grand cultural festival celebrating art, music, and creativity."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.mohanamantra.com/" />
-        <meta
-          property="og:image"
-          content="https://www.mohanamantra.com/logo2.png"
-        />
-        <meta property="og:site_name" content="MohanaMantra 2K26 | MBU" />
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="MohanaMantra 2K26 | MBU" />
-        <meta
-          name="twitter:description"
-          content="A grand cultural festival celebrating art, music, and creativity at MBU."
-        />
-        <meta
-          name="twitter:image"
-          content="https://www.mohanamantra.com/logo2.png"
-        />
-      </Helmet>
+      <SEO
+        title="MohanaMantra 2K26 | MBU National Techno-Cultural Fest"
+        description="Official website of MohanaMantra 2K26 at Mohan Babu University (MBU). Join India's premier national level techno-cultural fest celebrating art, music, dance, code, and innovation."
+        canonicalUrl="https://mm-template.vercel.app/"
+      />
       <BreadCrumb data={breadcrumbJsonLd} />
       {!removeGif && (
         <div style={{ zIndex: 50, position: "relative" }}>

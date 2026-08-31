@@ -34,7 +34,11 @@ if (window.location.hostname.search("mohanamantra.com") !== -1) {
 }
 
 export default function App() {
-  useCanonicalUrl("https://www.mohanamantra.com");
+  useCanonicalUrl(
+    window.location.origin.includes("localhost")
+      ? "https://mm-template.vercel.app"
+      : window.location.origin
+  );
   const navigate = useNavigate();
   const location = useLocation();
 

@@ -3,8 +3,8 @@ import styles from './Contact.module.scss';
 import doors from '/images/contact/DoorsCombined.webp';
 import doorsMobile from '/images/contact/DoorsMobile.webp';
 import BackButton from '../components/backButton/BackButton';
-import { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
+import { useState, useEffect } from 'react';
+import SEO from '../../components/SEO';
 
 interface HoriBarDetails {
     numOfBars: number,
@@ -27,23 +27,11 @@ export default function Contact() {
 
     return (
         <div className={styles.contactPageWrapper}>
-            <Helmet>
-                <title>Contact Us | MohanaMantra 2K26 | MBU</title>
-                <meta name="description" content="Contact the organizers of MohanaMantra 2K26. Find key contact information for team members, and get in touch for partnerships, queries, or support." />
-                <link rel="canonical" href="https://www.mohanamantra.com/contact" />
-                <meta name="robots" content="index, follow" />
-                <meta property="og:type" content="website" />
-                <meta property="og:title" content="Contact Us | MohanaMantra 2K26 | MBU" />
-                <meta property="og:description" content="Get in touch with the MohanaMantra 2K26 team for partnerships, queries, or support." />
-                <meta property="og:image" content="https://www.mohanamantra.com/images/logo.webp" />
-                <meta property="og:url" content="https://www.mohanamantra.com/contact" />
-                <meta property="og:site_name" content="MohanaMantra 2K26 | MBU" />
-                <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content="Contact Us | MohanaMantra 2K26 | MBU" />
-                <meta name="twitter:description" content="Reach out to the MohanaMantra 2K26 organizing team at MBU." />
-                <meta name="twitter:image" content="https://www.mohanamantra.com/images/logo.webp" />
-                <meta name="twitter:site" content="@Mohana_Mantra" />
-            </Helmet>
+            <SEO
+                title="Contact Us | MohanaMantra 2K26 | MBU"
+                description="Contact the organizers of MohanaMantra 2K26. Find key contact information for team members, and get in touch for partnerships, queries, or support."
+                canonicalUrl="https://mm-template.vercel.app/contact"
+            />
             <div className={styles.contactPageBg}>
                 {
                     Array(horiBarDetails?.numOfBars).fill(null).map((_, i) => 

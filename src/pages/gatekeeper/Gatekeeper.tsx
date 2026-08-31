@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./Gatekeeper.module.scss";
 import { Html5Qrcode } from "html5-qrcode";
+import { Helmet } from "react-helmet-async";
 
 interface CheckInSessionInfo {
   checkedIn: boolean;
@@ -298,6 +299,11 @@ const Gatekeeper: React.FC = () => {
 
   return (
     <div className={styles.container}>
+      <Helmet>
+        <title>Gatekeeper | Private Admin</title>
+        <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
+        <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet" />
+      </Helmet>
       <div className={styles.header}>
         <div className={styles.headerContent}>
           <div className={styles.badge}>MOHANA MANTRA 2K26</div>

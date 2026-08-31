@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet-async";
+import SEO from "../../components/SEO";
 import styles from "./Registration.module.scss";
 
 import Instructions from "../../pages/registration/components/Instructions/Instructions";
@@ -32,13 +32,13 @@ const Registration = ({ goToPage }: RegistrationProps) => {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://www.mohanamantra.com/",
+        item: "https://mm-template.vercel.app/",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Registration",
-        item: "https://www.mohanamantra.com/register",
+        item: "https://mm-template.vercel.app/register",
       },
     ],
   };
@@ -203,42 +203,11 @@ const Registration = ({ goToPage }: RegistrationProps) => {
 
   return (
     <div className={styles.instrback}>
-      <Helmet>
-        <title>Registration | MohanaMantra 2K26 | MBU</title>
-        <meta
-          name="description"
-          content="Register for MohanaMantra 2K26, the annual cultural festival of MBU. Fill your details and complete registration."
-        />
-        <link rel="canonical" href="https://www.mohanamantra.com/register" />
-        <meta
-          property="og:title"
-          content="Registration | MohanaMantra 2K26 | MBU"
-        />
-        <meta
-          property="og:description"
-          content="Register for MohanaMantra 2K26, the annual cultural festival of MBU."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.mohanamantra.com/register" />
-        <meta
-          property="og:image"
-          content="https://www.mohanamantra.com/logo2.png"
-        />
-        <meta property="og:site_name" content="MohanaMantra 2K26 | MBU" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:title"
-          content="Registration | MohanaMantra 2K26 | MBU"
-        />
-        <meta
-          name="twitter:description"
-          content="Register for MohanaMantra 2K26, the annual cultural festival of MBU."
-        />
-        <meta
-          name="twitter:image"
-          content="https://www.mohanamantra.com/logo2.png"
-        />
-      </Helmet>
+      <SEO
+        title="Registration | MohanaMantra 2K26 | MBU"
+        description="Register for MohanaMantra 2K26, the annual cultural festival of MBU. Fill your details and complete registration."
+        canonicalUrl="https://mm-template.vercel.app/register"
+      />
       <BreadCrumb data={breadcrumbJsonLd} />
       <img
         src={

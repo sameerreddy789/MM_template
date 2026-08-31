@@ -4,7 +4,7 @@ import BackButton from "../components/backButton/BackButton";
 import { useEffect } from "react";
 import sponsors6K from "/images/sponsors/Sponsors_6K.webp";
 import { motion, type Variants } from "framer-motion";
-import { Helmet } from "react-helmet-async";
+import SEO from "../../components/SEO";
 
 
 const sponsorLogos = [
@@ -75,23 +75,11 @@ const Sponsors = () => {
       }}
     >
       <BackButton />
-      <Helmet>
-        <title>Sponsors | MohanaMantra 2K26 | MBU</title>
-        <meta name="description" content="Meet the sponsors powering MohanaMantra 2K26 at Mohan Babu University. Partner with us for the biggest cultural fest." />
-        <link rel="canonical" href="https://www.mohanamantra.com/sponsors" />
-        <meta name="robots" content="index, follow" />
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content="Sponsors | MohanaMantra 2K26 | MBU" />
-        <meta property="og:description" content="Meet the sponsors powering MohanaMantra 2K26 at Mohan Babu University." />
-        <meta property="og:image" content="https://www.mohanamantra.com/images/logo.webp" />
-        <meta property="og:url" content="https://www.mohanamantra.com/sponsors" />
-        <meta property="og:site_name" content="MohanaMantra 2K26 | MBU" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Sponsors | MohanaMantra 2K26 | MBU" />
-        <meta name="twitter:description" content="Meet the sponsors powering MohanaMantra 2K26 at MBU." />
-        <meta name="twitter:image" content="https://www.mohanamantra.com/images/logo.webp" />
-        <meta name="twitter:site" content="@Mohana_Mantra" />
-      </Helmet>
+      <SEO
+        title="Sponsors | MohanaMantra 2K26 | MBU"
+        description="Meet the sponsors powering MohanaMantra 2K26 at Mohan Babu University. Partner with us for the biggest cultural fest."
+        canonicalUrl="https://mm-template.vercel.app/sponsors"
+      />
       <div className={styles.buttonWrapper}></div>
 
       <div className={styles.backgroundImage}></div>
