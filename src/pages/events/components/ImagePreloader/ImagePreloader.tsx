@@ -5,6 +5,7 @@ interface EventImageProps {
   alt?: string;
   className?: string;
   previewClass?: string;
+  style?: React.CSSProperties;
 }
 
 const EventImage: React.FC<EventImageProps> = ({
@@ -12,6 +13,7 @@ const EventImage: React.FC<EventImageProps> = ({
   alt = "Event image",
   className,
   previewClass,
+  style,
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -62,7 +64,7 @@ const EventImage: React.FC<EventImageProps> = ({
       src={images[currentIndex]} 
       alt={alt} 
       className={className} 
-      style={{ transition: 'opacity 0.5s ease-in-out' }} 
+      style={{ transition: 'opacity 0.5s ease-in-out', ...style }} 
     />
   );
 };

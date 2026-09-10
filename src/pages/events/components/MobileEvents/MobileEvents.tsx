@@ -41,6 +41,7 @@ const MobileEvents: React.FC<MobileEventsProps> = ({
                 alt={events[currentIndex]?.name}
                 className={styles.imagenewFullMobile}
                 previewClass={styles.imagenewpreviewFullMobile}
+                style={events[currentIndex]?.object_position ? { objectPosition: events[currentIndex].object_position } : undefined}
               />
             </div>
 
