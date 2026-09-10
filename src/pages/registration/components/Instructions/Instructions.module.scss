@@ -84,7 +84,13 @@
 @media (max-width: 1200px) and (max-aspect-ratio: 1.45) {
   .content {
     margin-top: 3vh;
-    height: 100svh;
+    // `height: 100svh` was removed. Instructions currently renders an empty div -
+    // the sign-in stage it used to hold is gone, and nothing calls the handler
+    // that would hide it - so this reserved a full screen of blank space between
+    // the banner and the form, in a container that could not scroll. Sizing to
+    // content lets the empty stage collapse, and if the instructions list comes
+    // back it will simply flow on the now-scrollable page.
+    height: auto;
     .headingCont {
       margin: 1.4 * 1vw 0 1.4 * 3vw 0;
       img {

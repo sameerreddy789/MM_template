@@ -196,9 +196,17 @@ const Registration = ({ goToPage }: RegistrationProps) => {
  })();
  };
 
- useEffect(() => {
- document.body.style.position = "static";
- }, []);
+  // The registration page scrolls on mobile, so it has to undo any scroll lock a
+  // previously mounted page left on the body. Landing sets `position: fixed` while
+  // its intro gif runs and only clears it on its own unmount, so arriving here
+  // straight from there could otherwise land on a body that cannot scroll.
+  // `overflow` is cleared alongside `position` because either one alone is enough
+  // to freeze the page.
+  useEffect(() => {
+    document.body.style.position = "static";
+    document.body.style.overflow = "";
+    document.body.style.height = "";
+  }, []);
 
  const backButtonHandler = () => {
  if (isAnim) return;

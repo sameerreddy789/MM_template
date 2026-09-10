@@ -83,14 +83,45 @@
     // below it - six fields in one column need more height than the old
     // two-column arrangement did.
     margin-top: 0.5rem;
-    width: clamp(6rem, 15vw, 15rem);
+
+    // Reduced from clamp(6rem, 15vw, 15rem), which drew the banner 255px wide at
+    // 1920. It now draws 187px - about a quarter narrower. Nothing below it moves:
+    // the sibling that follows is sized `height: 100%` and absorbs whatever height
+    // this box gives back, so the form and the pay button stay where they were.
+    width: clamp(4.5rem, 11vw, 11rem);
+
+    // Both of these are needed for the ratio set below to actually take. A flex
+    // item's automatic minimum size is its content's min-content height, and the
+    // img inside is square, so that floor silently held the box at 1:1 and
+    // cancelled the crop - it is also what stopped the old square box from ever
+    // being compressed by its `height: 100%` sibling. min-height lifts the floor;
+    // flex-shrink then stops the freed height being clawed back, which would let
+    // `cover` eat into the artwork itself.
+    flex-shrink: 0;
+    min-height: 0;
+
+    // reg-banner.webp is a 1254x1254 *square* file, but the artwork inside it
+    // only occupies rows 274-905 - almost exactly half the height, the rest is
+    // transparent padding. A 1:1 box therefore reserved twice the vertical space
+    // the banner actually draws into. On desktop that empty band was harmless
+    // (the form is absolutely positioned over it), but in the mobile flow it was
+    // ~39svh of nothing sitting directly above the fields.
+    //
+    // Giving the box the artwork's own ratio (measured 1.99:1; 1.85 leaves a
+    // margin for the soft glow that bleeds past the solid edges) and cropping to
+    // it reclaims that space without making the banner read any smaller.
+    aspect-ratio: 1.85;
     display: flex;
     justify-content: center;
     align-items: center;
 
     .bannerImage {
       width: 100%;
-      object-fit: contain;
+      height: 100%;
+      // Nudged above centre: the artwork's midpoint sits at 47% of the file, not
+      // 50%, because the bottom pad (348px) is deeper than the top one (274px).
+      object-fit: cover;
+      object-position: center 44%;
     }
   }
   // Absolutely positioned on purpose: Instructions / Register / Events are
@@ -135,8 +166,53 @@
 
 @media (max-width: 1200px) and (max-aspect-ratio: 1.45) {
   .instrback {
-    // height: 100svh;
-    overflow-y: hidden;
+    // The page scrolls on mobile. It used to be a hard 100svh box with
+    // `overflow-y: hidden`, which is why the form was unreachable: the in-flow
+    // children (banner + the Instructions stage + the Register stage) stacked up
+    // to roughly 240svh inside it, so everything from the first field down was
+    // clipped with no way to scroll to it.
+    //
+    // Document scroll rather than an inner scroll container on purpose - when the
+    // on-screen keyboard opens, the browser can only scroll a focused input into
+    // view if there is somewhere to scroll, and scrolling the document is what
+    // mobile Safari and Chrome handle correctly against the keyboard inset.
+    height: auto;
+    min-height: 100svh;
+    overflow: visible;
+    // Clears the fixed skyline so the last field and the pay button never sit on
+    // top of the artwork's temples. Keyboard clearance is handled separately, in
+    // Register.module.scss, so this stays small.
+    padding-bottom: 8svh;
+
+    // The artwork and the back button are pinned to the viewport so they stay put
+    // while the form scrolls over them. Left absolute, they would have anchored to
+    // the bottom of the *content* box, which is now taller than the screen - the
+    // skyline would only have appeared once you scrolled to the very end, and the
+    // back button would have scrolled off the top, stranding the only way out of
+    // the page.
+    //
+    // The countdown is deliberately *not* pinned. It belongs to the header, it is
+    // decorative (pointer-events: none), and holding it in the top right corner
+    // while the banner scrolled up underneath left it sitting across the
+    // "Registration" wordmark.
+    .backgroundImage {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      height: auto;
+      width: 100vw;
+      transform: translateX(0);
+      object-fit: contain;
+      object-position: 0 0;
+    }
+
+    &::after {
+      position: fixed;
+    }
+
+    .backBtn {
+      position: fixed;
+    }
 
     .overlay {
       position: absolute;
@@ -147,15 +223,6 @@
       background: rgba(0, 0, 0, 0.77);
       z-index: 1;
     }
-    .backgroundImage {
-      bottom: 0;
-      left: 0;
-      height: auto;
-      width: 100vw;
-      transform: translateX(0);
-      object-fit: contain;
-      object-position: 0 0;
-    }
     .sun {
       position: absolute;
       bottom: 45vw;
@@ -165,8 +232,14 @@
       height: 37vw;
       z-index: 0;
     }
+    // Was 85vw. On a square-boxed banner that meant 85vw of *height* too - about
+    // 39svh of a portrait phone spent on a title, half of it transparent padding.
+    // The base rule now crops the padding away; this trims the banner itself, and
+    // the svh term keeps it in proportion on short viewports (a 1024x768 tablet
+    // would otherwise hand it 60vw = 614px of width).
     .birds {
-      width: 85vw;
+      width: min(60vw, 37svh);
+      margin-top: 1.5svh;
     }
     .backBtn {
       width: 8vw;
@@ -176,8 +249,10 @@
 }
 @media (max-width: 1200px) and (max-aspect-ratio: 0.75) {
   .instrback {
+    // Portrait phones have the height to spare for a slightly wider banner than
+    // the squarer viewports above, but it is still well down from the old 85vw.
     .birds {
-      width: 85vw;
+      width: min(68vw, 40svh);
     }
     .sun {
       position: absolute;
