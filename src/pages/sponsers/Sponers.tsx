@@ -2,7 +2,6 @@ import styles from "./Sponsers.module.scss";
 import heading from "/svgs/sponsors/sponsorsHead.webp";
 import BackButton from "../components/backButton/BackButton";
 import { useEffect } from "react";
-import sponsors6K from "/images/sponsors/Sponsors_6K.webp";
 import { motion, type Variants } from "framer-motion";
 import SEO from "../../components/SEO";
 
@@ -94,27 +93,6 @@ const Sponsors = () => {
       </motion.div>
 
       <div className={styles.sponsors}>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          style={{ width: "100%", display: "flex", justifyContent: "center" }}
-        >
-          <img
-            src={sponsors6K}
-            alt="Main Sponsors Banner"
-            style={{
-              width: "100%",
-              maxWidth: "1000px",
-              height: "auto",
-              objectFit: "contain",
-              borderRadius: "16px",
-              boxShadow: "0 10px 40px rgba(0, 0, 0, 0.5)",
-            }}
-            draggable={false}
-          />
-        </motion.div>
-
         {/* Dynamic Animated Sponsor Cards Grid */}
         <motion.div
           className={styles.sponsorGrid}

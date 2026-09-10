@@ -8,9 +8,8 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import contactBanner from "/images/contact/contact-banner.webp";
-import contacts from "./components/contactGallery/contacts";
-// import ContactGallery from './components/contactGallery/ContactGallery';
-import { FaEnvelope } from "react-icons/fa6";
+import { contactRows } from "./components/contactGallery/contacts";
+import ContactCardBody from "./components/contactGallery/ContactCardBody";
 import debouncedHandler from "../../utils/debounce";
 
 interface ContactDoorsProps {
@@ -24,6 +23,24 @@ interface HoriBarDetails {
   barGap: number;
 }
 
+/**
+ * Finds the top offset of the first tag that sits on a row below the first one.
+ *
+ * The previous version indexed a fixed slot (`items[3]` on desktop), which only
+ * held while there were eight tags laid out two-by-two in each door. With five
+ * sections that index lands on a first-row tag in the other door, so the measured
+ * row gap collapsed to zero and the lattice bars stopped being generated.
+ * Scanning for the first genuinely lower tag works for any tag count.
+ */
+const findSecondRowTop = (items: HTMLCollection, firstRowTop: number) => {
+  for (let i = 1; i < items.length; i++) {
+    const top = items[i].getBoundingClientRect().top;
+    // 1px of slack absorbs sub-pixel rounding between siblings on a row.
+    if (top - firstRowTop > 1) return top;
+  }
+  return null;
+};
+
 export default function ContactDoors({
   pinElemRef,
   triggerElemRef,
@@ -32,30 +49,28 @@ export default function ContactDoors({
   const door2Ref = useRef<HTMLDivElement>(null);
   const contactBannerRef = useRef<HTMLImageElement>(null);
   const contactSectionRef = useRef<HTMLDivElement>(null);
-  // const galleryContentRef = useRef<HTMLDivElement>(null);
+  const contactTagsRef = useRef<HTMLDivElement>(null);
   const horiBarDetailsRef = useRef<HoriBarDetails | null>(null);
 
+  // Drives the door artwork swap and the scrub mode. The former `isTab` flag went
+  // with the per-door split: the tag layout is now CSS-driven, so no JS breakpoint
+  // is needed to decide how many tags sit on a row.
   const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 900);
-  const [isTab, setIsTab] = useState<boolean>(window.innerWidth <= 1300);
-
-  // const launchPhone = (phone: string) => window.location.href = `tel:${phone}`;
-  const launchEmail = (email: string) =>
-    (window.location.href = `mailto:${email}`);
 
   const calculateHoriBarPos = (contactItems: HTMLCollection) => {
     // const contactItems = document.getElementsByClassName(styles.contactItem);
     const firstRowItem = contactItems[0];
+    if (!firstRowItem) return;
     const firstRowRelPos = firstRowItem.getBoundingClientRect().top;
 
-    const secondRowItem = contactItems[window.innerWidth <= 1300 ? 1 : 3];
-
-    if (!secondRowItem) return;
-    const secondRowRelPos = secondRowItem.getBoundingClientRect().top;
+    const secondRowRelPos = findSecondRowTop(contactItems, firstRowRelPos);
+    if (secondRowRelPos === null) return;
 
     // const barGapThreshold = 100;
     let barGap = Math.round(secondRowRelPos - firstRowRelPos);
     // if (barGap > barGapThreshold)
     barGap = barGap / 2; //Math.round(barGap / 100);
+    if (barGap <= 0) return; // Guards Array(numOfBars) against an invalid length
 
     const firstRowAbsPos =
       firstRowRelPos - (door1Ref.current?.getBoundingClientRect().top || 0);
@@ -70,12 +85,19 @@ export default function ContactDoors({
   };
 
   const { contextSafe } = useGSAP();
+  /**
+   * Swings the tags by their string in response to scroll velocity.
+   *
+   * This used to rotate two groups in opposite directions, one per door, which
+   * suited tags that slid in from opposite sides. They now all hang from the same
+   * lattice on a single overlay, so they swing together - opposing rotations would
+   * read as two separate objects rather than one row of tags on one rail.
+   */
   const animateContactItems = contextSafe((angle: number) => {
     const angleLimit = 30;
     if (Math.abs(angle) >= angleLimit) return;
 
-    gsap.to(`.${styles.contactItemsLeft}`, { rotateZ: angle });
-    gsap.to(`.${styles.contactItemsRight}`, { rotateZ: -angle });
+    gsap.to(`.${styles.contactItem}`, { rotateZ: angle });
   });
 
   useGSAP(() => {
@@ -131,8 +153,11 @@ export default function ContactDoors({
           "--navlink-color": "#ffdfd0",
         },
         0
-      );
-    // .from(galleryContentRef.current, {autoAlpha: 0})
+      )
+      // The tags no longer ride the doors in, so they need their own reveal.
+      // Starting at 0.55 of the scrub keeps them off an empty background: the
+      // doors are most of the way in before the first tag shows.
+      .from(contactTagsRef.current, { autoAlpha: 0, duration: 0.45 }, 0.55);
 
     // if (contactSectionRef.current) contactSectionRef.current.style.transform = "translateY(-100vh)"//`translateY(${-((pinElemRef.current?.clientHeight || 0) - (contactSectionRef.current?.clientHeight || 0))})`
   }, { dependencies: [pinElemRef, triggerElemRef], revertOnUpdate: true });
@@ -161,9 +186,7 @@ export default function ContactDoors({
 
     const handleResize = () => {
       // location.reload()
-      const newIsTab = window.innerWidth <= 1300;
       const newIsMobile = window.innerWidth <= 900;
-      if (newIsTab !== isTab) setIsTab(newIsTab);
       if (newIsMobile !== isMobile) setIsMobile(newIsMobile);
       calculateHoriBarPos(contactItems);
       // ScrollTrigger.update();
@@ -195,6 +218,32 @@ export default function ContactDoors({
 
   // useEffect(() => console.log("ContactDoors just unmounted"), []);
 
+  /** The lattice bars, repeated identically behind each door panel. */
+  const latticeBars = (
+    <div className={styles.horiBarContainer}>
+      {Array(horiBarDetailsRef.current?.numOfBars)
+        .fill(null)
+        .map((_, i) => (
+          <div
+            className={styles.horiBar}
+            key={i}
+            style={{
+              top: `${
+                i * (horiBarDetailsRef.current?.barGap || 0) +
+                (horiBarDetailsRef.current?.firstBarPos || 0)
+              }px`,
+            }}
+          >
+            {Array(2)
+              .fill(null)
+              .map((_, barIndex) => (
+                <div key={barIndex} />
+              ))}
+          </div>
+        ))}
+    </div>
+  );
+
   return (
     <div className={styles.contactSection} ref={contactSectionRef}>
       <div className={styles.contactSectionContent}>
@@ -214,66 +263,7 @@ export default function ContactDoors({
               backgroundImage: `url('${isMobile ? door1mobile : door1}')`,
             }}
           >
-            {/* <img className={styles.contactDoorImg} src={door1} /> */}
-            <div className={styles.horiBarContainer}>
-              {Array(horiBarDetailsRef.current?.numOfBars)
-                .fill(null)
-                .map((_, i) => (
-                  <div
-                    className={styles.horiBar}
-                    key={i}
-                    style={{
-                      top: `${
-                        i * (horiBarDetailsRef.current?.barGap || 0) +
-                        (horiBarDetailsRef.current?.firstBarPos || 0)
-                      }px`,
-                    }}
-                  >
-                    {Array(2)
-                      .fill(null)
-                      .map((_, barIndex) => (
-                        <div key={barIndex} />
-                      ))}
-                  </div>
-                ))}
-            </div>
-            <div className={styles.contactsContainer}>
-              {(isTab
-                ? contacts.filter((_, i) => i % 2 === 0)
-                : contacts.slice(0, 4)
-              ).map((contact, index) => (
-                <div
-                  className={`${styles.contactItem} ${styles.contactItemsLeft}`}
-                  key={index}
-                >
-                  <div className={styles.contactCard}>
-                    <div className={styles.contactImgContainer}>
-                      <img src={contact.imageURL} alt={contact.name} />
-                    </div>
-                    <div className={styles.contactDetails}>
-                      <div className={styles.contactName} title={contact.name}>
-                        {contact.name}
-                      </div>
-                      <div
-                        className={styles.contactPosition}
-                        title={contact.role}
-                      >
-                        {contact.role}
-                      </div>
-                      <div className={styles.contactLinks}>
-                        {/* <div className={styles.contactPhone} onClick={() => launchPhone(contact.phone)}><FaPhone className={styles.contactIcon} /></div> */}
-                        <div
-                          className={styles.contactEmail}
-                          onClick={() => launchEmail(contact.email)}
-                        >
-                          <FaEnvelope className={styles.contactIcon} />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {latticeBars}
           </div>
           <div
             className={styles.contactDoor}
@@ -282,72 +272,30 @@ export default function ContactDoors({
               backgroundImage: `url('${isMobile ? door2mobile : door2}')`,
             }}
           >
-            {/* <img className={styles.contactDoorImg} src={door2} /> */}
-            <div className={styles.horiBarContainer}>
-              {Array(horiBarDetailsRef.current?.numOfBars)
-                .fill(null)
-                .map((_, i) => (
-                  <div
-                    className={styles.horiBar}
-                    key={i}
-                    style={{
-                      top: `${
-                        i * (horiBarDetailsRef.current?.barGap || 0) +
-                        (horiBarDetailsRef.current?.firstBarPos || 0)
-                      }px`,
-                    }}
-                  >
-                    {Array(2)
-                      .fill(null)
-                      .map((_, barIndex) => (
-                        <div key={barIndex} />
-                      ))}
-                  </div>
-                ))}
-            </div>
-            <div className={styles.contactsContainer}>
-              {(isTab
-                ? contacts.filter((_, i) => i % 2 === 1)
-                : contacts.slice(4, 8)
-              ).map((contact, index) => (
-                <div
-                  className={`${styles.contactItem} ${styles.contactItemsRight}`}
-                  key={index}
-                >
-                  <div className={styles.contactCard}>
-                    <div className={styles.contactImgContainer}>
-                      <img src={contact.imageURL} alt={contact.name} />
+            {latticeBars}
+          </div>
+
+          {/*
+            Sits above both doors rather than inside them, so the middle row of
+            three can be centred on the page instead of being split at the seam.
+            Same rows, same tag styling as the /contact page - both read from
+            contactRows.
+          */}
+          <div className={styles.contactTags} ref={contactTagsRef}>
+            <div className={styles.contactRows}>
+              {contactRows.map((row, rowIndex) => (
+                <div className={styles.contactRow} key={rowIndex}>
+                  {row.map((contact) => (
+                    <div className={styles.contactItem} key={contact.section}>
+                      <ContactCardBody contact={contact} styles={styles} />
                     </div>
-                    <div className={styles.contactDetails}>
-                      <div className={styles.contactName} title={contact.name}>
-                        {contact.name}
-                      </div>
-                      <div
-                        className={styles.contactPosition}
-                        title={contact.role}
-                      >
-                        {contact.role}
-                      </div>
-                      <div className={styles.contactLinks}>
-                        {/* <div className={styles.contactPhone} onClick={() => launchPhone(contact.phone)}><FaPhone className={styles.contactIcon} /></div> */}
-                        <div
-                          className={styles.contactEmail}
-                          onClick={() => launchEmail(contact.email)}
-                        >
-                          <FaEnvelope className={styles.contactIcon} />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               ))}
             </div>
           </div>
         </div>
       </div>
-      {/* <div className={styles.contactSectionContent} ref={galleryContentRef}>
-                <ContactGallery />
-            </div> */}
     </div>
   );
 }

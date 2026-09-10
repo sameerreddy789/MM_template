@@ -1,4 +1,5 @@
 // body {position: static;}
+@use './components/contactGallery/contactCard' as card;
 
 .contactPageWrapper {
     // height: 100vh;
@@ -182,30 +183,36 @@
         bottom: 0px;
         width: 100%;
         min-height: 100vh;
-        // height: 100%;
+        // A single row holding all three children. The two doors take one column
+        // each; the tag overlay spans both and, being the tallest, is what sets the
+        // row height - see .contactTags.
         display: grid;
         grid-template-columns: 50% 50%;
+        grid-template-rows: auto;
         pointer-events: none;
         overflow: visible;
 
         @media (max-width: 730px) {
-            height: calc(100% - 100vh + 60px);
+            // Was `height: calc(100% - 100vh + 60px)`. A fixed height here now
+            // clips the tags, because they define this element's height rather
+            // than being absolutely positioned inside it.
             min-height: 0px;
         }
 
         .contactDoor {
             width: 100%;
-            // height: 100%;
+            // Both doors share row 1 with the tag overlay and stretch to its
+            // height, so the artwork covers however tall the tags turn out to be.
+            grid-row: 1;
             background-size: 100% auto;
             background-repeat: repeat;
             pointer-events: all;
 
+            &:nth-of-type(1) { grid-column: 1; }
+            &:nth-of-type(2) { grid-column: 2; }
+
             &:nth-of-type(1) {
                 border-right: 0.5px solid #be9963;
-                .contactsContainer {
-                    padding: 15rem 3rem 3rem 1rem;
-                    @media (max-width: 900px) {padding: calc(6rem + 15vw) 1.2rem 3rem 0.6rem;}
-                }
                 .horiBarContainer .horiBar {
                     grid-template-columns: 1fr calc(40*50vw/960);
                     
@@ -223,10 +230,6 @@
 
             &:nth-of-type(2) {
                 border-left: 0.5px solid #be9963;
-                .contactsContainer {
-                    padding: 15rem 1rem 3rem 3rem;
-                    @media (max-width: 900px) {padding: calc(6rem + 15vw) 0.6rem 3rem 1.2rem;}
-                }
                 .horiBarContainer .horiBar {
                     grid-template-columns: calc(40*100%/960) 1fr;
 
@@ -262,161 +265,6 @@
                 }
             }
 
-            .contactsContainer {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                // height: 100%;
-                gap: 2.1rem 1.8rem;
-
-                .contactItemsLeft, .contactItemsRight {transform-origin: 52.5% 1%;}
-                .contactItem {
-                    width: 100%;
-                    height: 100%;
-                    position: relative;
-                    display: flex;
-
-                    $template: 1;
-                    aspect-ratio: 1.085;
-                    background-image: url("/images/contact/ContactCard" + $template + ".webp");
-                    background-size: cover;
-
-                    .contactCard {
-                        display: flex;
-                        gap: 0.1rem;
-                        height: 54%;
-                        width: 84%;
-                        position: relative;
-                        left: 50%;
-                        margin-top: auto;
-                        margin-bottom: 3%;
-                        transform: translateX(-46.5%) rotateZ(-2deg);
-                        pointer-events: all;
-
-                        .contactImgContainer {
-                            display: flex;
-                            align-items: center;
-                            min-width: 27%;
-                            max-width: 36%;
-                            max-height: 100%;
-
-                            img {
-                                width: 100%;
-                                max-height: 100%;
-                                object-fit: contain;
-                            }
-
-                            @media (max-width: 600px) {
-                                min-width: 30%;
-                            }
-                        }
-
-                        .contactDetails {
-                            flex: 1;
-                            display: flex;
-                            gap: 0.5rem;
-                            flex-direction: column;
-                            justify-content: center;
-
-                            .contactName {
-                                font-size: 1.8rem;
-                                font-weight: 600;
-                                font-family: 'Averia Serif Libre', serif;
-                                text-align: center;
-                            }
-
-                            .contactPosition {
-                                font-size: 1.2rem;
-                                font-weight: 100;
-                                font-family: 'Averia Serif Libre', serif;
-                                text-align: center;
-                                -webkit-line-clamp: 3;
-                                line-clamp: 3;
-                                overflow: hidden;
-                                display: -webkit-box;
-                                -webkit-box-orient: vertical;
-                                text-overflow: ellipsis;
-                            }
-
-                            .contactLinks {
-                                display: flex;
-                                justify-content: center;
-                                gap: 3rem;
-
-                                .contactIcon {
-                                    font-size: 1.8rem;
-                                    transition: 0.3s color;
-
-                                    &:hover {
-                                        color: rgb(129, 0, 0)
-                                    }
-                                }
-                            }
-
-                            @media (max-width: 1700px) {
-                                gap: 0.3rem;
-
-                                .contactName {
-                                    font-size: 1.2rem;
-                                    line-height: 1.2rem;
-                                }
-
-                                .contactPosition {
-                                    font-size: 0.9rem;
-                                    line-height: 0.9rem;
-                                }
-
-                                .contactLinks {
-                                    gap: 1rem;
-
-                                    div {
-                                        height: 1.5rem;
-
-                                        .contactIcon {
-                                            font-size: 1.5rem;
-                                            height: 1.5rem;
-                                            position: relative;
-                                        }
-                                    }
-                                }
-                            }
-
-                            @media (max-width: 600px) {
-                                gap: 0.1rem;
-
-                                .contactName {
-                                    font-size: 0.7rem;
-                                    line-height: 0.7rem;
-                                    text-wrap: nowrap;
-                                }
-
-                                .contactPosition {
-                                    font-size: 0.6rem;
-                                    line-height: 0.6rem;
-                                }
-
-                                .contactLinks {
-                                    gap: 1rem;
-
-                                    div {
-
-                                        // height: 0.8rem;
-                                        .contactIcon {
-                                            font-size: 0.8rem;
-                                            // height: 0.8rem;
-                                            position: relative;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                @media (max-width: 1300px) {
-                    grid-template-columns: 1fr;
-                    gap: 1rem;
-                }
-            }
             // .contactDoorImg {
             //     width: 100%;
             //     height: 100%;
@@ -431,6 +279,38 @@
             // &:nth-of-type(2) .contactBgImg {
             //     object-position: left;
             // }
+        }
+
+        // The tags, spanning both doors.
+        //
+        // They used to be children of the doors, one group in each, which is why
+        // the landing page could only ever show them split down the seam - a tag
+        // cannot be centred across a pair of panels that slide apart
+        // independently. Sharing row 1 with both doors and spanning both columns
+        // is what allows the same 1 / 3 / 1 arrangement as the /contact page.
+        //
+        // Deliberately in flow rather than absolutely positioned: as the tallest
+        // item in the row it sets the row height, and the doors stretch to match.
+        // Positioning it absolutely left the doors with no content to size them,
+        // so they collapsed to 100vh and the tags hung off the bottom.
+        .contactTags {
+            position: relative;
+            grid-row: 1;
+            grid-column: 1 / -1;
+            z-index: 5;
+            box-sizing: border-box;
+            // Clears the banner and the first lattice bar, matching the padding the
+            // per-door containers used to carry.
+            padding: 15rem clamp(0.75rem, 3vw, 3.5rem) 3rem;
+            // Each tag re-enables pointer events on its own paper, so the door
+            // artwork behind stays interactive everywhere else.
+            pointer-events: none;
+
+            @media (max-width: 900px) {
+                padding: calc(6rem + 15vw) clamp(0.75rem, 3vw, 3.5rem) 3rem;
+            }
+
+            @include card.rows;
         }
 
     }

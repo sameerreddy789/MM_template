@@ -1,6 +1,6 @@
-import { FaEnvelope } from 'react-icons/fa6';
 import styles from './ContactGallery.module.scss';
-import contacts from './contacts';
+import { contactRows } from './contacts';
+import ContactCardBody from './ContactCardBody';
 import contactBanner from '/images/contact/contact-banner.webp'
 import { useEffect, useState } from 'react';
 
@@ -10,32 +10,45 @@ interface HoriBarDetails {
     barGap: number
 }
 
+/**
+ * Finds the top offset of the first tag that sits on a row below the first one.
+ *
+ * The previous version indexed a fixed slot (`items[3]` on desktop), which only
+ * held for an eight-tag, two-by-two-per-group layout. The rows are now 1 / 3 / 1,
+ * so that index lands on a first-row tag and the measured gap collapses to zero.
+ * Scanning for the first genuinely lower tag works for any row shape.
+ */
+const findSecondRowTop = (items: HTMLCollection, firstRowTop: number) => {
+    for (let i = 1; i < items.length; i++) {
+        const top = items[i].getBoundingClientRect().top;
+        // 1px of slack absorbs sub-pixel rounding between siblings on a row.
+        if (top - firstRowTop > 1) return top;
+    }
+    return null;
+}
+
 export default function ContactGallery({ setHoriBarDetails }: { setHoriBarDetails?: React.Dispatch<React.SetStateAction<HoriBarDetails | undefined>> }) {
 
-    const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 1300);
-
-    // const launchPhone = (phone: string) => window.location.href = `tel:${phone}`;
-    const launchEmail = (email: string) => window.location.href = `mailto:${email}`;
+    // Only used to re-measure the lattice bars; the layout itself is CSS-driven.
+    const [, setViewportWidth] = useState<number>(window.innerWidth);
 
     useEffect(() => {
         const calculateHoriBarPos = () => {
             const contactItems = document.getElementsByClassName(styles.contactItem);
             const firstRowItem = contactItems[0];
+            if (!firstRowItem) return;
             const firstRowRelPos = firstRowItem.getBoundingClientRect().top
 
-            const secondRowItem = contactItems[window.innerWidth <= 1300 ? 1 : 3]
-            
-            if (!secondRowItem) return;
-            const secondRowRelPos = secondRowItem.getBoundingClientRect().top
+            const secondRowRelPos = findSecondRowTop(contactItems, firstRowRelPos);
+            if (secondRowRelPos === null) return;
 
-            // const barGapThreshold = 100;
             let barGap = Math.round(secondRowRelPos - firstRowRelPos);
-            barGap = barGap / 2;//Math.round(barGap / 100);
+            barGap = barGap / 2;
 
             if (barGap <= 0) return; // Prevent Invalid Array Length crash if items aren't laid out yet
 
             const firstRowAbsPos = firstRowRelPos + (document.scrollingElement?.scrollTop || 0);
-            
+
             const firstBarPos = Math.round(firstRowAbsPos % barGap);
             const numOfBars = Math.max(0, Math.round((document.body.clientHeight - firstBarPos || 0)/barGap));
 
@@ -43,7 +56,7 @@ export default function ContactGallery({ setHoriBarDetails }: { setHoriBarDetail
         }
 
         const handleResize = () => {
-            setIsMobile(window.innerWidth <= 1300)
+            setViewportWidth(window.innerWidth)
             calculateHoriBarPos()
         }
         document.body.style.position = "static";
@@ -56,53 +69,18 @@ export default function ContactGallery({ setHoriBarDetails }: { setHoriBarDetail
     return (
         <div className={styles.contactContent}>
             <div className={styles.contactHeading}>
-                <img className={styles.contactBanner} src={contactBanner}></img>
+                <img className={styles.contactBanner} src={contactBanner} alt="Contact Us"></img>
             </div>
-            <div className={styles.contactGalleryContainer}>
-                <div className={styles.contactGallery}>
-                    {
-                        (isMobile ? contacts.filter((_, i) => i % 2 === 0) : contacts.slice(0, 4))
-                        .map((contact, index) => (
-                            <div className={styles.contactItem} key={index}>
-                                <div className={styles.contactCard}>
-                                    <div className={styles.contactImgContainer}>
-                                        <img src={contact.imageURL} alt={contact.name} />
-                                    </div>
-                                    <div className={styles.contactDetails}>
-                                        <div className={styles.contactName} title={contact.name}>{contact.name}</div>
-                                        <div className={styles.contactPosition} title={contact.role}>{contact.role}</div>
-                                        <div className={styles.contactLinks}>
-                                            {/* <div className={styles.contactPhone} onClick={() => launchPhone(contact.phone)}><FaPhone className={styles.contactIcon} /></div> */}
-                                            <div className={styles.contactEmail} onClick={() => launchEmail(contact.email)}><FaEnvelope className={styles.contactIcon} /></div>
-                                        </div>
-                                    </div>
-                                </div>
+            <div className={styles.contactRows}>
+                {contactRows.map((row, rowIndex) => (
+                    <div className={styles.contactRow} key={rowIndex}>
+                        {row.map((contact) => (
+                            <div className={styles.contactItem} key={contact.section}>
+                                <ContactCardBody contact={contact} styles={styles} />
                             </div>
-                        ))
-                    }
-                </div>
-                <div className={styles.contactGallery}>
-                    {
-                        (isMobile ? contacts.filter((_, i) => i % 2 === 1) : contacts.slice(4, 8))
-                        .map((contact, index) => (
-                            <div className={styles.contactItem} key={index}>
-                                <div className={styles.contactCard}>
-                                    <div className={styles.contactImgContainer}>
-                                        <img src={contact.imageURL} alt={contact.name} />
-                                    </div>
-                                    <div className={styles.contactDetails}>
-                                        <div className={styles.contactName} title={contact.name}>{contact.name}</div>
-                                        <div className={styles.contactPosition} title={contact.role}>{contact.role}</div>
-                                        <div className={styles.contactLinks}>
-                                            {/* <div className={styles.contactPhone} onClick={() => launchPhone(contact.phone)}><FaPhone className={styles.contactIcon} /></div> */}
-                                            <div className={styles.contactEmail} onClick={() => launchEmail(contact.email)}><FaEnvelope className={styles.contactIcon} /></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    }
-                </div>
+                        ))}
+                    </div>
+                ))}
             </div>
         </div>
     )

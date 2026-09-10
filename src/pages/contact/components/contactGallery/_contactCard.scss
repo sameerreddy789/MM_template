@@ -1,0 +1,256 @@
+// Shared styling for the hanging contact tags and the rows they hang in.
+//
+// The landing-page doors (Contact.module.scss) and the /contact page
+// (ContactGallery.module.scss) show the same tags in the same arrangement. Keeping
+// both the row layout and the tag body here means each module still gets its own
+// hashed class names - which is what ContactCardBody's `styles` prop relies on -
+// while there is one place to edit either.
+//
+// Everything inside a tag is sized in `cqw` (percent of the tag's own width), so
+// the contents scale with the tag rather than with the viewport. That is what lets
+// one tag work at 320px across on a phone and 400px on a desktop without a ladder
+// of font-size breakpoints, and it is why the text cannot outgrow the paper: every
+// dimension is a fixed fraction of the same box. `clamp` only guards the extremes
+// - a floor for legibility, a ceiling so a very wide tag does not turn the name
+// into a poster.
+
+// --- Tag artwork geometry ---------------------------------------------------
+//
+// Measured off ContactCard1.webp (478x422) by sampling for the light paper
+// colour. The front sheet starts between 35.8% and 41.9% down depending on where
+// you cut across it - it hangs at a slight tilt - and runs to within about 2% of
+// the bottom. Horizontally it spans roughly 6%-12% in from the left and 6% from
+// the right, the corners being torn.
+//
+// The text box is inset to the worst case of each edge so it stays on paper at
+// every point, which leaves a little over half the tag's height to work with. That
+// is the constraint the sizes below are solved against: the artwork spends its
+// whole top third on the string.
+$paper-top: 43%;
+$paper-right: 8%;
+$paper-bottom: 4%;
+$paper-left: 9.5%;
+
+/// Drawn box ratio for a tag. The asset's own ratio is 1.133; a square box
+/// stretches it vertically by about 13% via `background-size: 100% 100%`, which
+/// buys the roster the paper room its three rows need. At that amount it reads as
+/// a slightly longer string on a paper texture rather than as distortion.
+$tag-ratio: 1;
+
+// Ink colours sampled against the aged-paper artwork. Contrast on that
+// background: name 6.9:1, label 4.9:1, phone 9.6:1 - all AA or better.
+$tag-ink: #3d2b1a;
+$tag-ink-muted: #6b4a2f;
+// Deep fest red. This is the "highlight" on the names: it lifts them clear of the
+// brown body text and echoes the CONTACT US banner without needing a marker band.
+$tag-ink-name: #7a1616;
+$tag-rule: rgba(90, 60, 30, 0.28);
+
+/// The 1 / 3 / 1 arrangement.
+///
+/// Rows of centred flex items rather than one grid: no uniform grid expresses
+/// 1 / 3 / 1, and a grid cannot centre a lone tag on its own row. Each row carries
+/// its own count for free, and degrades by wrapping, so the same markup handles
+/// every width - only the tag width changes at the two breakpoints below.
+@mixin rows {
+    .contactRows {
+        // Derived from the *row* width, not the viewport, so the three tags on the
+        // middle row and the single tags above and below all come out identical:
+        //   - a third of the row, less the two gaps, is the width that makes the
+        //     middle row span the page;
+        //   - 50vh keeps a short laptop window from producing tags so tall the
+        //     arrangement needs a long scroll;
+        //   - 24rem caps them on an ultrawide monitor.
+        --tag-gap: clamp(0.75rem, 2vw, 2.25rem);
+        --tag-width: min(24rem, 50vh, calc((100% - 2 * var(--tag-gap)) / 3));
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--tag-gap);
+        width: 100%;
+    }
+
+    .contactRow {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        gap: var(--tag-gap);
+        width: 100%;
+    }
+
+    .contactItem {
+        flex: 0 0 auto;
+        width: var(--tag-width);
+        max-width: 100%;
+        aspect-ratio: $tag-ratio;
+        position: relative;
+
+        // Makes `cqw` inside the tag resolve against the tag's own width, which is
+        // what lets the tag body size every element as a fraction of the tag.
+        container-type: inline-size;
+
+        background-image: url("/images/contact/ContactCard1.webp");
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+
+        // Pivot at the hole the string passes through, so any swing animation
+        // rotates the tag about where it actually hangs.
+        transform-origin: 52.5% 1%;
+
+        @include body;
+    }
+
+    // Two across: three tags on one row stop being readable somewhere around here,
+    // so the middle row wraps to 2 + 1 and every tag takes half the row.
+    @media (max-width: 1100px) {
+        .contactRows {
+            --tag-width: min(24rem, calc((100% - var(--tag-gap)) / 2));
+        }
+    }
+
+    // Single column. Rows still exist, each just holds its tags stacked, so the
+    // reading order stays Registrations, Sponsorship, Marketing, Website, Queries.
+    @media (max-width: 700px) {
+        .contactRows {
+            --tag-width: min(22rem, 100%);
+        }
+    }
+}
+
+/// Contents of a single tag. Include inside the `.contactItem` that owns the tag
+/// artwork; that element must be `position: relative` and an inline-size
+/// container. `rows` already does this.
+@mixin body {
+    .contactCard {
+        // Positioned against the artwork rather than flowed, so the text box maps
+        // onto the painted paper (see the geometry notes above).
+        position: absolute;
+        inset: $paper-top $paper-right $paper-bottom $paper-left;
+        // Matches the tilt the paper hangs at in the artwork.
+        transform: rotateZ(-2deg);
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2.2cqw;
+
+        color: $tag-ink;
+        font-family: 'Averia Serif Libre', serif;
+        text-align: center;
+        // The tags sit inside a `pointer-events: none` overlay on the landing page.
+        pointer-events: all;
+    }
+
+    // Section name: deliberately the quiet element. It is a category label, and
+    // the person's name is what a visitor is actually scanning for.
+    .sectionLabel {
+        margin: 0;
+        font-size: clamp(0.6rem, 5cqw, 1.2rem);
+        line-height: 1.15;
+        font-weight: 400;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: $tag-ink-muted;
+    }
+
+    // The highlighted line: larger, heavier, and in fest red.
+    .personName {
+        display: block;
+        font-size: clamp(0.82rem, 9cqw, 2.1rem);
+        line-height: 1.14;
+        font-weight: 700;
+        color: $tag-ink-name;
+        text-wrap: balance;
+    }
+
+    .personTitle {
+        display: block;
+        font-size: clamp(0.52rem, 4.5cqw, 1.05rem);
+        line-height: 1.25;
+        font-style: italic;
+        color: $tag-ink-muted;
+        text-wrap: balance;
+    }
+
+    .personPhone {
+        display: block;
+        font-size: clamp(0.62rem, 6cqw, 1.35rem);
+        line-height: 1.25;
+        color: $tag-ink;
+        text-decoration: none;
+        cursor: pointer;
+        // Lining figures stop the digit groups looking ragged against each other.
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        transition: 0.25s color;
+
+        &:hover {
+            color: $tag-ink-name;
+            text-decoration: underline;
+        }
+    }
+
+    // Keyboard users need to see where they are; a page of tags is otherwise a
+    // wall of similar-looking links.
+    .contactCard a:focus-visible {
+        outline: 2px solid $tag-ink-name;
+        outline-offset: 2px;
+        border-radius: 2px;
+    }
+
+    // --- Solo tag ------------------------------------------------------------
+
+    .solo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.2cqw;
+        width: 100%;
+        min-width: 0;
+    }
+
+    // --- Roster tag: one row per person --------------------------------------
+
+    .roster {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .rosterRow {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25cqw;
+        min-width: 0;
+        padding: 0.9cqw 0;
+
+        // Hairline between members: keeps three people from reading as one block
+        // while staying quieter than boxing each row.
+        & + & {
+            border-top: 1px solid $tag-rule;
+        }
+    }
+
+    // The roster carries three names where a solo tag carries one, so its type
+    // steps down. Sized off the same tag width, so the ratio holds at every size.
+    .contactCardRoster {
+        gap: 1.8cqw;
+
+        .personName {
+            font-size: clamp(0.7rem, 5.2cqw, 1.3rem);
+        }
+
+        .personPhone {
+            font-size: clamp(0.56rem, 4.3cqw, 1.05rem);
+        }
+    }
+}
