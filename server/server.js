@@ -83,18 +83,19 @@ const allowedOrigins = [
 ].filter(Boolean);
 
 app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, postman) or matching allowed domains
-      if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app") || origin.includes("mohanamantra")) {
-        callback(null, true);
-      } else {
-        callback(null, true);
-      }
-    },
-    methods: ["GET", "POST"],
-    credentials: true,
-  })
+ cors({
+ origin: (origin, callback) => {
+ // Allow requests with no origin (mobile apps, curl, postman) or matching allowed domains.
+ // The previous version accepted every origin in both branches of this if, which meant the
+ // allowlist below was decorative; tighten it back up here.
+ if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app") || origin.includes("mohanamantra")) {
+ callback(null, true);
+  } else {
+ callback(new Error(`Origin ${origin} not allowed by CORS`), false);
+ }
+ },
+ methods: ["GET", "POST"],
+ })
 );
 
 // JSON body parser with RAW BODY preservation
@@ -386,9 +387,16 @@ app.get("/api/health", (_req, res) => {
 
 // Helper to validate Admin Key-Value Credentials
 function isValidAdmin(adminKey, adminSecret) {
-  const expectedKey = process.env.ADMIN_KEY || "admin_gatekeeper";
-  const expectedSecret = process.env.ADMIN_SECRET || "MM26_Gatekeeper_Secret_99!";
-  return adminKey === expectedKey && adminSecret === expectedSecret;
+ // Refuse to start with a guessable secret. JWTs signed with this would be forgeable by anyone
+ // who reads the public repo. If the env vars are missing, fail closed — the operator has
+ // to set them on Render before the server can boot into a usable state.
+ const expectedKey = process.env.ADMIN_KEY;
+ const expectedSecret = process.env.ADMIN_SECRET;
+ if (!expectedKey || !expectedSecret) {
+ console.error("❌ ADMIN_KEY / ADMIN_SECRET not configured on server.");
+  return false;
+ }
+ return adminKey === expectedKey && adminSecret === expectedSecret;
 }
 
 // ROUTE: POST /api/gatekeeper/login
@@ -421,13 +429,18 @@ app.post("/api/gatekeeper/verify", async (req, res) => {
 
     // If token is provided, verify JWT signature
     if (token) {
-      try {
-        const jwt = require("jsonwebtoken");
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || "mohanamantra2k26_super_secret_jwt_key_change_me");
-        targetTicketId = decoded.tid;
-      } catch (jwtErr) {
-        return res.status(400).json({ success: false, error: "Invalid or forged QR token signature." });
-      }
+     try {
+    const jwt = require("jsonwebtoken");
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+    console.error("❌ JWT_SECRET not configured on server — cannot verify QR token.");
+    return res.status(500).json({ success: false, error: "QR verification is not configured on this server." });
+    }
+    const decoded = jwt.verify(token, jwtSecret);
+    targetTicketId = decoded.tid;
+    } catch (jwtErr) {
+    return res.status(400).json({ success: false, error: "Invalid or forged QR token signature." });
+    }
     }
 
     if (!targetTicketId) {
