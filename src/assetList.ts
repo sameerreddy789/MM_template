@@ -97,6 +97,7 @@ const assetList = {
             './images/events/Eventpics/Agri-Plex.png',
             './images/events/Eventpics/Band Battle.png',
             './images/events/Eventpics/CADathon.png',
+            './images/events/Eventpics/Dedicate_a_song.png',
             './images/events/Eventpics/Hackathon.png',
             './images/events/Eventpics/Robo-Race.png',
             './images/events/Eventpics/Tech-Exhibition.png',

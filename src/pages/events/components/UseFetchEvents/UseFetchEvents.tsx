@@ -26,7 +26,7 @@ const dummyEventsData = [
      category_name: "Band Night",
     events: [
       { name: "Band Battle", club_name: "Music Club", venue: "Main Auditorium", description: "Battle of the musical bands.", image_url: "/images/events/Eventpics/Band Battle.png" },
-      { name: "Dedicate a song", club_name: "Music Club", venue: "Campus Radio", description: "Dedicate your favorite song to someone special.", image_url: "/images/logo.webp" },
+      { name: "Dedicate a song", club_name: "Music Club", venue: "Campus Radio", description: "Dedicate your favorite song to someone special.", image_url: "/images/events/Eventpics/Dedicate_a_song.png" },
       { name: "Solo and Group Singing", club_name: "Music Club", venue: "Main Auditorium", description: "Melodious vocal performances in solo & group categories.", image_url: "/images/logo.webp" },
       { name: "Fashion Show", club_name: "Fashion Club", venue: "Main Stage", description: "Walk the ramp in style.", image_url: "/images/logo.webp" }
     ]
