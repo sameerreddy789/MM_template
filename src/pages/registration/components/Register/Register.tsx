@@ -7,7 +7,6 @@ import { useForm } from "react-hook-form";
 import Left from "/svgs/registration/leftarr.svg";
 import Right from "/svgs/registration/rightarr.svg";
 import type { PaymentSuccessData } from "../PaymentSuccessModal/PaymentSuccessModal";
-import { saveRegistrationToFirestore } from "../../../../firebase";
 
 const registrationSchema = yup.object({
   name: yup
@@ -113,151 +112,109 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
       });
     };
 
-    const onSubmit = async (data: FormData) => {
-      const registrationPayload = {
-        ...data,
-        is_mbu: "",
-        city: "",
-      };
-      setUserData(registrationPayload);
-      localStorage.removeItem("registrationFormData");
+     const onSubmit = async (data: FormData) => {
+    const registrationPayload = {
+    ...data,
+     is_mbu: "",
+    city: "",
+    };
+    setUserData(registrationPayload);
+    localStorage.removeItem("registrationFormData");
 
-      const keyId =
-        (import.meta as any).env?.VITE_RAZORPAY_KEY_ID ||
-        "rzp_live_JXXvFjARDIcDEl";
+    const keyId = (import.meta as any).env?.VITE_RAZORPAY_KEY_ID as
+    | string
+    | undefined;
+    if (!keyId) {
+     console.error(
+    "VITE_RAZORPAY_KEY_ID is not configured. Registration is disabled."
+     );
+    alert(
+    "Payment is not configured on this build. Please contact the organizers."
+    );
+    return;
+    }
 
-      // =====================================================
-      // Direct Razorpay Checkout Integration
-      // =====================================================
-      await loadRazorpayScript();
-      if (typeof (window as any).Razorpay !== "undefined") {
-        const options: any = {
-          key: keyId,
-          amount: 1000 * 100, // ₹1,000 in paise
-          currency: "INR",
-          name: "MohanaMantra 2K26",
-          description: "Festival Pass & Registration Fee",
-          image: "https://www.mohanamantra.com/images/logo.webp",
-          prefill: {
-            name: data.name,
-            email: data.email_id,
-            contact: data.phone,
-          },
-          notes: {
-            student_name: data.name,
-            student_email: data.email_id,
-            roll_no: data.roll_no,
-            college_name: data.college_id,
-            student_phone: data.phone,
-            fest: "MohanaMantra 2K26",
-          },
-          theme: {
-            color: "#8B2635",
-          },
-          handler: async function (response: any) {
-            const paymentId =
-              response.razorpay_payment_id || `pay_${Date.now()}`;
-            const randomCode = Math.random()
-              .toString(36)
-              .substring(2, 8)
-              .toUpperCase();
-            const ticketId = `MM26-${randomCode}`;
+    const scriptLoaded = await loadRazorpayScript();
+    if (!scriptLoaded || typeof (window as any).Razorpay === "undefined") {
+    console.error("Razorpay SDK failed to load. Aborting registration.");
+    alert(
+    "Could not load the payment SDK. Please check your network connection and try again."
+    );
+    return;
+    }
 
-            // Save record directly to Firebase Firestore
-            await saveRegistrationToFirestore({
-              ticketId,
-              name: data.name,
-              email: data.email_id,
-              phone: data.phone,
-              college: data.college_id,
-              rollNo: data.roll_no,
-              paymentId,
-              amount: 1000,
-            });
+    const options: any = {
+    key: keyId,
+    amount: 1000 * 100, // ₹1,000 in paise
+    currency: "INR",
+    name: "MohanaMantra 2K26",
+    description: "Festival Pass & Registration Fee",
+    image: "https://www.mohanamantra.com/images/logo.webp",
+    prefill: {
+    name: data.name,
+     email: data.email_id,
+    contact: data.phone,
+    },
+    notes: {
+    student_name: data.name,
+    student_email: data.email_id,
+    roll_no: data.roll_no,
+    college_name: data.college_id,
+    student_phone: data.phone,
+     fest: "MohanaMantra 2K26",
+    },
+    theme: {
+    color: "#8B2635",
+    },
+    handler: async function (response: any) {
+    // The Razorpay handler only fires for confirmed payments. We do NOT
+    // create the Firestore record here — the verified webhook on the
+    // backend is the single source of truth, and it issues the ticket
+    // id + secure token. Showing the success modal is fine: it confirms
+    // to the student that payment went through, and the email arrives
+    // a few seconds later from the backend pipeline.
+    const paymentId =
+    response.razorpay_payment_id || `pay_${Date.now()}`;
+    const successData: PaymentSuccessData = {
+    name: data.name,
+    email_id: data.email_id,
+     roll_no: data.roll_no,
+    college_id: data.college_id,
+    phone: data.phone,
+    payment_id: paymentId,
+    amount: 1000,
+    };
+    onPaymentSuccess(successData);
+     },
+    modal: {
+    ondismiss: function () {
+    // User closed the checkout without paying. No record is written
+    // to Firestore — the webhook is the only thing that creates
+    // confirmed registrations, so abandoning checkout is safe.
+    console.info("Razorpay checkout closed by user");
+    },
+    },
+    };
 
-            const successData: PaymentSuccessData = {
-              name: data.name,
-              email_id: data.email_id,
-              roll_no: data.roll_no,
-              college_id: data.college_id,
-              phone: data.phone,
-              payment_id: paymentId,
-              amount: 1000,
-            };
-            onPaymentSuccess(successData);
-          },
-          modal: {
-            ondismiss: function () {
-              console.log("Razorpay checkout closed by user");
-            },
-          },
-        };
-
-        try {
-          const rzp = new (window as any).Razorpay(options);
-          rzp.on("payment.failed", function (response: any) {
-            alert(
-              `Payment Failed: ${
-                response.error?.description || "Please try again."
-              }`
-            );
-          });
-          rzp.open();
-        } catch (err) {
-          console.warn("Razorpay fallback triggered:", err);
-          const fallbackPaymentId = `pay_demo_${Math.floor(
-            100000 + Math.random() * 900000
-          )}`;
-          saveRegistrationToFirestore({
-            ticketId: `MM26-${Math.random()
-              .toString(36)
-              .substring(2, 8)
-              .toUpperCase()}`,
-            name: data.name,
-            email: data.email_id,
-            phone: data.phone,
-            college: data.college_id,
-            rollNo: data.roll_no,
-            paymentId: fallbackPaymentId,
-            amount: 1000,
-          });
-          onPaymentSuccess({
-            name: data.name,
-            email_id: data.email_id,
-            roll_no: data.roll_no,
-            college_id: data.college_id,
-            phone: data.phone,
-            payment_id: fallbackPaymentId,
-            amount: 1000,
-          });
-        }
-      } else {
-        const demoPaymentId = `pay_demo_${Math.floor(
-          100000 + Math.random() * 900000
-        )}`;
-        saveRegistrationToFirestore({
-          ticketId: `MM26-${Math.random()
-            .toString(36)
-            .substring(2, 8)
-            .toUpperCase()}`,
-          name: data.name,
-          email: data.email_id,
-          phone: data.phone,
-          college: data.college_id,
-          rollNo: data.roll_no,
-          paymentId: demoPaymentId,
-          amount: 1000,
-        });
-        onPaymentSuccess({
-          name: data.name,
-          email_id: data.email_id,
-          roll_no: data.roll_no,
-          college_id: data.college_id,
-          phone: data.phone,
-          payment_id: demoPaymentId,
-          amount: 1000,
-        });
-      }
+     try {
+    const rzp = new (window as any).Razorpay(options);
+    rzp.on("payment.failed", function (response: any) {
+    alert(
+    `Payment Failed: ${
+    response.error?.description || "Please try again."
+    }`
+    );
+    });
+    rzp.open();
+    } catch (err) {
+    // We deliberately do NOT write a registration record on error —
+    // only the verified Razorpay webhook creates confirmed records
+    // in Firestore.
+    console.error("Failed to open Razorpay checkout:", err);
+    alert(
+    "Could not open the payment window. Please check your network and try again."
+    );
+    }
     };
 
     return (

@@ -97,19 +97,25 @@ export const useMusicStore = create<music>((set, get) => ({
         set({ isMusicOn: false });
         get().audioEl?.pause();
     },
-    // The element's own paused flag is the source of truth, not isMusicOn, so a
-    // toggle still does the expected thing if the two ever drift (a rejected
-    // autoplay, say).
+    // The element's own paused flag is the source of truth, not isMusicOn. We
+    // do NOT optimistically write isMusicOn here, because:
+    // 1. audio.play() returns a promise that rejects on autoplay refusal — if we
+    // set isMusicOn: true synchronously and the play() rejects, the BackgroundMusic
+    // reconciler would then pause() the (still paused) element and the player
+    // icon would say "playing" while nothing plays.
+    // 2. The BackgroundMusic effect depends on isMusicOn; an optimistic write
+    // makes the effect re-fire and immediately pause() the element before the
+    // play() promise resolves, which looks like a no-op toggle.
+    // Instead, toggle() only calls play()/pause(); the element's onplay/onpause
+    // handlers update isMusicOn, so the store stays truthful to the DOM.
     toggle: () => {
-        const audio = get().audioEl;
-        if (!audio) return;
-        if (audio.paused) {
-            set({ isMusicOn: true });
-            audio.play().catch(() => {});
-        } else {
-            set({ isMusicOn: false });
-            audio.pause();
-        }
+    const audio = get().audioEl;
+    if (!audio) return;
+    if (audio.paused) {
+    audio.play().catch(() => {});
+    } else {
+    audio.pause();
+    }
     },
     // Track changes only move the index. Swapping the src resets the element to
     // paused, and BackgroundMusic's reconciling effect picks it back up once the

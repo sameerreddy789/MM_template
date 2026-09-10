@@ -4,8 +4,8 @@ const categoryAliases: Record<string, string[]> = {
   kalakshetra: ["kalakshetra", "kalakshera", "drama & theatre", "drama and theatre", "drama"],
   technoholic: ["technoholic", "tech"],
   "spot events": ["spot events", "photography", "spot"],
-  "pro shows": ["pro shows", "por shows", "proshow"],
-  music: ["music", "misc", "fashion"],
+  "pro shows": ["dj night", "pro shows", "por shows", "proshow"],
+  music: ["band night", "music", "misc", "fashion"],
   misc: ["misc", "music", "fashion"],
 };
 
@@ -23,7 +23,7 @@ const dummyEventsData = [
     ]
   },
   {
-    category_name: "Music",
+     category_name: "Band Night",
     events: [
       { name: "Band Battle", club_name: "Music Club", venue: "Main Auditorium", description: "Battle of the musical bands.", image_url: "/images/events/Eventpics/Band Battle.png" },
       { name: "Dedicate a song", club_name: "Music Club", venue: "Campus Radio", description: "Dedicate your favorite song to someone special.", image_url: "/images/logo.webp" },
@@ -55,7 +55,7 @@ const dummyEventsData = [
     ]
   },
   {
-    category_name: "Pro Shows",
+    category_name: "DJ Night",
     events: [
       { name: "The Band Night", club_name: "Cultural Club", venue: "Main Stage", description: "Electrifying live musical band performance.", image_url: "/images/logo.webp" },
       { name: "The DJ Night", club_name: "Cultural Club", venue: "Main Stage", description: "High-energy EDM and DJ tracks to light up the night.", image_url: "/images/logo.webp" },

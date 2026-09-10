@@ -245,10 +245,18 @@ const Gatekeeper: React.FC = () => {
   };
 
   const stopScanner = async () => {
-    if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
-      try { await html5QrCodeRef.current.stop(); } catch (e) {}
-    }
-    setIsScanning(false);
+  if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
+  try {
+  await html5QrCodeRef.current.stop();
+  } catch (e) {
+  // Html5Qrcode throws "Cannot stop, scanner is not running" when the underlying
+  // camera was already torn down (tab switch, permission revoke, browser
+  // closing). That's expected — surface it as a warning so silent failures
+  // don't pile up in the console, but don't break the rest of the cleanup.
+  console.warn("html5Qrcode.stop() failed:", e);
+  }
+  }
+  setIsScanning(false);
   };
 
   const [dragActive, setDragActive] = useState<boolean>(false);

@@ -15,7 +15,7 @@ import useCanonicalUrl from "./UseCanonicalUrl";
 import Events from "./pages/events/Events";
 
 export const navContext = createContext<{ goToPage?: (page: string) => void }>(
-  {}
+ {}
 );
 
 import ReactGA from "react-ga4";
@@ -29,213 +29,221 @@ import Gatekeeper from "./pages/gatekeeper/Gatekeeper";
 
 const TRACKING_ID = "G-57YBBH7RXW";
 if (window.location.hostname.search("mohanamantra.com") !== -1) {
-  ReactGA.initialize(TRACKING_ID);
-  console.log("Hey :)");
+ ReactGA.initialize(TRACKING_ID);
 }
 
 export default function App() {
-  useCanonicalUrl(
-    window.location.origin.includes("localhost")
-      ? "https://mm-template.vercel.app"
-      : window.location.origin
-  );
-  const navigate = useNavigate();
-  const location = useLocation();
+ useCanonicalUrl(
+ window.location.origin.includes("localhost")
+ ? "https://mm-template.vercel.app"
+ : window.location.origin
+ );
+ const navigate = useNavigate();
+ const location = useLocation();
 
-  interface LocationState {
-    startAnimation?: boolean;
-  }
+ interface LocationState {
+ startAnimation?: boolean;
+ }
 
-  useEffect(() => {
-    ReactGA.send({
-      hitType: "pageview",
-      page: location.pathname + location.search,
-    });
-  }, [location]);
+ useEffect(() => {
+ ReactGA.send({
+ hitType: "pageview",
+ page: location.pathname + location.search,
+ });
+ }, [location]);
 
-  const pageList = [
-    "home",
-    "register",
-    "events",
-    "aboutus",
-    "contact",
-    "brochure",
-    "sponsors",
-    "mediaPartners",
-    "gallery",
-  ];
+ const pageList = [
+ "home",
+ "register",
+ "events",
+ "aboutus",
+ "contact",
+ "brochure",
+ "sponsors",
+ "mediaPartners",
+ "gallery",
+ ];
 
-  const [currentPage, setCurrentPage] = useState<
-    (typeof pageList)[number]
-  >(
-    location.pathname === "/"
-      ? "home"
-      : pageList.includes(location.pathname.replace("/", ""))
-      ? location.pathname.replace("/", "")
-      : "home"
-  );
+ const [currentPage, setCurrentPage] = useState<
+ (typeof pageList)[number]
+ >(
+ location.pathname === "/"
+ ? "home"
+ : pageList.includes(location.pathname.replace("/", ""))
+ ? location.pathname.replace("/", "")
+ : "home"
+ );
 
-  const [doorPhase, setDoorPhase] = useState<
-    "idle" | "closing" | "waiting" | "opening"
-  >("idle");
-  const [doorPLPercentageLoaded, setDoorPLPercentageLoaded] =
-    useState<number>(0);
+ const [doorPhase, setDoorPhase] = useState<
+ "idle" | "closing" | "waiting" | "opening"
+ >("idle");
+ const [doorPLPercentageLoaded, setDoorPLPercentageLoaded] =
+ useState<number>(0);
 
-  const [isPreloading, setIsPreloading] = useState(location.pathname !== "/");
+ const [isPreloading, setIsPreloading] = useState(location.pathname !== "/");
 
-  const nextRoute = useRef<string | null>(null);
+ const nextRoute = useRef<string | null>(null);
 
-  useEffect(() => {
-    const path = location.pathname.replace("/", "");
+ useEffect(() => {
+ const path = location.pathname.replace("/", "");
 
-    // If visiting any subpage, mark the session as already entered so
-    // returning home never prompts with the initial enter animation
-    if (path !== "") {
-      useOverlayStore.getState().setRemoveGif();
-    }
+ // If visiting any subpage, mark the session as already entered so
+ // returning home never prompts with the initial enter animation
+ if (path !== "") {
+ useOverlayStore.getState().setRemoveGif();
+ }
 
-    if (location.pathname.startsWith("/gatekeeper")) {
-      setCurrentPage("gatekeeper");
-      setIsPreloading(false);
-      return;
-    }
+ if (location.pathname.startsWith("/gatekeeper")) {
+ setCurrentPage("gatekeeper");
+ setIsPreloading(false);
+ return;
+ }
 
-    setCurrentPage(
-      pageList.includes(path)
-        ? (path as typeof currentPage)
-        : "home"
-    );
-    setIsPreloading(Object.keys(assetList).includes(path));
-  }, [location.pathname]);
+ setCurrentPage(
+ pageList.includes(path)
+ ? (path as typeof currentPage)
+ : "home"
+ );
+ setIsPreloading(Object.keys(assetList).includes(path));
+ }, [location.pathname]);
 
-  const handleDoorsClosed = async () => {
-    setDoorPhase("waiting");
+ const handleDoorsClosed = async () => {
+ setDoorPhase("waiting");
 
-    const page = nextRoute.current?.replace("/", "");
-    if (page && Object.keys(assetList).includes(page))
-      await loadAssets(page as keyof typeof assetList);
-    // await new Promise((resolve) => setTimeout(resolve, 10000))
+ const page = nextRoute.current?.replace("/", "");
+ if (page && Object.keys(assetList).includes(page))
+ await loadAssets(page as keyof typeof assetList);
+ // await new Promise((resolve) => setTimeout(resolve, 10000))
 
-    if (nextRoute.current) {
-      navigate(nextRoute.current, { state: { startAnimation: true } });
-    }
+ if (nextRoute.current) {
+ navigate(nextRoute.current, { state: { startAnimation: true } });
+ }
 
-    if (
-      nextRoute.current &&
-      !Object.keys(assetList).includes(nextRoute.current)
-    ) {
-      setTimeout(() => {
-        setDoorPhase("opening");
-      }, 500);
-    }
-  };
+ if (
+ nextRoute.current &&
+ !Object.keys(assetList).includes(nextRoute.current)
+ ) {
+ setTimeout(() => {
+ setDoorPhase("opening");
+ }, 500);
+ }
+ };
 
-  const handleDoorsOpened = () => {
-    setDoorPhase("idle");
-    nextRoute.current = null;
-    setDoorPLPercentageLoaded(0);
-  };
+ const handleDoorsOpened = () => {
+ setDoorPhase("idle");
+ nextRoute.current = null;
+ setDoorPLPercentageLoaded(0);
+ };
 
-  const goToPage = (path: string) => {
-    if (location.pathname !== path) {
-      nextRoute.current = path;
-      setDoorPhase("closing");
-    }
-  };
+ const goToPage = (path: string) => {
+ if (location.pathname !== path) {
+ nextRoute.current = path;
+ setDoorPhase("closing");
+ }
+ };
 
-  const handlePreloaderEnter = () => {
-    setIsPreloading(false);
+ const handlePreloaderEnter = () => {
+ setIsPreloading(false);
 
-    // Only re-open doors that were actually closed. The preloader also runs when
-    // a page simply loads - a refresh, a pasted URL, browser back/forward, or the
-    // events page's category back button, which is a window.location.reload - and
-    // in none of those did anything close the doors. Opening from there animated
-    // them to the off-screen position they were already sitting in, so nothing
-    // moved on screen but the transition sound still played.
-    //
-    // nextRoute is only set by goToPage and cleared once the doors finish
-    // opening, so it is exactly "a door transition is in flight".
-    if (!nextRoute.current) return;
+ // Only re-open doors that were actually closed. The preloader also runs when
+ // a page simply loads - a refresh, a pasted URL, browser back/forward, or the
+ // events page's category back button, which is a window.location.reload - and
+ // in none of those did anything close the doors. Opening from there animated
+ // them to the off-screen position they were already sitting in, so nothing
+ // moved on screen but the transition sound still played.
+ //
+ // nextRoute is set by goToPage and cleared once the doors finish opening,
+ // so its presence is exactly "a door transition is in flight".
+ //
+ // The previous version used setTimeout(..., 300) here, which was guessing at
+ // how long the preloader fade-out takes. The 300ms is sometimes too long
+ // (doors jitter), sometimes too short (animation overlaps the click sound).
+ // We use rAF instead so the open phase starts the next frame after the
+ // click resolves - the visual gap is imperceptible and the timing stops
+ // drifting as the preloader animation evolves.
+ if (!nextRoute.current) return;
+ if (doorPhase !== "waiting") return;
 
-    setTimeout(() => {
-      setDoorPhase("opening");
-    }, 300);
-  };
+ requestAnimationFrame(() => {
+ setDoorPhase("opening");
+ });
+ };
 
-  const loadAssets = async (page: keyof typeof assetList) => {
-    const handleLoadedAsset = (callback: (param?: any) => void) => {
-      setDoorPLPercentageLoaded((prev) => prev + 100 / promises.length);
-      callback();
-    };
+ const loadAssets = async (page: keyof typeof assetList) => {
+ const handleLoadedAsset = (callback: (param?: any) => void) => {
+ setDoorPLPercentageLoaded((prev) => prev + 100 / promises.length);
+ callback();
+ };
 
-    const promises = [
-      ...assetList[page].images.map(
-        (path) =>
-          new Promise((resolve, reject) => {
-            const image = new Image();
-            image.src = path;
-            image.onload = () => handleLoadedAsset(() => resolve(image));
-            image.onerror = () => handleLoadedAsset((error) => reject(error));
-          })
-      ),
-      ...assetList[page].videos.map(
-        (path) =>
-          new Promise((resolve, reject) => {
-            const video = document.createElement("video");
-            video.src = path;
-            video.onloadeddata = () => handleLoadedAsset(() => resolve(video));
-            video.onerror = () => handleLoadedAsset((error) => reject(error));
-          })
-      ),
-    ];
+ const promises = [
+ ...assetList[page].images.map(
+ (path) =>
+ new Promise((resolve, reject) => {
+ const image = new Image();
+ image.src = path;
+ image.onload = () => handleLoadedAsset(() => resolve(image));
+ image.onerror = () => handleLoadedAsset((error) => reject(error));
+ })
+ ),
+ ...assetList[page].videos.map(
+ (path) =>
+ new Promise((resolve, reject) => {
+ const video = document.createElement("video");
+ video.src = path;
+ video.onloadeddata = () =>
+ handleLoadedAsset(() => resolve(video));
+ video.onerror = () =>
+ handleLoadedAsset((error) => reject(error));
+ })
+ ),
+ ];
 
-    await Promise.allSettled(promises); //.catch((error) => console.log(error))
-    console.log("loaded");
-  };
+ await Promise.allSettled(promises); //.catch((error) => console.log(error))
+ };
 
-  return (
-    <navContext.Provider value={{ goToPage }}>
-      <DoorTransition
-        phase={doorPhase}
-        onClosed={handleDoorsClosed}
-        onOpened={handleDoorsOpened}
-        percentageLoaded={doorPLPercentageLoaded}
-        targetPageRef={nextRoute}
-      />
-      {/* Deliberately outside the conditional page block below. Every page down
-          there is unmounted on navigation, and the audio element has to outlive
-          that. Suppressed on the gallery, which autoplays an unmuted video. */}
-      <BackgroundMusic suppressed={currentPage === "gallery"} />
+ return (
+ <navContext.Provider value={{ goToPage }}>
+ <DoorTransition
+ phase={doorPhase}
+ onClosed={handleDoorsClosed}
+ onOpened={handleDoorsOpened}
+ percentageLoaded={doorPLPercentageLoaded}
+ targetPageRef={nextRoute}
+ />
+ {/* Deliberately outside the conditional page block below. Every page down
+ there is unmounted on navigation, and the audio element has to outlive
+ that. Suppressed on the gallery, which autoplays its own video. */}
+ <BackgroundMusic suppressed={currentPage === "gallery"} />
 
-      <h1 style={{ display: "none" }}>MohanaMantra 2K26 | MBU</h1>
-      {isPreloading && (
-        <Preloader
-          onEnter={handlePreloaderEnter}
-          targetLocation={nextRoute.current}
-        />
-      )}
+ <h1 style={{ display: "none" }}>MohanaMantra 2K26 | MBU</h1>
+ {isPreloading && (
+ <Preloader
+ onEnter={handlePreloaderEnter}
+ targetLocation={nextRoute.current}
+ />
+ )}
 
-      {!isPreloading && currentPage === "home" && (
-        <Homepage goToPage={goToPage} />
-      )}
+ {!isPreloading && currentPage === "home" && (
+ <Homepage goToPage={goToPage} />
+ )}
 
-      {!isPreloading && currentPage === "register" && (
-        <Registration
-          goToPage={goToPage}
-          startAnimation={
-            (location.state as LocationState)?.startAnimation || false
-          }
-        />
-      )}
+ {!isPreloading && currentPage === "register" && (
+ <Registration
+ goToPage={goToPage}
+ startAnimation={
+ (location.state as LocationState)?.startAnimation || false
+ }
+ />
+ )}
 
-      {!isPreloading && currentPage === "events" && <Events />}
-      {!isPreloading && currentPage === "aboutus" && <AboutUs />}
-      {!isPreloading && currentPage === "contact" && <Contact />}
-      {!isPreloading && currentPage === "brochure" && <Brochure />}
-      {!isPreloading && currentPage === "gallery" && <Gallery />}
-      {!isPreloading && currentPage === "sponsors" && <Sponsors />}
-      {!isPreloading && currentPage === "mediaPartners" && <MediaPatners />}
-      {currentPage === "gatekeeper" && <Gatekeeper />}
-    </navContext.Provider>
-  );
+ {!isPreloading && currentPage === "events" && <Events />}
+ {!isPreloading && currentPage === "aboutus" && <AboutUs />}
+ {!isPreloading && currentPage === "contact" && <Contact />}
+ {!isPreloading && currentPage === "brochure" && <Brochure />}
+ {!isPreloading && currentPage === "gallery" && <Gallery />}
+ {!isPreloading && currentPage === "sponsors" && <Sponsors />}
+ {!isPreloading && currentPage === "mediaPartners" && <MediaPatners />}
+ {currentPage === "gatekeeper" && <Gatekeeper />}
+ </navContext.Provider>
+ );
 }

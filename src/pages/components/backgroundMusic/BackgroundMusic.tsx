@@ -14,62 +14,79 @@ import { PLAYLIST, useMusicStore } from "../../../utils/store";
  * music resumes on its own once the page that asked for quiet is left behind.
  */
 export default function BackgroundMusic({
-  suppressed,
+ suppressed,
 }: {
-  /** Pause while true - the gallery autoplays an unmuted video of its own. */
-  suppressed: boolean;
-}) {
-  const trackIndex = useMusicStore((state) => state.trackIndex);
-  const isMusicOn = useMusicStore((state) => state.isMusicOn);
-  const audioEl = useMusicStore((state) => state.audioEl);
-  const setAudioEl = useMusicStore((state) => state.setAudioEl);
-  const toggle = useMusicStore((state) => state.toggle);
+ /** Pause while true - the gallery autoplays an unmuted video of its own. */
+ suppressed: boolean;
+ }) {
+ const trackIndex = useMusicStore((state) => state.trackIndex);
+ const isMusicOn = useMusicStore((state) => state.isMusicOn);
+ const audioEl = useMusicStore((state) => state.audioEl);
+ const setAudioEl = useMusicStore((state) => state.setAudioEl);
+ const setMusicOn = useMusicStore((state) => state.setMusicOn);
+ const toggle = useMusicStore((state) => state.toggle);
 
-  // Stable identity matters here. An inline arrow would be a new function every
-  // render, so React would detach and reattach the ref each time, and because
-  // setAudioEl writes to a store this component reads from, that would re-render
-  // and reattach forever. Zustand actions are stable, so this closes over one.
-  const attachAudio = useCallback(
-    (el: HTMLAudioElement | null) => {
-      if (el) el.volume = 0.2; // 0.0 - 1.0
-      setAudioEl(el);
-    },
-    [setAudioEl]
-  );
+ // Stable identity matters here. An inline arrow would be a new function every
+ // render, so React would detach and reattach the ref each time, and because
+ // setAudioEl writes to a store this component reads from, that would re-render
+ // and reattach forever. Zustand actions are stable, so this closes over one.
+ const attachAudio = useCallback(
+ (el: HTMLAudioElement | null) => {
+ if (el) el.volume = 0.2; // 0.0 - 1.0
+ setAudioEl(el);
+ },
+ [setAudioEl]
+ );
 
-  // One place reconciles the element with the intended state, covering all four
-  // ways it can drift: the element first appearing, the user toggling playback,
-  // moving on or off a suppressed page, and changing track (swapping src leaves
-  // the element paused, and this runs after the new src is committed).
-  useEffect(() => {
-    if (!audioEl) return;
+ // Sync isMusicOn to the element's real playback state. The store's toggle()
+ // and play()/pause() only call the DOM API; these handlers are the
+ // single source of truth for isMusicOn so the UI can't lie about
+ // whether audio is actually playing (e.g. after an autoplay rejection).
+ useEffect(() => {
+ if (!audioEl) return;
+ const onPlay = () => setMusicOn(true);
+ const onPause = () => setMusicOn(false);
+ audioEl.addEventListener("play", onPlay);
+ audioEl.addEventListener("pause", onPause);
+ return () => {
+ audioEl.removeEventListener("play", onPlay);
+ audioEl.removeEventListener("pause", onPause);
+ };
+ }, [audioEl, setMusicOn]);
 
-    if (suppressed || !isMusicOn) {
-      audioEl.pause();
-      return;
-    }
+ // One place reconciles the element with the intended state, covering all four
+ // ways it can drift: the element first appearing, the user toggling playback,
+ // moving on or off a suppressed page, and changing track (swapping src leaves
+ // the element paused, and this runs after the new src is committed).
+ useEffect(() => {
+ if (!audioEl) return;
 
-    audioEl.play().catch(() => {});
-  }, [audioEl, isMusicOn, suppressed, trackIndex]);
+ if (suppressed || !isMusicOn) {
+ audioEl.pause();
+ return;
+ }
 
-  // Spacebar toggles music globally, but not on a suppressed page: there are no
-  // player controls there to reflect the change, and the reconciling effect would
-  // immediately pause it again, so the keypress would look broken.
-  useEffect(() => {
-    if (suppressed) return;
+ audioEl.play().catch(() => {});
+ }, [audioEl, isMusicOn, suppressed, trackIndex]);
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code !== "Space") return;
-      if (e.target instanceof HTMLInputElement) return;
-      if (e.target instanceof HTMLTextAreaElement) return;
+ // Spacebar toggles music globally, but not on a suppressed page: there are no
+ // player controls there to reflect the change, and the reconciling effect would
+ // immediately pause it again, so the keypress would look broken.
+ useEffect(() => {
+ if (suppressed) return;
 
-      e.preventDefault();
-      toggle();
-    };
+ const handleKeyDown = (e: KeyboardEvent) => {
+ if (e.code !== "Space") return;
+ if (e.target instanceof HTMLInputElement) return;
+ if (e.target instanceof HTMLTextAreaElement) return;
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [suppressed, toggle]);
+ e.preventDefault();
+ toggle();
+ };
 
-  return <audio src={PLAYLIST[trackIndex]} loop ref={attachAudio} />;
+ window.addEventListener("keydown", handleKeyDown);
+ return () => window.removeEventListener("keydown", handleKeyDown);
+ }, [suppressed, toggle]);
+
+ return <audio src={PLAYLIST[trackIndex]} loop ref={attachAudio} />;
 }
