@@ -17,9 +17,9 @@ const dummyEventsData = [
       { name: "Push-up Challenge", club_name: "Fitness Club", venue: "Open Ground", description: "Test your ultimate upper body strength.", image_url: "/images/events/Eventpics/Push_up_challenge.png" },
       { name: "Shoot and Edit", club_name: "Media Club", venue: "Campus Wide", description: "Capture reels & videos and edit them on the spot.", image_url: "/images/events/Eventpics/Shoota_and_edit.png" },
       { name: "Spot Photography", club_name: "Photography Club", venue: "Campus Wide", description: "Capture spontaneous aesthetics across campus.", image_url: "/images/events/Eventpics/Spot_photography.png" },
-      { name: "Traditional Dressing Competition", club_name: "Cultural Club", venue: "Main Stage", description: "Flaunt authentic traditional attire and grace.", image_url: "/images/logo.webp" },
-      { name: "Folk Dance", club_name: "Dance Club", venue: "Main Stage", description: "Celebrate cultural roots through vibrant folk dance.", image_url: "/images/logo.webp" },
-      { name: "Talent show", club_name: "Cultural Club", venue: "Open Air Theatre", description: "Showcase your unique skills and extraordinary talents.", image_url: "/images/logo.webp" }
+      { name: "Traditional Dressing Competition", club_name: "Cultural Club", venue: "Main Stage", description: "Flaunt authentic traditional attire and grace.", image_url: "/images/events/Eventpics/Traditional_Dressing_competition.png" },
+      { name: "Folk Dance", club_name: "Dance Club", venue: "Main Stage", description: "Celebrate cultural roots through vibrant folk dance.", image_url: "/images/events/Eventpics/Folk_dance.png" },
+      { name: "Talent show", club_name: "Cultural Club", venue: "Open Air Theatre", description: "Showcase your unique skills and extraordinary talents.", image_url: "/images/events/Eventpics/Talent_show.png" }
     ]
   },
   {
@@ -47,8 +47,8 @@ const dummyEventsData = [
     category_name: "Spot Events",
     events: [
       { name: "Spot Photography", club_name: "Photography Club", venue: "Campus", description: "Capture the moment.", image_url: "/images/events/Eventpics/Spot_photography.png" },
-      { name: "Jenga", club_name: "Fun Club", venue: "Food Court", description: "Don't let the tower fall.", image_url: "/images/logo.webp" },
-      { name: "Tug of War", club_name: "Sports Club", venue: "Ground", description: "Show your team strength.", image_url: "/images/logo.webp" },
+      { name: "Jenga", club_name: "Fun Club", venue: "Food Court", description: "Don't let the tower fall.", image_url: "/images/events/Eventpics/Jenga.png" },
+      { name: "Tug of War", club_name: "Sports Club", venue: "Ground", description: "Show your team strength.", image_url: "/images/events/Eventpics/Tug_of_war.png" },
       { name: "Food Challenge", club_name: "Food & Fun Club", venue: "Food Court", description: "Eat fast, win big! Ultimate eating challenge.", image_url: "/images/logo.webp" },
       { name: "Gully Cricket", club_name: "Sports Club", venue: "Open Ground", description: "Classic street-style cricket tournament.", image_url: "/images/logo.webp" },
       { name: "Treasure Hunt", club_name: "Adventure Club", venue: "Campus Wide", description: "Find the hidden treasures across campus.", image_url: "/images/logo.webp" }
