@@ -57,7 +57,6 @@ const dummyEventsData = [
   {
     category_name: "Pro Shows",
     events: [
-      { name: "The Band Night", club_name: "Cultural Club", venue: "Main Stage", description: "Electrifying live musical band performance.", image_url: "/images/logo.webp" },
       { name: "The DJ Night", club_name: "Cultural Club", venue: "Main Stage", description: "High-energy EDM and DJ tracks to light up the night.", image_url: "/images/logo.webp" },
       { name: "Stunt show", club_name: "Sports & Adventure Club", venue: "Outdoor Arena", description: "Thrilling professional bike and stunt performances.", image_url: "/images/logo.webp" },
       { name: "Talk Show", club_name: "Media & Cultural Club", venue: "Main Auditorium", description: "Interactive talk show and Q&A session with popular guests.", image_url: "/images/logo.webp" }
