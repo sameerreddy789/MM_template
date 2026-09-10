@@ -22,20 +22,30 @@
 // the bottom. Horizontally it spans roughly 6%-12% in from the left and 6% from
 // the right, the corners being torn.
 //
-// The text box is inset to the worst case of each edge so it stays on paper at
-// every point, which leaves a little over half the tag's height to work with. That
-// is the constraint the sizes below are solved against: the artwork spends its
-// whole top third on the string.
-$paper-top: 43%;
+// So the asset spends its entire top ~40% on the hanging string. Drawing it to fit
+// the box meant only about half the box was usable paper, which is what forced the
+// tags to be large enough that three rows could never share a screen.
+//
+// The fix is to draw the artwork oversized and bottom-anchored ($tag-draw-height
+// below), cropping most of the string away. Paper then covers roughly 69% of the
+// box instead of 53%, so the same text fits in a box a third shorter. Enough
+// string survives at the top to still read as hanging from the lattice.
+$tag-draw-height: 130%;
+
+// Text box, inset to the worst case of each paper edge after that crop, so the
+// text stays on paper at every point across the tag's tilt. $paper-top is the
+// binding one: 25% is where the paper's highest edge lands once cropped, so
+// reducing it puts the section label off the top of the sheet.
+$paper-top: 25%;
 $paper-right: 8%;
 $paper-bottom: 4%;
-$paper-left: 9.5%;
+$paper-left: 9%;
 
-/// Drawn box ratio for a tag. The asset's own ratio is 1.133; a square box
-/// stretches it vertically by about 13% via `background-size: 100% 100%`, which
-/// buys the roster the paper room its three rows need. At that amount it reads as
-/// a slightly longer string on a paper texture rather than as distortion.
-$tag-ratio: 1;
+/// Drawn box ratio. Landscape, close to the asset's own 1.133 once the vertical
+/// crop is taken into account - the artwork ends up drawn at about 1.115, so under
+/// 2% off its natural shape. Landscape also matters for fitting: height is what is
+/// scarce when three rows have to share a viewport, and the text needs width.
+$tag-ratio: 1.35;
 
 // Ink colours sampled against the aged-paper artwork. Contrast on that
 // background: name 6.9:1, label 4.9:1, phone 9.6:1 - all AA or better.
@@ -54,15 +64,25 @@ $tag-rule: rgba(90, 60, 30, 0.28);
 /// every width - only the tag width changes at the two breakpoints below.
 @mixin rows {
     .contactRows {
-        // Derived from the *row* width, not the viewport, so the three tags on the
-        // middle row and the single tags above and below all come out identical:
-        //   - a third of the row, less the two gaps, is the width that makes the
-        //     middle row span the page;
-        //   - 50vh keeps a short laptop window from producing tags so tall the
-        //     arrangement needs a long scroll;
-        //   - 24rem caps them on an ultrawide monitor.
-        --tag-gap: clamp(0.75rem, 2vw, 2.25rem);
-        --tag-width: min(24rem, 50vh, calc((100% - 2 * var(--tag-gap)) / 3));
+        // Vertical room the three rows have to share. Each page sets this to the
+        // viewport less whatever it puts above them (banner, navbar, padding);
+        // the fallback is a conservative guess for any other caller.
+        --tag-rows-space: 68vh;
+        --tag-gap: clamp(0.4rem, 1.1vw, 1.1rem);
+
+        // All five tags come out the same size, bounded by whichever of three
+        // limits binds first:
+        //   - a third of the row, so the middle row of three spans the page;
+        //   - a third of the vertical budget, so all three rows fit one screen.
+        //     Height is width / $tag-ratio, hence the ratio in the numerator;
+        //   - 19rem, so they stop growing on an ultrawide monitor.
+        --tag-width: min(
+            19rem,
+            calc((100% - 2 * var(--tag-gap)) / 3),
+            calc(
+                #{$tag-ratio} * (var(--tag-rows-space) - 2 * var(--tag-gap)) / 3
+            )
+        );
 
         display: flex;
         flex-direction: column;
@@ -92,7 +112,10 @@ $tag-rule: rgba(90, 60, 30, 0.28);
         container-type: inline-size;
 
         background-image: url("/images/contact/ContactCard1.webp");
-        background-size: 100% 100%;
+        // Oversized and bottom-anchored, cropping most of the hanging string off
+        // the top - see the geometry notes above.
+        background-size: 100% $tag-draw-height;
+        background-position: center bottom;
         background-repeat: no-repeat;
 
         // Pivot at the hole the string passes through, so any swing animation
@@ -103,10 +126,13 @@ $tag-rule: rgba(90, 60, 30, 0.28);
     }
 
     // Two across: three tags on one row stop being readable somewhere around here,
-    // so the middle row wraps to 2 + 1 and every tag takes half the row.
+    // so the middle row wraps to 2 + 1 and every tag takes half the row. Fitting
+    // one screen stops being the goal once the rows start wrapping, so the height
+    // limit drops out and the tags can be comfortable instead.
     @media (max-width: 1100px) {
         .contactRows {
-            --tag-width: min(24rem, calc((100% - var(--tag-gap)) / 2));
+            --tag-gap: clamp(0.5rem, 1.5vw, 1.5rem);
+            --tag-width: min(21rem, calc((100% - var(--tag-gap)) / 2));
         }
     }
 
@@ -114,7 +140,7 @@ $tag-rule: rgba(90, 60, 30, 0.28);
     // reading order stays Registrations, Sponsorship, Marketing, Website, Queries.
     @media (max-width: 700px) {
         .contactRows {
-            --tag-width: min(22rem, 100%);
+            --tag-width: min(20rem, 100%);
         }
     }
 }
@@ -148,7 +174,7 @@ $tag-rule: rgba(90, 60, 30, 0.28);
     // the person's name is what a visitor is actually scanning for.
     .sectionLabel {
         margin: 0;
-        font-size: clamp(0.6rem, 5cqw, 1.2rem);
+        font-size: clamp(0.62rem, 5cqw, 1.2rem);
         line-height: 1.15;
         font-weight: 400;
         letter-spacing: 0.16em;
@@ -157,9 +183,12 @@ $tag-rule: rgba(90, 60, 30, 0.28);
     }
 
     // The highlighted line: larger, heavier, and in fest red.
+    // The clamp floors across these rules are the readability guarantee. Tag width
+    // is now driven by fitting three rows on a screen, so on a short laptop the
+    // cqw terms alone would take the numbers under 11px.
     .personName {
         display: block;
-        font-size: clamp(0.82rem, 9cqw, 2.1rem);
+        font-size: clamp(0.95rem, 9cqw, 2.1rem);
         line-height: 1.14;
         font-weight: 700;
         color: $tag-ink-name;
@@ -168,7 +197,7 @@ $tag-rule: rgba(90, 60, 30, 0.28);
 
     .personTitle {
         display: block;
-        font-size: clamp(0.52rem, 4.5cqw, 1.05rem);
+        font-size: clamp(0.62rem, 4.5cqw, 1.05rem);
         line-height: 1.25;
         font-style: italic;
         color: $tag-ink-muted;
@@ -177,7 +206,7 @@ $tag-rule: rgba(90, 60, 30, 0.28);
 
     .personPhone {
         display: block;
-        font-size: clamp(0.62rem, 6cqw, 1.35rem);
+        font-size: clamp(0.8rem, 6cqw, 1.35rem);
         line-height: 1.25;
         color: $tag-ink;
         text-decoration: none;
@@ -229,9 +258,9 @@ $tag-rule: rgba(90, 60, 30, 0.28);
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.25cqw;
+        gap: 0.15cqw;
         min-width: 0;
-        padding: 0.9cqw 0;
+        padding: 0.45cqw 0;
 
         // Hairline between members: keeps three people from reading as one block
         // while staying quieter than boxing each row.
@@ -242,15 +271,21 @@ $tag-rule: rgba(90, 60, 30, 0.28);
 
     // The roster carries three names where a solo tag carries one, so its type
     // steps down. Sized off the same tag width, so the ratio holds at every size.
+    // Three names where a solo tag carries one, so the roster runs tighter: smaller
+    // type and closer leading. The line-heights are pulled in as well - at the tag
+    // sizes that fitting one screen implies, leading is a bigger share of the
+    // roster's height than the glyphs are.
     .contactCardRoster {
-        gap: 1.8cqw;
+        gap: 0.6cqw;
 
         .personName {
-            font-size: clamp(0.7rem, 5.2cqw, 1.3rem);
+            font-size: clamp(0.78rem, 5.2cqw, 1.3rem);
+            line-height: 1.08;
         }
 
         .personPhone {
-            font-size: clamp(0.56rem, 4.3cqw, 1.05rem);
+            font-size: clamp(0.74rem, 4.3cqw, 1.05rem);
+            line-height: 1.12;
         }
     }
 }

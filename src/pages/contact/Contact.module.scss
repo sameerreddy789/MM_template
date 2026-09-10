@@ -126,11 +126,9 @@
 
     .contactHeading {
         position: absolute;
-        // Pulled up from 11rem. This spacing suited a short banner strip; the
-        // current artwork is much taller, so it needs the empty room above it.
-        // Measured across desktop sizes, the smallest gap left above the banner
-        // was 76px, so reclaiming 40px of it still clears the viewport edge.
-        padding-top: 8.5rem;
+        // Clears the navbar. Pulled in from 8.5rem along with the banner height
+        // below, to leave the three tag rows room to share one screen.
+        padding-top: 4.5rem;
         width: 100%;
         margin-bottom: 3rem;
 
@@ -148,7 +146,10 @@
             // safe here). 10vw plus the 2.5rem reclaimed above leaves a gap at
             // every size. object-fit keeps the art undistorted if max-width
             // ever binds.
-            height: clamp(7rem, calc(10vw + 2.5rem), 16rem);
+            // Reduced from clamp(7rem, 10vw + 2.5rem, 16rem). The banner's height is
+            // the main thing competing with the tags for the screen, and all three
+            // rows now have to share one. --tags-top below tracks this.
+            height: clamp(4.5rem, calc(6.5vw + 1.5rem), 10rem);
             width: auto;
             max-width: min(88vw, 30rem);
             object-fit: contain;
@@ -299,18 +300,29 @@
             grid-column: 1 / -1;
             z-index: 5;
             box-sizing: border-box;
-            // Clears the banner and the first lattice bar, matching the padding the
-            // per-door containers used to carry.
-            padding: 15rem clamp(0.75rem, 3vw, 3.5rem) 3rem;
+            // Clears the navbar and the CONTACT US banner above it. Was a flat
+            // 15rem, which ate a sixth of a laptop screen on its own and left the
+            // three rows no room to fit together.
+            //
+            // Tracks .contactHeading: its 4.5rem padding-top plus the banner's own
+            // clamp(4.5rem, 6.5vw + 1.5rem, 10rem) height, plus a little clearance.
+            // Keep these in step - if the banner grows, the tags collide with it.
+            --tags-top: clamp(9.5rem, calc(6.5vw + 6.5rem), 15.5rem);
+            padding: var(--tags-top) clamp(0.75rem, 3vw, 3.5rem) clamp(1rem, 3vh, 2.5rem);
             // Each tag re-enables pointer events on its own paper, so the door
             // artwork behind stays interactive everywhere else.
             pointer-events: none;
 
             @media (max-width: 900px) {
-                padding: calc(6rem + 15vw) clamp(0.75rem, 3vw, 3.5rem) 3rem;
+                --tags-top: calc(5rem + 14vw);
             }
 
             @include card.rows;
+
+            .contactRows {
+                // One screen less the banner clearance above and the padding below.
+                --tag-rows-space: calc(100vh - var(--tags-top) - 3rem);
+            }
         }
 
     }

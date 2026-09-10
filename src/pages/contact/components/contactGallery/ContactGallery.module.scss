@@ -12,17 +12,20 @@
     // width to measure against.
     width: 100%;
     box-sizing: border-box;
-    padding: 0 clamp(0.75rem, 3vw, 3.5rem) clamp(2rem, 5vh, 5rem);
+    padding: 0 clamp(0.75rem, 3vw, 3.5rem) clamp(0.75rem, 2vh, 2rem);
 
     .contactHeading {
         position: relative;
-        width: clamp(12rem, 30vw, 30rem);
+        // Narrower than before. The banner is sized by width but its height is what
+        // competes with the tags for the screen, and all three rows have to fit.
+        width: clamp(8rem, 15vw, 16rem);
         margin: auto;
-        margin-bottom: 3rem;
+        margin-bottom: clamp(0.4rem, 1.2vh, 1rem);
 
         .contactBanner {
             position: relative;
             width: 100%;
+            display: block;
             z-index: 20;
         }
 
@@ -34,4 +37,11 @@
     }
 
     @include card.rows;
+
+    .contactRows {
+        // The banner above is sized by width (15vw) and its artwork is 1.5:1, so it
+        // stands about 10vw tall; the rest is its margin and this block's bottom
+        // padding. Subtracting that from the viewport leaves what the rows can use.
+        --tag-rows-space: calc(100vh - 10vw - 3rem);
+    }
 }
