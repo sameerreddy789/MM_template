@@ -46,7 +46,7 @@ const galleryImageProperties: ImageProperty[] = [
     { src: '/images/gallery/gallery1.webp', type: 'image' },     // top-right
     { src: '/images/gallery/left-up.webp', type: 'image' },      // left-top
     { src: '/images/gallery/left-bottom.webp', type: 'image' },  // left-bottom
-    { src: '/images/gallery/gallery2.webp', type: 'image' },     // right-top
+    { src: '/images/gallery/gallery5.webp', type: 'image' },     // right-top (beside the video, top)
     { src: '/images/gallery/right-bottom.webp', type: 'image' }, // right-bottom
     { src: '/images/gallery/mm1.webp', type: 'image' },         // bottom-left (under video - group with red carpet)
     { src: '/images/gallery/mm2.webp', type: 'image' },         // bottom-right (under video - group with potted plants)
@@ -57,7 +57,7 @@ const galleryImageProperties: ImageProperty[] = [
     { src: '/images/gallery/gallery3.webp', type: 'image' },     // Right: concert audience facing the stage/singer
 
     // --- Remaining flowing festival gallery ---
-    { src: '/images/gallery/gallery5.webp', type: 'image' },
+    { src: '/images/gallery/gallery2.webp', type: 'image' },     // Swapped from right-top slot beside video
     { src: '/images/gallery/gallery6.webp', type: 'image' },     // Concert stage with full truss lights
     { src: '/images/gallery/mm3.webp', type: 'image' },          // Guest with dancers in traditional attire
     { src: '/images/gallery/mm4.webp', type: 'image' },          // Mohan Babu sir at festival stall
