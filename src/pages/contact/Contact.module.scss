@@ -117,6 +117,7 @@
     // overflow-y: scroll;
     pointer-events: none;
     transform: translateY(-100dvh);
+    visibility: hidden;
 
     --bar-thickness: calc(10*100vw/1920);
 

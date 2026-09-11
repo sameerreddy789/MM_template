@@ -91,8 +91,8 @@ export default function ContactDoors({
     if (!targetTrigger || !targetPin) return;
     gsap.registerPlugin(ScrollTrigger);
 
-    const animateContactBanner = (animation: gsap.TimelineVars) =>
-      gsap.to(contactBannerRef.current, { ...animation, duration: 0.3 });
+    // Keep contactSection hidden until scroll arrives at bottom of About Us
+    gsap.set(contactSectionRef.current, { visibility: "hidden" });
 
     const doorTimeLine = gsap.timeline({
       scrollTrigger: {
@@ -105,20 +105,19 @@ export default function ContactDoors({
         invalidateOnRefresh: true,
         onEnter: () => {
           document.body.classList.add("in-contact-section");
+          gsap.set(contactSectionRef.current, { visibility: "visible" });
         },
         onLeave: () => {
           document.body.classList.add("in-contact-section");
-          animateContactBanner({ y: "0%", autoAlpha: 1 });
-          animateContactItems(0);
-          gsap.set(`.${styles.contactSection}`, { pointerEvents: "all" });
+          gsap.set(contactSectionRef.current, { visibility: "visible", pointerEvents: "all" });
         },
         onEnterBack: () => {
           document.body.classList.add("in-contact-section");
-          animateContactBanner({ y: "-100%", autoAlpha: 0 });
-          gsap.set(`.${styles.contactSection}`, { pointerEvents: "none" });
+          gsap.set(contactSectionRef.current, { visibility: "visible", pointerEvents: "none" });
         },
         onLeaveBack: () => {
           document.body.classList.remove("in-contact-section");
+          gsap.set(contactSectionRef.current, { visibility: "hidden", pointerEvents: "none" });
         },
         onUpdate: (self) => {
           const scrollVelocity = self.getVelocity();
@@ -130,9 +129,10 @@ export default function ContactDoors({
     });
 
     doorTimeLine
-      .from(door1Ref.current, { x: "-120%" }, 0)
-      .from(door2Ref.current, { x: "120%" }, 0)
-      .from(contactTagsRef.current, { autoAlpha: 0, duration: 0.45 }, 0.55);
+      .fromTo(door1Ref.current, { x: "-120%" }, { x: "0%", ease: "none" }, 0)
+      .fromTo(door2Ref.current, { x: "120%" }, { x: "0%", ease: "none" }, 0)
+      .fromTo(contactBannerRef.current, { autoAlpha: 0, y: "-100%" }, { autoAlpha: 1, y: "0%", ease: "none" }, 0.4)
+      .fromTo(contactTagsRef.current, { autoAlpha: 0 }, { autoAlpha: 1, ease: "none" }, 0.5);
 
     return () => {
       document.body.classList.remove("in-contact-section");
@@ -238,7 +238,6 @@ export default function ContactDoors({
             ref={door1Ref}
             style={{
               backgroundImage: `url('${isMobile ? door1mobile : door1}')`,
-              transform: "translateX(-120%)",
             }}
           >
             {latticeBars}
@@ -248,7 +247,6 @@ export default function ContactDoors({
             ref={door2Ref}
             style={{
               backgroundImage: `url('${isMobile ? door2mobile : door2}')`,
-              transform: "translateX(120%)",
             }}
           >
             {latticeBars}
