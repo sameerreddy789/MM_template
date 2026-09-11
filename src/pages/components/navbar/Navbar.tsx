@@ -35,10 +35,9 @@ export default function Navbar({
   const navRef = useRef<HTMLElement>(null);
   // Published to the store so the music player can hide alongside the header.
   const navShow = useNavVisibilityStore((state) => state.isNavVisible);
-  const isNavbarBlocked = useNavVisibilityStore((state) => state.isNavbarBlocked);
   const setNavShow = useNavVisibilityStore((state) => state.setNavVisible);
 
-  const shouldShowNav = navShow && !isNavbarBlocked;
+  const shouldShowNav = navShow;
 
   useEffect(() => {
     let lastY = window.scrollY;

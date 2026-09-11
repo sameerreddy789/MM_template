@@ -4,6 +4,13 @@ body {
   --navlink-color: #f2f2f2; //will be changed via gsap later
 }
 
+:global(body.in-contact-section) .nav {
+  transform: translateY(-140px) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
 .nav {
   user-select: none;
   position: fixed;

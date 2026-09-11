@@ -11,11 +11,12 @@ import contactBanner from "/images/contact/contact-banner.webp";
 import { contactRows } from "./components/contactGallery/contacts";
 import ContactCardBody from "./components/contactGallery/ContactCardBody";
 import debouncedHandler from "../../utils/debounce";
-import { useNavVisibilityStore } from "../../utils/store";
 
 interface ContactDoorsProps {
-  pinElemRef: React.RefObject<HTMLDivElement | null>;
-  triggerElemRef: React.RefObject<HTMLDivElement | null>;
+  pinElemRef?: React.RefObject<HTMLDivElement | null>;
+  triggerElemRef?: React.RefObject<HTMLDivElement | null>;
+  pinElem?: HTMLDivElement | null;
+  triggerElem?: HTMLDivElement | null;
 }
 
 interface HoriBarDetails {
@@ -26,17 +27,10 @@ interface HoriBarDetails {
 
 /**
  * Finds the top offset of the first tag that sits on a row below the first one.
- *
- * The previous version indexed a fixed slot (`items[3]` on desktop), which only
- * held while there were eight tags laid out two-by-two in each door. With five
- * sections that index lands on a first-row tag in the other door, so the measured
- * row gap collapsed to zero and the lattice bars stopped being generated.
- * Scanning for the first genuinely lower tag works for any tag count.
  */
 const findSecondRowTop = (items: HTMLCollection, firstRowTop: number) => {
   for (let i = 1; i < items.length; i++) {
     const top = items[i].getBoundingClientRect().top;
-    // 1px of slack absorbs sub-pixel rounding between siblings on a row.
     if (top - firstRowTop > 1) return top;
   }
   return null;
@@ -45,8 +39,12 @@ const findSecondRowTop = (items: HTMLCollection, firstRowTop: number) => {
 export default function ContactDoors({
   pinElemRef,
   triggerElemRef,
+  pinElem,
+  triggerElem,
 }: ContactDoorsProps) {
-  const setNavbarBlocked = useNavVisibilityStore((state) => state.setNavbarBlocked);
+  const targetPin = pinElem || pinElemRef?.current;
+  const targetTrigger = triggerElem || triggerElemRef?.current;
+
   const door1Ref = useRef<HTMLDivElement>(null);
   const door2Ref = useRef<HTMLDivElement>(null);
   const contactBannerRef = useRef<HTMLImageElement>(null);
@@ -54,13 +52,10 @@ export default function ContactDoors({
   const contactTagsRef = useRef<HTMLDivElement>(null);
   const horiBarDetailsRef = useRef<HoriBarDetails | null>(null);
 
-  // Drives the door artwork swap and the scrub mode. The former `isTab` flag went
-  // with the per-door split: the tag layout is now CSS-driven, so no JS breakpoint
-  // is needed to decide how many tags sit on a row.
+  // Drives the door artwork swap and the scrub mode.
   const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 900);
 
   const calculateHoriBarPos = (contactItems: HTMLCollection) => {
-    // const contactItems = document.getElementsByClassName(styles.contactItem);
     const firstRowItem = contactItems[0];
     if (!firstRowItem) return;
     const firstRowRelPos = firstRowItem.getBoundingClientRect().top;
@@ -68,11 +63,9 @@ export default function ContactDoors({
     const secondRowRelPos = findSecondRowTop(contactItems, firstRowRelPos);
     if (secondRowRelPos === null) return;
 
-    // const barGapThreshold = 100;
     let barGap = Math.round(secondRowRelPos - firstRowRelPos);
-    // if (barGap > barGapThreshold)
-    barGap = barGap / 2; //Math.round(barGap / 100);
-    if (barGap <= 0) return; // Guards Array(numOfBars) against an invalid length
+    barGap = barGap / 2;
+    if (barGap <= 0) return;
 
     const firstRowAbsPos =
       firstRowRelPos - (door1Ref.current?.getBoundingClientRect().top || 0);
@@ -82,19 +75,11 @@ export default function ContactDoors({
       (door1Ref.current?.clientHeight || 0 - firstBarPos || 0) / barGap
     );
 
-    // if (setHoriBarDetails) setHoriBarDetails({numOfBars, firstBarPos, barGap})
     horiBarDetailsRef.current = { numOfBars, firstBarPos, barGap };
   };
 
   const { contextSafe } = useGSAP();
-  /**
-   * Swings the tags by their string in response to scroll velocity.
-   *
-   * This used to rotate two groups in opposite directions, one per door, which
-   * suited tags that slid in from opposite sides. They now all hang from the same
-   * lattice on a single overlay, so they swing together - opposing rotations would
-   * read as two separate objects rather than one row of tags on one rail.
-   */
+
   const animateContactItems = contextSafe((angle: number) => {
     const angleLimit = 30;
     if (Math.abs(angle) >= angleLimit) return;
@@ -103,7 +88,7 @@ export default function ContactDoors({
   });
 
   useGSAP(() => {
-    if (!triggerElemRef.current || !pinElemRef.current) return;
+    if (!targetTrigger || !targetPin) return;
     gsap.registerPlugin(ScrollTrigger);
 
     const animateContactBanner = (animation: gsap.TimelineVars) =>
@@ -111,29 +96,29 @@ export default function ContactDoors({
 
     const doorTimeLine = gsap.timeline({
       scrollTrigger: {
-        trigger: triggerElemRef.current,
+        trigger: targetTrigger,
         start: "bottom bottom",
         end: () => `+=${window.innerHeight}`,
         scrub: isMobile ? true : 0.5,
-        pin: pinElemRef.current,
+        pin: targetPin,
         pinSpacing: false,
         invalidateOnRefresh: true,
         onEnter: () => {
-          setNavbarBlocked(true);
+          document.body.classList.add("in-contact-section");
         },
         onLeave: () => {
-          setNavbarBlocked(true);
+          document.body.classList.add("in-contact-section");
           animateContactBanner({ y: "0%", autoAlpha: 1 });
           animateContactItems(0);
           gsap.set(`.${styles.contactSection}`, { pointerEvents: "all" });
         },
         onEnterBack: () => {
-          setNavbarBlocked(true);
+          document.body.classList.add("in-contact-section");
           animateContactBanner({ y: "-100%", autoAlpha: 0 });
           gsap.set(`.${styles.contactSection}`, { pointerEvents: "none" });
         },
         onLeaveBack: () => {
-          setNavbarBlocked(false);
+          document.body.classList.remove("in-contact-section");
         },
         onUpdate: (self) => {
           const scrollVelocity = self.getVelocity();
@@ -150,9 +135,9 @@ export default function ContactDoors({
       .from(contactTagsRef.current, { autoAlpha: 0, duration: 0.45 }, 0.55);
 
     return () => {
-      setNavbarBlocked(false);
+      document.body.classList.remove("in-contact-section");
     };
-  }, { dependencies: [pinElemRef, triggerElemRef], revertOnUpdate: true });
+  }, [targetPin, targetTrigger]);
 
   // The door trigger is measured off the about section. If that section is still
   // pulling in images when this mounts, start/end land on a stale scroll
@@ -253,6 +238,7 @@ export default function ContactDoors({
             ref={door1Ref}
             style={{
               backgroundImage: `url('${isMobile ? door1mobile : door1}')`,
+              transform: "translateX(-120%)",
             }}
           >
             {latticeBars}
@@ -262,6 +248,7 @@ export default function ContactDoors({
             ref={door2Ref}
             style={{
               backgroundImage: `url('${isMobile ? door2mobile : door2}')`,
+              transform: "translateX(120%)",
             }}
           >
             {latticeBars}

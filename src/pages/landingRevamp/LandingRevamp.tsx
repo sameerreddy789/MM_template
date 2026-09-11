@@ -86,8 +86,7 @@ export default function LandingRevamp({
   const onPrev = useMusicStore((state) => state.prev);
   // Written by the navbar's scroll listener; the player mirrors it.
   const isNavVisible = useNavVisibilityStore((state) => state.isNavVisible);
-  const isNavbarBlocked = useNavVisibilityStore((state) => state.isNavbarBlocked);
-  const showControls = isNavVisible && !isNavbarBlocked;
+  const showControls = isNavVisible;
   const overlayIsActive = useOverlayStore((state) => state.isActive);
   const removeGif = useOverlayStore((state) => state.removeGif);
   const setRemoveGif = useOverlayStore((state) => state.setRemoveGif);
@@ -105,8 +104,8 @@ export default function LandingRevamp({
   const treeImageRef = useRef<HTMLImageElement>(null);
   const scrollerRef = useRef<HTMLImageElement>(null);
 
-  const aboutUsContRef = useRef<HTMLDivElement>(null);
-  const aboutUsWrapperRef = useRef<HTMLDivElement>(null);
+  const [aboutUsCont, setAboutUsCont] = useState<HTMLDivElement | null>(null);
+  const [aboutUsWrapper, setAboutUsWrapper] = useState<HTMLDivElement | null>(null);
 
   // `scrollHeight` state used to be measured off the scroller purely to give the
   // hero's zoom timeline a scroll length, and the ResizeObserver existed to keep
@@ -730,15 +729,17 @@ export default function LandingRevamp({
           style={{ marginTop: -heroOverlap }}
         >
           <div className={styles.bottomOverlay} />
-          <div className={styles.aboutUsContainer} ref={aboutUsContRef}>
-            <div className={styles.aboutUsWrapper} ref={aboutUsWrapperRef}>
+          <div className={styles.aboutUsContainer} ref={setAboutUsCont}>
+            <div className={styles.aboutUsWrapper} ref={setAboutUsWrapper}>
               <AboutUs isBackBtn={false} />
               <div className={styles.aboutUsBottom} id="aboutUsBottom" />
             </div>
-            <ContactDoors
-              pinElemRef={aboutUsContRef}
-              triggerElemRef={aboutUsWrapperRef}
-            />
+            {aboutUsCont && aboutUsWrapper && (
+              <ContactDoors
+                pinElem={aboutUsCont}
+                triggerElem={aboutUsWrapper}
+              />
+            )}
           </div>
           {/* <div className={styles.bottomSpacer} ref={bottomSpacerRef}/> */}
         </div>

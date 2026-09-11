@@ -4,7 +4,6 @@ import galleryItemList, { HERO_COUNT } from './galleryItemList';
 import GalleryItem from './GalleryItem';
 import { useEffect, useRef, useState } from 'react';
 import ImagePopup from './ImagePopup';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SEO from '../../components/SEO';
 
 // The video plus its symmetric ring of 8 photos (2 above, 2 below, 2 each side) -
@@ -23,20 +22,6 @@ function Gallery() {
         activeImageIndex.current = index;
         setIsPopupOpen(true);
     }
-
-    // normalizeScroll smooths the scrub animations against mobile address-bar
-    // resizing. It was previously called straight from the render body, which both
-    // re-ran it on every render and left it switched on globally after this page
-    // unmounted - where it fights the landing page's Lenis for ownership of the
-    // scroll position. Scoped to this route's lifetime instead.
-    useEffect(() => {
-        ScrollTrigger.normalizeScroll(true);
-        // Braces matter: normalizeScroll returns an Observer, and a cleanup
-        // function is not allowed to return a value.
-        return () => {
-            ScrollTrigger.normalizeScroll(false);
-        };
-    }, []);
 
     // The page scrolls now, so it has to undo any scroll lock a previously mounted
     // page left on the body - the landing page pins it while its intro runs.

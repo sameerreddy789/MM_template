@@ -291,6 +291,13 @@ body {
   }
 
 
+  :global(body.in-contact-section) .musicControlsContainer {
+    transform: translateY(-180px) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: transform 0.35s ease, opacity 0.35s ease;
+  }
+
   .musicControlsContainer {
     position: fixed;
     z-index: 1001;
