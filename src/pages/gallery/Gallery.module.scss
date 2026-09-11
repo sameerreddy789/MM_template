@@ -124,32 +124,32 @@
     }
 
     // Flowing gallery below the hero cross:
-    // Uses multi-column masonry where each photo keeps its exact natural aspect ratio
-    // (portrait or landscape). No fitting to arbitrary frames, zero cropping.
+    // 3-column grid layout where Row 1 forms a triptych:
+    // Audience (left) -> Singer (middle) -> Audience (right), all uncropped.
     .galleryContent {
         width: 100%;
         max-width: 76rem;
         margin: 0 auto;
         padding: 1rem 0 4rem;
-        columns: 3 320px;
-        column-gap: 1.5rem;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        align-items: center; // Centers flanking audience vertically alongside the taller singer
 
         @media (max-width: 900px) {
-            columns: 2 240px;
-            column-gap: 1rem;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
         }
 
-        @media (max-width: 520px) {
-            columns: 1 100%;
-            column-gap: 0;
+        @media (max-width: 580px) {
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
         }
 
         > .galleryImageContainer {
-            break-inside: avoid;
-            margin-bottom: 1.5rem;
             width: 100%;
             height: auto;
-            display: inline-block;
+            display: block;
             border-radius: 16px;
             overflow: hidden;
             background: rgba(18, 18, 25, 0.75);

@@ -20,10 +20,21 @@ function GalleryItem({ galleryItem, index, onClick }: GalleryItemProps) {
         setIsError(true);
     }
 
-    // Subtle organic tilt for dynamic, beautiful festival photo album feel
-    // (Video at index 0 remains perfectly straight)
-    const tilts = [0, -1.2, 1.4, -0.9, 1.1, -1.5, 0.8, -1.1, 1.3];
-    const tilt = index === 0 ? 0 : tilts[index % tilts.length];
+    // Organic tilt for festival photo gallery:
+    // - Hero items (0..8) remain crisp & straight (0deg)
+    // - Row 1 concert triptych: Left card tilts toward singer (+1.2deg), Singer stands straight (0deg), Right card tilts toward singer (-1.2deg)
+    // - Following cards have subtle natural polaroid angles
+    let tilt = 0;
+    if (index === 9) {
+        tilt = 1.2; // tilts slightly toward center
+    } else if (index === 10) {
+        tilt = 0;   // singer in center spotlight
+    } else if (index === 11) {
+        tilt = -1.2; // tilts slightly toward center
+    } else if (index > 11) {
+        const flowingTilts = [-1.3, 1.1, -1.0, 1.4, -1.2, 0.9, -1.4, 1.2];
+        tilt = flowingTilts[(index - 12) % flowingTilts.length];
+    }
 
     return (
         <div 

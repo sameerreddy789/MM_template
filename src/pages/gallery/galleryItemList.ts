@@ -51,16 +51,18 @@ const galleryImageProperties: ImageProperty[] = [
     { src: '/images/gallery/mm1.webp', type: 'image' },         // bottom-left (under video - group with red carpet)
     { src: '/images/gallery/mm2.webp', type: 'image' },         // bottom-right (under video - group with potted plants)
 
-    // --- Flows below the cross in organic masonry layout ---
-    { src: '/images/gallery/gallery3.webp', type: 'image' },
-    { src: '/images/gallery/gallery4.webp', type: 'image' },
+    // --- Row 1: Concert Stage Triptych (Audience viewing the Singer in the center) ---
+    { src: '/images/gallery/gallery4.webp', type: 'image' },     // Left: cheering crowd of girls with phones raised
+    { src: '/images/gallery/mm7.webp', type: 'image' },          // Middle: the Singer in snakeskin jacket
+    { src: '/images/gallery/gallery3.webp', type: 'image' },     // Right: concert audience facing the stage/singer
+
+    // --- Remaining flowing festival gallery ---
     { src: '/images/gallery/gallery5.webp', type: 'image' },
     { src: '/images/gallery/gallery6.webp', type: 'image' },     // Concert stage with full truss lights
-    { src: '/images/gallery/mm3.webp', type: 'image' },
-    { src: '/images/gallery/mm4.webp', type: 'image' },
+    { src: '/images/gallery/mm3.webp', type: 'image' },          // Guest with dancers in traditional attire
+    { src: '/images/gallery/mm4.webp', type: 'image' },          // Mohan Babu sir at festival stall
     { src: '/images/gallery/mm5.webp', type: 'image' },
     { src: '/images/gallery/mm6.webp', type: 'image' },
-    { src: '/images/gallery/mm7.webp', type: 'image' },          // Portrait of singer in snakeskin jacket
     { src: '/images/gallery/kerala-dance.webp', type: 'image' },
     { src: '/images/gallery/siv-man-in-action.webp', type: 'image' },
     { src: '/images/gallery/students.webp', type: 'image' },
