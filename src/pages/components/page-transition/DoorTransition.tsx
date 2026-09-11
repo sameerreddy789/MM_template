@@ -43,15 +43,15 @@ export default function DoorTransition({
     Object.keys(assetList).includes(targetPageRef?.current.replace("/", ""));
 
   useEffect(() => {
-    const closeAudio = new Audio(Aud);
-    closeAudio.load();
-    closeAudio.onerror = (e) => console.warn("Error loading close sound", e);
-    closeSoundRef.current = closeAudio;
+    try {
+      const closeAudio = new Audio(Aud);
+      closeSoundRef.current = closeAudio;
 
-    const openAudio = new Audio(Aud);
-    openAudio.load();
-    openAudio.onerror = (e) => console.warn("Error loading open sound", e);
-    openSoundRef.current = openAudio;
+      const openAudio = new Audio(Aud);
+      openSoundRef.current = openAudio;
+    } catch {
+      // Audio not supported in environment
+    }
   }, []);
 
   const onClosedRef = useRef(onClosed);
@@ -77,7 +77,7 @@ export default function DoorTransition({
       previousPhase === "closing" || previousPhase === "waiting";
 
     const runClosing = async () => {
-      closeSoundRef.current?.play();
+      closeSoundRef.current?.play().catch(() => {});
       await Promise.all([
         c1.set({ "--dx": START.outerLeft }),
         c2.set({ "--dx": START.innerLeft }),
@@ -111,7 +111,7 @@ export default function DoorTransition({
 
     const runOpening = async () => {
       setTimeout(async () => {
-        if (followsAClosing) openSoundRef.current?.play();
+        if (followsAClosing) openSoundRef.current?.play().catch(() => {});
         await Promise.all([
           c2.start({
             "--dx": START.innerLeft,

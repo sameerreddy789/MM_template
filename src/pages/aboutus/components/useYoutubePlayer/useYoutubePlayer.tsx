@@ -22,6 +22,7 @@ export const useYouTubePlayer = (
         playerRef.current = new window.YT.Player(playerDiv, {
           height: "100%",
           width: "100%",
+          host: "https://www.youtube.com",
           videoId: videos[current] || videos[0],
           playerVars: {
             autoplay: 0,
@@ -30,6 +31,7 @@ export const useYouTubePlayer = (
             modestbranding: 1,
             enablejsapi: 1,
             origin: window.location.origin,
+            widget_referrer: window.location.origin,
           },
           events: {
             onStateChange: (e: any) => {

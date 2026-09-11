@@ -86,6 +86,8 @@ export default function LandingRevamp({
   const onPrev = useMusicStore((state) => state.prev);
   // Written by the navbar's scroll listener; the player mirrors it.
   const isNavVisible = useNavVisibilityStore((state) => state.isNavVisible);
+  const isNavbarBlocked = useNavVisibilityStore((state) => state.isNavbarBlocked);
+  const showControls = isNavVisible && !isNavbarBlocked;
   const overlayIsActive = useOverlayStore((state) => state.isActive);
   const removeGif = useOverlayStore((state) => state.removeGif);
   const setRemoveGif = useOverlayStore((state) => state.setRemoveGif);
@@ -404,12 +406,12 @@ export default function LandingRevamp({
             // viewport: -120 left a sliver of the frame on screen. Fading as well
             // guarantees it is gone regardless of where the frame ends up.
             animate={{
-              y: isNavVisible ? 0 : -180,
-              opacity: isNavVisible ? 1 : 0,
+              y: showControls ? 0 : -180,
+              opacity: showControls ? 1 : 0,
             }}
             transition={{ type: "spring", stiffness: 80, damping: 20 }}
             // Not clickable once hidden.
-            style={{ pointerEvents: isNavVisible ? "auto" : "none" }}
+            style={{ pointerEvents: showControls ? "auto" : "none" }}
           >
             <div className={styles.playerMain}>
               {/* Elongated Octagon SVG Vector Frame */}
@@ -733,13 +735,10 @@ export default function LandingRevamp({
               <AboutUs isBackBtn={false} />
               <div className={styles.aboutUsBottom} id="aboutUsBottom" />
             </div>
-            {aboutUsContRef.current &&
-              aboutUsWrapperRef && ( // bottomSpacerRef.current &&
-                <ContactDoors
-                  pinElemRef={aboutUsContRef}
-                  triggerElemRef={aboutUsWrapperRef}
-                />
-              )}
+            <ContactDoors
+              pinElemRef={aboutUsContRef}
+              triggerElemRef={aboutUsWrapperRef}
+            />
           </div>
           {/* <div className={styles.bottomSpacer} ref={bottomSpacerRef}/> */}
         </div>

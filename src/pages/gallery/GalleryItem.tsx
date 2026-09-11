@@ -38,7 +38,11 @@ function GalleryItem({ galleryItem, index, onClick }: GalleryItemProps) {
     })
 
     return (
-        <div className={styles.galleryImageContainer} onClick={onClick}>
+        <div 
+            className={styles.galleryImageContainer} 
+            style={galleryItem.containerModifiers}
+            onClick={onClick}
+        >
             {galleryItem.type === 'streamable' ? (
                 <iframe 
                     className={styles.galleryImage}

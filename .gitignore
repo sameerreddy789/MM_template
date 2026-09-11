@@ -130,3 +130,15 @@ scan_results*.txt
 *.dbg.*
 
 open-seo/
+
+# Camera originals for gallery photos.
+#
+# Kept on disk so a higher-resolution re-export is possible, but out of git and
+# out of the build. They must not live under public/ - Vite copies that folder
+# verbatim into dist/, so the thirteen 2K25 originals were adding 57.5 MB of
+# unreferenced files to every deploy. The page loads the WebP conversions in
+# public/images/gallery instead.
+#
+# To add more: drop the originals here, then convert with
+#   ffmpeg -i in.jpg -vf "scale='min(1600,iw)':-2" -c:v libwebp -quality 82 out.webp
+source-images/

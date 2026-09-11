@@ -2,8 +2,12 @@
 
 .galleryPage {
     position: relative;
-    height: 100svh;
-    width: 100vw;
+    // min-height, not height. A fixed 100svh capped the page at one viewport, so
+    // anything past the first screenful was unreachable - which is why the old
+    // eight-item mosaic had to fit exactly one screen.
+    min-height: 100svh;
+    width: 100%;
+    overflow-x: hidden;
     padding: 3rem;
 
     $iconColor: #FF575A;
@@ -34,50 +38,144 @@
         text-align: center;
     }
 
-    .galleryContent {
-        width: 100%;
-        padding: 1rem;
+    // The hero: video centred, flanked by a symmetric ring of 8 photos - 2 above,
+    // 2 below, 2 each side. Deliberately a fixed 9-slot layout, hand-placed by
+    // nth-child the same way the whole gallery used to be: a symmetric cross does
+    // not have a general rule for "one more photo", so unlike .galleryContent
+    // below, this one is not meant to flow. Change which photos appear here by
+    // editing HERO_COUNT's slice in galleryItemList.ts, not this file.
+    .galleryHero {
+        --hero-row: 12rem;
+
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        grid-auto-rows: 250px;
+        grid-template-rows: repeat(4, var(--hero-row));
         gap: 1rem;
-        justify-content: center;
+        max-width: 72rem;
+        margin: 0 auto 3rem;
+
+        > .galleryImageContainer {
+            &:nth-child(1) { grid-column: 2 / span 2; grid-row: 2 / span 2; } /* Video, centre */
+            &:nth-child(2) { grid-column: 2; grid-row: 1; } /* Top left */
+            &:nth-child(3) { grid-column: 3; grid-row: 1; } /* Top right */
+            &:nth-child(4) { grid-column: 1; grid-row: 2; } /* Left top */
+            &:nth-child(5) { grid-column: 1; grid-row: 3; } /* Left bottom */
+            &:nth-child(6) { grid-column: 4; grid-row: 2; } /* Right top */
+            &:nth-child(7) { grid-column: 4; grid-row: 3; } /* Right bottom */
+            &:nth-child(8) { grid-column: 2; grid-row: 4; } /* Bottom left */
+            &:nth-child(9) { grid-column: 3; grid-row: 4; } /* Bottom right */
+
+            // The video does not zoom on hover the way the surrounding photos do -
+            // it has its own play/pause click handler, and scaling a video up 1.3x
+            // on hover reads as a glitch rather than an invitation to click.
+            &:nth-child(1):hover .galleryImage {
+                transform: none !important;
+                filter: none;
+            }
+        }
 
         @media (max-width: 1200px) {
-            grid-template-columns: repeat(2, 1fr);
-            grid-auto-rows: 250px;
+            --hero-row: 10rem;
         }
 
-        @media (max-width: 768px) {
+        // Below this width there is no room either side of the video for a column
+        // of photos without shrinking it to a sliver, so the cross gives up its
+        // shape and falls back to a plain stack: video full width on top, the
+        // same 8 photos flowing under it in list order.
+        @media (max-width: 900px) {
+            --hero-row: 9rem;
             grid-template-columns: repeat(2, 1fr);
-            grid-auto-rows: 150px;
-            gap: 1rem;
+            grid-template-rows: auto;
+            grid-auto-rows: var(--hero-row);
+
+            > .galleryImageContainer {
+                &:nth-child(1) {
+                    grid-column: 1 / -1;
+                    grid-row: span 2;
+                }
+                &:nth-child(n+2) {
+                    grid-column: auto;
+                    grid-row: auto;
+                }
+            }
+        }
+    }
+
+    // Open-ended: the remaining photos flow into as many rows as the list needs.
+    // Add or remove entries in galleryItemList.ts and this adjusts on its own -
+    // unlike .galleryHero above, nothing here is pinned to a fixed item count.
+    //
+    // A repeating mosaic, not a uniform grid of same-size cells. The module is 4
+    // photos across an exact 8-cell block (2x2 big + 2x1 wide + two 1x1 small),
+    // which is what makes it tile with no ragged gaps: every complete group of 4
+    // fills its 2 rows exactly, so the pattern can repeat indefinitely as more
+    // photos are added. Only a *trailing* group smaller than 4 can end short - the
+    // last item then just sits alone rather than forcing empty cells beside it.
+    // The same 4-role rhythm repeats at 2 columns on narrower screens (mod-3
+    // module: one 2x2 alongside two 1x1, still an exact 4-cell tile) rather than
+    // collapsing to a plain stack, so the "designed", not-uniform read carries
+    // down to mobile too.
+    .galleryContent {
+        --row-h: 10.5rem;
+        --grid-gap: 1.5rem;
+
+        width: 100%;
+        max-width: 72rem; // matches .galleryHero, so the mosaic lines up under the cross
+        margin: 0 auto;
+        padding: 1rem 0;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-auto-rows: var(--row-h);
+        grid-auto-flow: dense;
+        gap: var(--grid-gap);
+
+        > .galleryImageContainer {
+            &:nth-child(4n + 1) { grid-column: span 2; grid-row: span 2; } /* Big */
+            &:nth-child(4n + 2) { grid-column: span 2; grid-row: span 1; } /* Wide */
+            &:nth-child(4n + 3) { grid-column: span 1; grid-row: span 1; } /* Small */
+            &:nth-child(4n)     { grid-column: span 1; grid-row: span 1; } /* Small */
         }
 
-        .galleryImageContainer {
-            &:nth-child(1) { grid-column: 2 / span 2; grid-row: 2 / span 2; } /* Video Center */
-            &:nth-child(2) { grid-column: 2 / span 2; grid-row: 1; } /* Top 1 spanning both */
-            &:nth-child(3) { grid-column: 1; grid-row: 2; } /* Left 1 */
-            &:nth-child(4) { grid-column: 1; grid-row: 3; } /* Left 2 */
-            &:nth-child(5) { grid-column: 4; grid-row: 2; } /* Right 1 */
-            &:nth-child(6) { grid-column: 4; grid-row: 3; } /* Right 2 */
-            &:nth-child(7) { grid-column: 2; grid-row: 4; } /* Bottom 1 */
-            &:nth-child(8) { grid-column: 3; grid-row: 4; } /* Bottom 2 */
+        // A trailing group of 2 or 3 items still starts on a Big role, but dense
+        // packing pulls the Wide or Small that follows it up into the space beside
+        // it, so those self-heal. A group of exactly 1 has nothing to pull up, so
+        // that half-width Big would sit next to a dead 2x2 hole - give it the full
+        // row instead. Scoped to min-width: 901px on purpose: below that the grid
+        // drops to 2 columns, where span-2 already *is* the full width, so this
+        // same condition can never produce a gap there and the rule must not leak
+        // into the mod-3 rules that take over at that width.
+        @media (min-width: 901px) {
+            > .galleryImageContainer:nth-child(4n + 1):last-child {
+                grid-column: 1 / -1;
+            }
+        }
 
-            @media (max-width: 1200px) {
-                &:nth-child(1) { grid-column: 1 / span 2; grid-row: 1 / span 2; } /* Video Top */
-                &:nth-child(2) { grid-column: 1 / span 2; grid-row: 3; } /* Top 1 spanning both */
-                &:nth-child(3) { grid-column: 1; grid-row: 4; }
-                &:nth-child(4) { grid-column: 2; grid-row: 4; }
-                &:nth-child(5) { grid-column: 1; grid-row: 5; }
-                &:nth-child(6) { grid-column: 2; grid-row: 5; }
-                &:nth-child(7) { grid-column: 1; grid-row: 6; }
-                &:nth-child(8) { grid-column: 2; grid-row: 6; }
+        @media (max-width: 1200px) {
+            --row-h: 9rem;
+            --grid-gap: 1.25rem;
+        }
+
+        // Below this width a 2x2 "big" tile next to a 2x1 "wide" one leaves each
+        // column too narrow to read, so the module drops to 2 columns and 3 photos
+        // (one 2x2 plus two 1x1 - still an exact 4-cell tile, just narrower).
+        @media (max-width: 900px) {
+            --row-h: 9rem;
+            --grid-gap: 1rem;
+            grid-template-columns: repeat(2, 1fr);
+
+            > .galleryImageContainer {
+                // The mod-3 rules below are exhaustive over every item - whichever
+                // one matches always overrides the 4-column rules above, so no
+                // reset is needed even though both sets of selectors stay live.
+                &:nth-child(3n + 1) { grid-column: span 2; grid-row: span 2; } /* Big */
+                &:nth-child(3n + 2) { grid-column: span 1; grid-row: span 1; } /* Small */
+                &:nth-child(3n)     { grid-column: span 1; grid-row: span 1; } /* Small */
             }
-            @media (max-width: 768px) {
-                &:nth-child(1) { grid-column: 1 / span 2; grid-row: 1 / span 2; }
-                &:nth-child(n+2) { grid-column: span 1; grid-row: span 1; }
-            }
+        }
+
+        @media (max-width: 480px) {
+            --row-h: 7.5rem;
+            --grid-gap: 0.75rem;
         }
     }
 
@@ -127,7 +225,12 @@
         transition: transform 0.3s, filter 0.3s;
     }
 
-    &:nth-child(n+3):hover .galleryImage {
+    // Photos zoom on hover. This used to exclude the video by `:not(:first-child)`,
+    // which worked while there was one grid and the video was its only first
+    // child. Now .galleryContent has its own first child too - a real photo - so
+    // that exclusion would have wrongly frozen it as well. The video's own
+    // exclusion is scoped to .galleryHero instead, next to the rest of its layout.
+    &:hover .galleryImage {
         transform: scale(1.3) !important;
         filter: brightness(0.7);
     }

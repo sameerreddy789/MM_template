@@ -11,6 +11,7 @@ import contactBanner from "/images/contact/contact-banner.webp";
 import { contactRows } from "./components/contactGallery/contacts";
 import ContactCardBody from "./components/contactGallery/ContactCardBody";
 import debouncedHandler from "../../utils/debounce";
+import { useNavVisibilityStore } from "../../utils/store";
 
 interface ContactDoorsProps {
   pinElemRef: React.RefObject<HTMLDivElement | null>;
@@ -45,6 +46,7 @@ export default function ContactDoors({
   pinElemRef,
   triggerElemRef,
 }: ContactDoorsProps) {
+  const setNavbarBlocked = useNavVisibilityStore((state) => state.setNavbarBlocked);
   const door1Ref = useRef<HTMLDivElement>(null);
   const door2Ref = useRef<HTMLDivElement>(null);
   const contactBannerRef = useRef<HTMLImageElement>(null);
@@ -101,10 +103,8 @@ export default function ContactDoors({
   });
 
   useGSAP(() => {
+    if (!triggerElemRef.current || !pinElemRef.current) return;
     gsap.registerPlugin(ScrollTrigger);
-    // normalizeScroll would take over wheel/touch input, but the landing page
-    // already drives scrolling through Lenis. Running both means neither owns
-    // the scroll position and the door timeline never scrubs.
 
     const animateContactBanner = (animation: gsap.TimelineVars) =>
       gsap.to(contactBannerRef.current, { ...animation, duration: 0.3 });
@@ -112,29 +112,29 @@ export default function ContactDoors({
     const doorTimeLine = gsap.timeline({
       scrollTrigger: {
         trigger: triggerElemRef.current,
-        // start: `+=${(triggerElemRef.current?.clientHeight || 0) - window.innerHeight}`,
         start: "bottom bottom",
         end: () => `+=${window.innerHeight}`,
         scrub: isMobile ? true : 0.5,
         pin: pinElemRef.current,
         pinSpacing: false,
         invalidateOnRefresh: true,
-        // anticipatePin: 1,
-        // fastScrollEnd: 1,
-        // onEnter: calculateHoriBarPos,
+        onEnter: () => {
+          setNavbarBlocked(true);
+        },
         onLeave: () => {
+          setNavbarBlocked(true);
           animateContactBanner({ y: "0%", autoAlpha: 1 });
           animateContactItems(0);
           gsap.set(`.${styles.contactSection}`, { pointerEvents: "all" });
         },
         onEnterBack: () => {
+          setNavbarBlocked(true);
           animateContactBanner({ y: "-100%", autoAlpha: 0 });
           gsap.set(`.${styles.contactSection}`, { pointerEvents: "none" });
         },
-        // No snap: it tweens the scroll position after scrolling stops, which
-        // Lenis immediately fights back to its own target. With snapTo [0, 1]
-        // and directional off, anything under half progress got pulled back to
-        // 0, so the doors slid straight back out of view.
+        onLeaveBack: () => {
+          setNavbarBlocked(false);
+        },
         onUpdate: (self) => {
           const scrollVelocity = self.getVelocity();
           const swingSensitivity = 0.003;
@@ -147,19 +147,11 @@ export default function ContactDoors({
     doorTimeLine
       .from(door1Ref.current, { x: "-120%" }, 0)
       .from(door2Ref.current, { x: "120%" }, 0)
-      .to(
-        document.body,
-        {
-          "--navlink-color": "#ffdfd0",
-        },
-        0
-      )
-      // The tags no longer ride the doors in, so they need their own reveal.
-      // Starting at 0.55 of the scrub keeps them off an empty background: the
-      // doors are most of the way in before the first tag shows.
       .from(contactTagsRef.current, { autoAlpha: 0, duration: 0.45 }, 0.55);
 
-    // if (contactSectionRef.current) contactSectionRef.current.style.transform = "translateY(-100vh)"//`translateY(${-((pinElemRef.current?.clientHeight || 0) - (contactSectionRef.current?.clientHeight || 0))})`
+    return () => {
+      setNavbarBlocked(false);
+    };
   }, { dependencies: [pinElemRef, triggerElemRef], revertOnUpdate: true });
 
   // The door trigger is measured off the about section. If that section is still

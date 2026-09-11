@@ -35,7 +35,10 @@ export default function Navbar({
   const navRef = useRef<HTMLElement>(null);
   // Published to the store so the music player can hide alongside the header.
   const navShow = useNavVisibilityStore((state) => state.isNavVisible);
+  const isNavbarBlocked = useNavVisibilityStore((state) => state.isNavbarBlocked);
   const setNavShow = useNavVisibilityStore((state) => state.setNavVisible);
+
+  const shouldShowNav = navShow && !isNavbarBlocked;
 
   useEffect(() => {
     let lastY = window.scrollY;
@@ -86,84 +89,12 @@ export default function Navbar({
     };
   }, [setNavShow]);
 
-  useEffect(() => {
-    const handleResize = () => {
-      ScrollTrigger.refresh();
-      ScrollTrigger.update();
-    };
-    window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!navRef.current) return;
-
-    // console.log("Setting up scroll-based color change");
-
-    const timer = setTimeout(() => {
-      const targets = navRef.current?.querySelectorAll(
-        `.${styles.actualLabel}`
-      );
-
-      if (!targets || targets.length === 0) {
-        console.warn("No navbar text elements found");
-        return;
-      }
-
-      // console.log("Found targets:", targets.length);
-
-      ScrollTrigger.refresh();
-
-      const colorAnimation = gsap.fromTo(
-        document.body,
-        {
-          "--navlink-color": "#f2f2f2",
-        },
-        {
-          scrollTrigger: {
-            trigger: document.body,
-            start: `+=${window.innerHeight * 1.5}`,
-            end: `+=${window.innerHeight * 0.5}`,
-            scrub: 1,
-            // onEnter: () => console.log("Color change TRIGGERED at 150vh"),
-            // onLeave: () => console.log("Color change ENDED"),
-            // onUpdate: (self) => console.log("Scroll progress:", self.progress),
-          },
-          //color: "#C0B063",
-          "--navlink-color": "#c0b063",
-          ease: "none",
-          // markers: "true",
-        }
-      );
-
-      return () => {
-        // console.log("Cleaning up scroll trigger");
-        const element = document.getElementById("navbar-scroll-trigger");
-        if (element) {
-          element.remove();
-        }
-
-        if (colorAnimation?.scrollTrigger) {
-          colorAnimation.scrollTrigger.kill();
-        }
-
-        colorAnimation?.kill();
-      };
-    }, 500);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, []);
-
   return (
     <motion.nav
       initial={{ y: 0, opacity: 1 }}
-      animate={{ y: navShow ? 0 : -140, opacity: navShow ? 1 : 0 }}
+      animate={{ y: shouldShowNav ? 0 : -140, opacity: shouldShowNav ? 1 : 0 }}
       transition={{ type: "spring", stiffness: 80, damping: 20 }}
-      style={{ pointerEvents: navShow ? "auto" : "none" }}
+      style={{ pointerEvents: shouldShowNav ? "auto" : "none" }}
       ref={navRef}
       className={`${styles.nav} ${
         variant === "about" ? styles.aboutVariant : ""

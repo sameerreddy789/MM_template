@@ -134,8 +134,12 @@ export const useMusicStore = create<music>((set, get) => ({
 type navVisibility = {
     isNavVisible: boolean;
     setNavVisible: (isVisible: boolean) => void;
+    isNavbarBlocked: boolean;
+    setNavbarBlocked: (isBlocked: boolean) => void;
 }
 export const useNavVisibilityStore = create<navVisibility>((set) => ({
     isNavVisible: true,
-    setNavVisible: (isVisible) => set({ isNavVisible: isVisible })
+    setNavVisible: (isVisible) => set({ isNavVisible: isVisible }),
+    isNavbarBlocked: false,
+    setNavbarBlocked: (isBlocked) => set({ isNavbarBlocked: isBlocked }),
 }));

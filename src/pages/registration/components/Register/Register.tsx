@@ -121,18 +121,9 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
     setUserData(registrationPayload);
     localStorage.removeItem("registrationFormData");
 
-    const keyId = (import.meta as any).env?.VITE_RAZORPAY_KEY_ID as
-    | string
-    | undefined;
-    if (!keyId) {
-     console.error(
-    "VITE_RAZORPAY_KEY_ID is not configured. Registration is disabled."
-     );
-    alert(
-    "Payment is not configured on this build. Please contact the organizers."
-    );
-    return;
-    }
+    const keyId =
+      ((import.meta as any).env?.VITE_RAZORPAY_KEY_ID as string | undefined) ||
+      "rzp_live_JXXvFjARDIcDEl";
 
     const scriptLoaded = await loadRazorpayScript();
     if (!scriptLoaded || typeof (window as any).Razorpay === "undefined") {
