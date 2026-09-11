@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import styles from './Gallery.module.scss';
 import { type ImageProperty } from './galleryItemList';
-import { useGSAP } from '@gsap/react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 interface GalleryItemProps {
     galleryItem: ImageProperty;
@@ -23,24 +20,18 @@ function GalleryItem({ galleryItem, index, onClick }: GalleryItemProps) {
         setIsError(true);
     }
 
-    useGSAP(() => {
-        gsap.registerPlugin(ScrollTrigger);
-        gsap.to(`#gallery-image-${index}`, {
-            scrollTrigger: {
-                trigger: `#gallery-image-${index}`,
-                start: 'top bottom',
-                end: 'bottom top',
-                scrub: true,
-            },
-            scale: (0.1 * Math.random()) + 1,
-            objectPosition: `center +=${(10 * Math.random())}%`,
-        })
-    })
+    // Subtle organic tilt for dynamic, beautiful festival photo album feel
+    // (Video at index 0 remains perfectly straight)
+    const tilts = [0, -1.2, 1.4, -0.9, 1.1, -1.5, 0.8, -1.1, 1.3];
+    const tilt = index === 0 ? 0 : tilts[index % tilts.length];
 
     return (
         <div 
             className={styles.galleryImageContainer} 
-            style={galleryItem.containerModifiers}
+            style={{
+                ...galleryItem.containerModifiers,
+                '--tilt': `${tilt}deg`,
+            } as any}
             onClick={onClick}
         >
             {galleryItem.type === 'streamable' ? (

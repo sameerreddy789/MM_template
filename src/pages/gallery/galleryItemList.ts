@@ -41,38 +41,30 @@ const galleryImageProperties: ImageProperty[] = [
     {
         src: '/videos/1_Glimpse_of_MM2k23.mp4',
         type: 'video',
-        modifiers: { objectFit: 'contain' }
     },
-    { src: '/images/gallery/top1.webp', type: 'image', modifiers: { objectFit: 'cover', objectPosition: 'center' } },       // top-left
-    { src: '/images/gallery/gallery1.webp', type: 'image', modifiers: { objectFit: 'cover' } },                            // top-right
-    { src: '/images/gallery/left-up.webp', type: 'image', modifiers: { objectFit: 'cover' } },                             // left-top
-    { src: '/images/gallery/left-bottom.webp', type: 'image', modifiers: { objectFit: 'cover' } },                         // left-bottom
-    { src: '/images/gallery/gallery2.webp', type: 'image', modifiers: { objectFit: 'cover' } },                            // right-top
-    { src: '/images/gallery/right-bottom.webp', type: 'image', modifiers: { objectFit: 'cover' } },                        // right-bottom
-    { src: '/images/gallery/mm1.webp', type: 'image', modifiers: { objectFit: 'cover', objectPosition: 'center' } },       // bottom-left (under video)
-    { src: '/images/gallery/mm2.webp', type: 'image', modifiers: { objectFit: 'cover', objectPosition: 'center' } },       // bottom-right (under video)
+    { src: '/images/gallery/top1.webp', type: 'image' },         // top-left
+    { src: '/images/gallery/gallery1.webp', type: 'image' },     // top-right
+    { src: '/images/gallery/left-up.webp', type: 'image' },      // left-top
+    { src: '/images/gallery/left-bottom.webp', type: 'image' },  // left-bottom
+    { src: '/images/gallery/gallery2.webp', type: 'image' },     // right-top
+    { src: '/images/gallery/right-bottom.webp', type: 'image' }, // right-bottom
+    { src: '/images/gallery/mm1.webp', type: 'image' },         // bottom-left (under video - group with red carpet)
+    { src: '/images/gallery/mm2.webp', type: 'image' },         // bottom-right (under video - group with potted plants)
 
-    // --- Flows below the cross, in any quantity ---
-    { src: '/images/gallery/gallery3.webp', type: 'image', modifiers: { objectFit: 'cover' } },
-    { src: '/images/gallery/gallery4.webp', type: 'image', modifiers: { objectFit: 'cover' } },
-    { src: '/images/gallery/gallery5.webp', type: 'image', modifiers: { objectFit: 'cover' } },
-    { 
-        src: '/images/gallery/gallery6.webp', 
-        type: 'image', 
-        modifiers: { objectFit: 'contain', backgroundColor: '#0a0a0a' },
-        containerModifiers: { gridColumn: 'span 2', gridRow: 'span 2' }
-    }, // Full view of concert stage with truss lights
-    { src: '/images/gallery/mm3.webp', type: 'image', modifiers: { objectFit: 'cover' } },
-    { src: '/images/gallery/mm4.webp', type: 'image', modifiers: { objectFit: 'cover' } },
-    { src: '/images/gallery/mm5.webp', type: 'image', modifiers: { objectFit: 'cover' } },
-    { src: '/images/gallery/mm6.webp', type: 'image', modifiers: { objectFit: 'cover' } },
-    { 
-        src: '/images/gallery/mm7.webp', 
-        type: 'image', 
-        modifiers: { objectFit: 'contain', backgroundColor: '#0a0a0a' },
-        containerModifiers: { gridColumn: 'span 2', gridRow: 'span 2' }
-    }  // Full portrait view of singer without cropping
-]
+    // --- Flows below the cross in organic masonry layout ---
+    { src: '/images/gallery/gallery3.webp', type: 'image' },
+    { src: '/images/gallery/gallery4.webp', type: 'image' },
+    { src: '/images/gallery/gallery5.webp', type: 'image' },
+    { src: '/images/gallery/gallery6.webp', type: 'image' },     // Concert stage with full truss lights
+    { src: '/images/gallery/mm3.webp', type: 'image' },
+    { src: '/images/gallery/mm4.webp', type: 'image' },
+    { src: '/images/gallery/mm5.webp', type: 'image' },
+    { src: '/images/gallery/mm6.webp', type: 'image' },
+    { src: '/images/gallery/mm7.webp', type: 'image' },          // Portrait of singer in snakeskin jacket
+    { src: '/images/gallery/kerala-dance.webp', type: 'image' },
+    { src: '/images/gallery/siv-man-in-action.webp', type: 'image' },
+    { src: '/images/gallery/students.webp', type: 'image' },
+];
 
 export default galleryImageProperties;
 export type { ImageProperty };
