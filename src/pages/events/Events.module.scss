@@ -46,16 +46,8 @@
       bottom: -2svh;
       bottom: 0;
       transform-origin: center;
-      // transition: transform 0.3s ease, filter 0.3s ease;
-      z-index: 1;
-      // &:hover {
-      //   transform: scale(1.05) !important;
-      //   filter: saturate(1.5);
-      // }
-      // @media (min-width: 1950px) {
-      //   bottom: -20px;
-      //   padding-top: 20px;
-      // }
+      z-index: 3;
+      clip-path: polygon(0% 0%, 55% 15%, 100% 60%, 100% 100%, 0% 100%);
     }
 
     .music {
@@ -65,85 +57,42 @@
       width: 42vw;
       height: 80svh;
       transform-origin: center;
-      // transition: transform 0.3s ease, filter 0.3s ease;
       z-index: 2;
       object-fit: fill;
       object-position: center;
-      // &:hover {
-      //   transform: scale(1.1) !important;
-      //   filter: saturate(1.5);
-      // }
+      clip-path: polygon(0% 0%, 75% 0%, 100% 80%, 85% 100%, 20% 50%, 0% 30%);
     }
 
     .misc {
       position: absolute;
       width: 34.8vw;
-      
       height: 56.3svh;
-      // bottom: -2.5svh;
       right: 0;
-      // transform-origin: center;
-      // transition: transform 0.3s ease, filter 0.3s ease;
-      z-index: 1;
-      // &:hover {
-      //   transform: scale(1.07) !important;
-      //   filter: saturate(1.5);
-      // }
+      z-index: 3;
+      clip-path: polygon(45% 15%, 100% 0%, 100% 100%, 0% 100%, 0% 60%);
     }
 
     .dance {
       position: absolute;
       width: 42vw;
-
       height: 80svh;
       z-index: 2;
       top: -9svh;
       right: 0vw;
       overflow: hidden;
       transform-origin: center;
-
-      // rotate: -3deg;
-      object-position: center;
-      // transition: transform 0.1s, filter 0.1s ease;
-      // z-index: 1;
-      // &:hover {
-      //   transform: scale(1.05) !important;
-      //   filter: saturate(1.5);
-      // }
+      clip-path: polygon(25% 0%, 100% 0%, 100% 30%, 80% 50%, 15% 100%, 0% 80%, 0% 60%);
     }
-
-    // .photographyWrapper {
-    //   // position: absolute;
-    //   // left: 35vw;
-    //   // width: 30.2vw;
-    //   // height: 67.8svh;
-    //   // top: 0;
-
-    //   // // // Apply the clip path to the wrapper
-    //   // // clip-path: url(#photography-clip);
-    //   // // -webkit-clip-path: url(#photography-clip);
-
-    //   // // Ensures any overflow from the scaling image is hidden
-    //   // overflow: hidden;
-    // }
 
     .photography {
       position: absolute;
-      left: 50%;
-      translate: -50%;
-      // transform: translateX(-50%);
-
-      width: 28.2vw;
-      height: 67.8svh;
-      top: 0;
-
-      // transition: transform 0.3s ease, filter 0.3s ease;
+      width: 42.6vw;
+      height: 77.2svh;
+      left: 28.5vw;
+      top: -24svh;
+      z-index: 4;
+      clip-path: polygon(0% 0%, 100% 0%, 75% 100%, 25% 100%);
     }
-
-    // .photography:hover {
-    //    transform: scale(1.1) !important;
-    //   filter: saturate(1.5);
-    // }
 
     .text {
       position: absolute;
@@ -151,6 +100,7 @@
       width: 30.625vw;
       height: 26.74svh;
       bottom: 2svh;
+      pointer-events: none;
     }
     @media ((min-aspect-ratio: 1.7) or (max-aspect-ratio: 1.7)) {
       .quizzes {
@@ -159,8 +109,8 @@
         width: 32.6198vw;
         height: 55.07svh;
         left: -2vw;
-        z-index: 1;
-        // filter: drop-shadow(0px 0px 10px rgba(0, 0,  0,1));
+        z-index: 3;
+        clip-path: polygon(0% 0%, 55% 15%, 100% 60%, 100% 100%, 0% 100%);
       }
       .music {
         top: 0;
@@ -169,14 +119,13 @@
         width: 41.614vw;
         height: 80.098svh;
         z-index: 2;
-        // filter: drop-shadow(0px 0px 30px rgba(0, 0,  0,1));
+        clip-path: polygon(0% 0%, 75% 0%, 100% 80%, 85% 100%, 20% 50%, 0% 30%);
       }
       .photography {
         width: 30vw;
         height: 67.8svh;
-        z-index: 100;
-        // filter: drop-shadow(0px 0px 30px rgba(0, 0,  0,1));
-        z-index: 3;
+        z-index: 4;
+        clip-path: polygon(0% 0%, 100% 0%, 75% 100%, 25% 100%);
       }
       .dance {
         height: 80svh;
@@ -184,22 +133,18 @@
         width: 41.614vw;
         height: 80.098svh;
         top: 0;
-        z-index: 4;
-        // filter: drop-shadow(0px 0px 30px rgba(0, 0,  0,1))  ;
-
+        z-index: 2;
+        clip-path: polygon(25% 0%, 100% 0%, 100% 30%, 80% 50%, 15% 100%, 0% 80%, 0% 60%);
       }
       .misc {
         height: 50.3svh;
         width: 31vw;
-        // right: -2vw;
         width: 31.9427vw;
         height: 54.6092svh;
-        left: 71;
         right: 0;
-        z-index: 5;
+        z-index: 3;
         bottom: -1.12svh;
-        
-        // filter: drop-shadow(0px 0px 30px rgba(0, 0,  0,1))  ;
+        clip-path: polygon(45% 15%, 100% 0%, 100% 100%, 0% 100%, 0% 60%);
       }
     }
     @media((max-width: 1200px) and (max-aspect-ratio: 1.45)){
@@ -284,12 +229,12 @@
         bottom: 0;
         z-index: 4;
         clip-path: polygon(
-    100% 20%,   /* top-right */
-    10 10%,    /* tip at upper-left */
-    0% 30%,
-    90% 100%, /* bottom-left taper */
-    100% 100% /* bottom-right base */
-  );
+          100% 20%,   /* top-right */
+          10% 10%,    /* tip at upper-left */
+          0% 30%,
+          90% 100%, /* bottom-left taper */
+          100% 100% /* bottom-right base */
+        );
 
       }
       .misc {
