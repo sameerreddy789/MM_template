@@ -49,9 +49,9 @@ const dummyEventsData = [
       { name: "Spot Photography", club_name: "Photography Club", venue: "Campus", description: "Capture the moment.", image_url: "/images/events/Eventpics/Spot_photography.png" },
       { name: "Jenga", club_name: "Fun Club", venue: "Food Court", description: "Don't let the tower fall.", image_url: "/images/events/Eventpics/Jenga.png" },
       { name: "Tug of War", club_name: "Sports Club", venue: "Ground", description: "Show your team strength.", image_url: "/images/events/Eventpics/Tug_of_war.png" },
-      { name: "Food Challenge", club_name: "Food & Fun Club", venue: "Food Court", description: "Eat fast, win big! Ultimate eating challenge.", image_url: "/images/logo.webp" },
-      { name: "Gully Cricket", club_name: "Sports Club", venue: "Open Ground", description: "Classic street-style cricket tournament.", image_url: "/images/logo.webp" },
-      { name: "Treasure Hunt", club_name: "Adventure Club", venue: "Campus Wide", description: "Find the hidden treasures across campus.", image_url: "/images/logo.webp" }
+      { name: "Food Challenge", club_name: "Food & Fun Club", venue: "Food Court", description: "Eat fast, win big! Ultimate eating challenge.", image_url: "/images/events/Eventpics/Food_challenge.png" },
+      { name: "Gully Cricket", club_name: "Sports Club", venue: "Open Ground", description: "Classic street-style cricket tournament.", image_url: "/images/events/Eventpics/Gully_cricket.png" },
+      { name: "Treasure Hunt", club_name: "Adventure Club", venue: "Campus Wide", description: "Find the hidden treasures across campus.", image_url: "/images/events/Eventpics/Treasure_hunt.png" }
     ]
   },
   {
