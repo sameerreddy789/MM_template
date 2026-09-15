@@ -94,6 +94,19 @@ const Sponsors = () => {
       </motion.div>
 
       <div className={styles.sponsors}>
+        <motion.div
+          className={styles.previousSponsorsHeader}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <div className={styles.badge}>✦ Previous Editions ✦</div>
+          <h2 className={styles.subTitle}>Our Previous Sponsors</h2>
+          <p className={styles.subDescription}>
+            Proudly honoring the esteemed partners and brands who supported MohanaMantra in our previous editions.
+          </p>
+        </motion.div>
+
         {/* Dynamic Animated Sponsor Cards Grid */}
         <motion.div
           className={styles.sponsorGrid}

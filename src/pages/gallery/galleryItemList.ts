@@ -64,9 +64,6 @@ const galleryImageProperties: ImageProperty[] = [
     { src: cdn('/images/gallery/mm4.webp'), type: 'image' },          // Mohan Babu sir at festival stall
     { src: cdn('/images/gallery/mm5.webp'), type: 'image' },
     { src: cdn('/images/gallery/mm6.webp'), type: 'image' },
-    { src: cdn('/images/gallery/kerala-dance.webp'), type: 'image' },
-    { src: cdn('/images/gallery/siv-man-in-action.webp'), type: 'image' },
-    { src: cdn('/images/gallery/students.webp'), type: 'image' },
 ];
 
 export default galleryImageProperties;

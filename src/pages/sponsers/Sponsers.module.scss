@@ -124,6 +124,63 @@
       padding: 0 20px 40px;
     }
 
+    .previousSponsorsHeader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+      margin-top: 5px;
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 20px;
+        border-radius: 9999px;
+        background: rgba(255, 184, 0, 0.12);
+        border: 1px solid rgba(255, 184, 0, 0.4);
+        color: #FFB800;
+        font-family: $regFont;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        box-shadow: 0 0 20px rgba(255, 184, 0, 0.15);
+        backdrop-filter: blur(8px);
+      }
+
+      .subTitle {
+        font-family: $regFont;
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #ffffff;
+        letter-spacing: 0.5px;
+        margin: 0;
+        text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
+        background: linear-gradient(180deg, #ffffff 40%, #e0e0e0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+
+        @media screen and (max-width: 768px) {
+          font-size: 1.6rem;
+        }
+      }
+
+      .subDescription {
+        font-family: $regFont;
+        font-size: 1.05rem;
+        color: rgba(255, 255, 255, 0.75);
+        max-width: 600px;
+        line-height: 1.6;
+        margin: 0;
+
+        @media screen and (max-width: 768px) {
+          font-size: 0.95rem;
+          padding: 0 10px;
+        }
+      }
+    }
+
     .titleSponsor {
       display: flex;
       flex-direction: column;
@@ -239,7 +296,7 @@
       gap: 30px;
       width: 100%;
       max-width: 1200px;
-      margin-top: 20px;
+      margin-top: 0px;
       box-sizing: border-box;
 
       .sponsorCard {
