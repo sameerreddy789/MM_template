@@ -1,16 +1,16 @@
+import { cdn } from "../../../../utils/cdn";
 import { useState, forwardRef, useRef, useEffect } from "react";
 import React from "react";
 import axios from "axios";
 
 import styles from "./Events.module.scss";
 
-import thumb from "/svgs/registration/scrollThumb.svg";
-import ScrollBar from "/svgs/registration/scroll-bar.svg";
-import Left from "/svgs/registration/leftarr.svg";
-import Right from "/svgs/registration/rightarr.svg";
-import info from "/images/registration/information.png"
-import info2 from "/images/registration/info3.png"
-
+const thumb = cdn("/svgs/registration/scrollThumb.svg");
+const ScrollBar = cdn("/svgs/registration/scroll-bar.svg");
+const Left = cdn("/svgs/registration/leftarr.svg");
+const Right = cdn("/svgs/registration/rightarr.svg");
+const info = cdn("/images/registration/information.webp");
+const info2 = cdn("/images/registration/info3.webp");
 import ConfirmModal from "../ConfirmModal/ConfirmModal";
 import EventsModal from "../EventsModal/EventsModal";
 import { useGSAP } from "@gsap/react";

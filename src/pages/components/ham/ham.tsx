@@ -1,10 +1,11 @@
+import { cdn } from "../../../utils/cdn";
 import styles from "./ham.module.scss";
-import hamX from "/svgs/landing/hamX.svg";
-import phone from "/svgs/landing/phone.svg";
-import homeIcon from "/svgs/landing/homeIcon.svg";
-import aboutusIcon from "/svgs/landing/aboutusIcon.svg";
-import eventIcon from "/svgs/landing/eventsIcon.svg";
-import mmLogo from "/images/logo.webp";
+const hamX = cdn("/svgs/landing/hamX.svg");
+const phone = cdn("/svgs/landing/phone.svg");
+const homeIcon = cdn("/svgs/landing/homeIcon.svg");
+const aboutusIcon = cdn("/svgs/landing/aboutusIcon.svg");
+const eventIcon = cdn("/svgs/landing/eventsIcon.svg");
+const mmLogo = cdn("/images/logo.webp");
 import { useHamStore } from "../../../utils/store";
 
 const navItems = [

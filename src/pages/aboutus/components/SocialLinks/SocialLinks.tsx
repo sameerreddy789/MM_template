@@ -1,6 +1,7 @@
+import { cdn } from "../../../../utils/cdn";
 import styles from "../../AboutUs.module.scss";
-import instaicon from "/svgs/aboutus/instaicon.svg";
-import yticon from "/svgs/aboutus/yticon.svg";
+const instaicon = cdn("/svgs/aboutus/instaicon.svg");
+const yticon = cdn("/svgs/aboutus/yticon.svg");
 
 const SocialLinks = () => (
   <div className={styles.social}>

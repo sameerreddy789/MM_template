@@ -1,7 +1,8 @@
+import { cdn } from "../../../../utils/cdn";
 import styles from './ContactGallery.module.scss';
 import { contactRows } from './contacts';
 import ContactCardBody from './ContactCardBody';
-import contactBanner from '/images/contact/contact-banner.webp'
+const contactBanner = cdn("/images/contact/contact-banner.webp");
 import { useEffect, useState } from 'react';
 
 interface HoriBarDetails {

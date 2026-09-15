@@ -1,7 +1,8 @@
+import { cdn } from "../../utils/cdn";
 import ContactGallery from './components/contactGallery/ContactGallery';
 import styles from './Contact.module.scss';
-import doors from '/images/contact/DoorsCombined.webp';
-import doorsMobile from '/images/contact/DoorsMobile.webp';
+const doors = cdn("/images/contact/DoorsCombined.webp");
+const doorsMobile = cdn("/images/contact/DoorsMobile.webp");
 import BackButton from '../components/backButton/BackButton';
 import { useState, useEffect } from 'react';
 import SEO from '../../components/SEO';

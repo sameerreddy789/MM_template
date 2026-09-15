@@ -1,8 +1,9 @@
+import { cdn } from "../../utils/cdn";
 import styles from "./MediaPartners.module.scss";
-import background from "/images/mediaPartners/bg1.webp";
-import heading from "/svgs/mediaPartners/mediaHead.svg";
-import dummy from "/images/logo.webp";
-import Back from "/svgs/registration/back.svg";
+const background = cdn("/images/mediaPartners/bg1.webp");
+const heading = cdn("/svgs/mediaPartners/mediaHead.svg");
+const dummy = cdn("/images/logo.webp");
+const Back = cdn("/svgs/registration/back.svg");
 import { useContext, useEffect } from "react";
 import { navContext } from "../../App";
 import { motion, type Variants } from "framer-motion";

@@ -1,8 +1,9 @@
+import { cdn } from "../../../../utils/cdn";
 import { motion, AnimatePresence } from "framer-motion";
 import styles from "../Eventspage.module.scss";
 import EventImage from "../ImagePreloader/ImagePreloader";
-import Location from "/svgs/events/location.svg";
-import Right from "/svgs/events/Next1.svg";
+const Location = cdn("/svgs/events/location.svg");
+const Right = cdn("/svgs/events/Next1.svg");
 
 interface DesktopEventsProps {
   events: any[];

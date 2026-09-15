@@ -1,11 +1,12 @@
+import { cdn } from "../../../utils/cdn";
 import { useEffect, useRef, type RefObject } from "react";
 import { motion, useAnimation } from "framer-motion";
 import styles from "./style.module.scss";
-import Door1Image from "/images/doors/Door1.webp";
-import Door2Image from "/images/doors/Door2.webp";
-import Door3Image from "/images/doors/Door3.webp";
-import Door4Image from "/images/doors/Door4.webp";
-import Aud from "/sounds/door-close.mp3";
+const Door1Image = cdn("/images/doors/Door1.webp");
+const Door2Image = cdn("/images/doors/Door2.webp");
+const Door3Image = cdn("/images/doors/Door3.webp");
+const Door4Image = cdn("/images/doors/Door4.webp");
+const Aud = cdn("/sounds/door-close.mp3");
 // import Preloader from "../../registration/components/Preloader/Preloader";
 import assetList from "../../../assetList";
 

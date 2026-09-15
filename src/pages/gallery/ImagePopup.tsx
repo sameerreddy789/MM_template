@@ -1,9 +1,9 @@
+import { cdn } from "../../utils/cdn";
 import { useState } from 'react';
 import styles from './Gallery.module.scss';
 import galleryItemList from './galleryItemList';
 import { FaLeftLong, FaRightLong } from 'react-icons/fa6';
-import closeButton from '/images/gallery/close_button.png'
-
+const closeButton = cdn("/images/gallery/close_button.webp");
 interface ImagePopupProps {
     index: number;
     onClose: () => void;

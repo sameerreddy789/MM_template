@@ -1,5 +1,6 @@
+import { cdn } from "../../utils/cdn";
 import styles from "./Sponsers.module.scss";
-import heading from "/svgs/sponsors/sponsorsHead.webp";
+const heading = cdn("/svgs/sponsors/sponsorsHead.webp");
 import BackButton from "../components/backButton/BackButton";
 import { useEffect } from "react";
 import { motion, type Variants } from "framer-motion";
@@ -7,16 +8,16 @@ import SEO from "../../components/SEO";
 
 
 const sponsorLogos = [
-  { name: "Beautiful Tirupati", img: encodeURI("/images/sponsors/Beautiful Tirupati.jpeg") },
-  { name: "CS Overseas", img: encodeURI("/images/sponsors/CS-Overseas.jpeg") },
-  { name: "ED-West", img: encodeURI("/images/sponsors/ED-West.jpeg") },
-  { name: "IMFS", img: encodeURI("/images/sponsors/IMFS.jpeg") },
-  { name: "Mango Tranquil", img: encodeURI("/images/sponsors/Mango Tranquil.jpeg") },
-  { name: "MayaBazaar", img: encodeURI("/images/sponsors/MayaBazaar.jpeg") },
-  { name: "Nellorians", img: encodeURI("/images/sponsors/Nellorians.jpeg") },
-  { name: "Sahanah", img: encodeURI("/images/sponsors/Sahanah.jpeg") },
-  { name: "Sneha", img: encodeURI("/images/sponsors/Sneha.jpeg") },
-  { name: "Kalanjali", img: encodeURI("/images/sponsors/kalanjali.jpeg") },
+  { name: "Beautiful Tirupati", img: encodeURI(cdn("/images/sponsors/Beautiful_Tirupati.webp")) },
+  { name: "CS Overseas", img: encodeURI(cdn("/images/sponsors/CS-Overseas.webp")) },
+  { name: "ED-West", img: encodeURI(cdn("/images/sponsors/ED-West.webp")) },
+  { name: "IMFS", img: encodeURI(cdn("/images/sponsors/IMFS.webp")) },
+  { name: "Mango Tranquil", img: encodeURI(cdn("/images/sponsors/Mango_Tranquil.webp")) },
+  { name: "MayaBazaar", img: encodeURI(cdn("/images/sponsors/MayaBazaar.webp")) },
+  { name: "Nellorians", img: encodeURI(cdn("/images/sponsors/Nellorians.webp")) },
+  { name: "Sahanah", img: encodeURI(cdn("/images/sponsors/Sahanah.webp")) },
+  { name: "Sneha", img: encodeURI(cdn("/images/sponsors/Sneha.webp")) },
+  { name: "Kalanjali", img: encodeURI(cdn("/images/sponsors/kalanjali.webp")) },
 ];
 
 const containerVariants: Variants = {

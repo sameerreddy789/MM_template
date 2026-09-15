@@ -1,5 +1,6 @@
+import { cdn } from "../../../utils/cdn";
 import "./TirumalaHills.css";
-import hillsImage from "./tirumala_hills_4k.webp";
+const hillsImage = cdn("/images/landing/tirumala_hills_4k.webp");
 
 type TirumalaHillsProps = {
   className?: string;

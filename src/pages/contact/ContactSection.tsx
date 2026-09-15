@@ -1,5 +1,6 @@
+import { cdn } from "../../utils/cdn";
 import styles from "./ContactSection.module.scss";
-import contactBanner from '/images/contact/contact-banner.webp';
+const contactBanner = cdn("/images/contact/contact-banner.webp");
 import ContactGallery from './components/contactGallery/ContactGallery';
 
 export default function ContactSection() {

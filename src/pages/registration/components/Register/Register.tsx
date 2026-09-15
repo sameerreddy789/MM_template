@@ -1,11 +1,12 @@
+import { cdn } from "../../../../utils/cdn";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import Field from "/svgs/registration/field2.svg";
+const Field = cdn("/svgs/registration/field2.svg");
 import styles from "./Register.module.scss";
 import { useEffect, forwardRef } from "react";
 import { useForm } from "react-hook-form";
-import Left from "/svgs/registration/leftarr.svg";
-import Right from "/svgs/registration/rightarr.svg";
+const Left = cdn("/svgs/registration/leftarr.svg");
+const Right = cdn("/svgs/registration/rightarr.svg");
 import type { PaymentSuccessData } from "../PaymentSuccessModal/PaymentSuccessModal";
 
 const registrationSchema = yup.object({

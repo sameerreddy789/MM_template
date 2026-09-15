@@ -1,3 +1,4 @@
+import { cdn } from "./cdn";
 import { create } from "zustand";
 
 type overlayActive ={
@@ -48,11 +49,13 @@ export const useMainHamStore = create<mainHam>((set) => ({
     setMainHamOpen: (isOpen) => set({ isMainHamOpen: isOpen })
 }));
 
+// "FUNK DESTRAVADO slowed.mp3" used to sit in slot 2 here but the file is not in
+// the repo, so advancing to that track failed silently. Dropped rather than
+// migrated -- add it back through the CDN if the audio turns up.
 export const PLAYLIST = [
-    "/sounds/Shape of U x Carnatic.mp3",
-    "/sounds/FUNK DESTRAVADO slowed.mp3",
-    "/sounds/bg-music.mp3",
-    "/sounds/bg-music2.mp3"
+    cdn("/sounds/Shape_of_U_x_Carnatic.mp3"),
+    cdn("/sounds/bg-music.mp3"),
+    cdn("/sounds/bg-music2.mp3")
 ];
 
 // The whole music system lives here so it can outlive any page. App has no

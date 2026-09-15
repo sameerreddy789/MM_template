@@ -1,10 +1,11 @@
+import { cdn } from "../../../utils/cdn";
 import styles from "./mainHam.module.scss";
 import { useMainHamStore } from "../../../utils/store";
-import mmLogo from "/images/logo.webp";
-import insta from "/svgs/landing/insta.svg";
-import instaLamp from "/svgs/landing/instaLamp.svg";
-import youtube from "/svgs/landing/youtube.svg";
-import youtubeLamp from "/svgs/landing/youtubeLamp.svg";
+const mmLogo = cdn("/images/logo.webp");
+const insta = cdn("/svgs/landing/insta.svg");
+const instaLamp = cdn("/svgs/landing/instaLamp.svg");
+const youtube = cdn("/svgs/landing/youtube.svg");
+const youtubeLamp = cdn("/svgs/landing/youtubeLamp.svg");
 
 interface MainHamProps {
   goToPage: (path: string) => void;

@@ -1,3 +1,4 @@
+import { cdn } from "../../utils/cdn";
 import SEO from "../../components/SEO";
 import styles from "./Registration.module.scss";
 
@@ -7,9 +8,9 @@ import PaymentSuccessModal, {
  type PaymentSuccessData,
 } from "./components/PaymentSuccessModal/PaymentSuccessModal";
 
-import bgExtend from "/images/registration/bg-extended.webp";
-import banner from "/images/registration/reg-banner.webp";
-import bgMobile from "/svgs/registration/bg-mobile.svg";
+const bgExtend = cdn("/images/registration/bg-extended.webp");
+const banner = cdn("/images/registration/reg-banner.webp");
+const bgMobile = cdn("/svgs/registration/bg-mobile.svg");
 import BackButton from "../components/backButton/BackButton";
 
 import { useGSAP } from "@gsap/react";

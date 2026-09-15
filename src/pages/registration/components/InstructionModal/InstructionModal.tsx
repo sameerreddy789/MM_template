@@ -1,8 +1,9 @@
+import { cdn } from "../../../../utils/cdn";
 import { useEffect, useRef } from "react";
 import styles from "./InstructionModal.module.scss";
 
-import thumb from "/svgs/registration/scrollThumb.svg";
-import ScrollBar from "/svgs/registration/scroll-bar.svg";
+const thumb = cdn("/svgs/registration/scrollThumb.svg");
+const ScrollBar = cdn("/svgs/registration/scroll-bar.svg");
 
 import ReactDOM from "react-dom";
 

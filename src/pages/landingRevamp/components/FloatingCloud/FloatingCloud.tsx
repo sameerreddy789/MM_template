@@ -1,3 +1,4 @@
+import { cdn } from "../../../../utils/cdn";
 import React from "react";
 import styles from "./FloatingCloud.module.scss";
 
@@ -46,7 +47,7 @@ export default function FloatingCloud({
   cloudId = 1,
   className = "",
 }: FloatingCloudProps) {
-  const imgSrc = `/images/landing/cloud_${cloudId}.png`;
+  const imgSrc = cdn(`/images/landing/cloud_${cloudId}.webp`);
 
   // Shorter duration over the same distance = faster.
   const cycle = duration / SPEED_MULTIPLIER;

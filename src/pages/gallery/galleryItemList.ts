@@ -1,3 +1,4 @@
+import { cdn } from "../../utils/cdn";
 import type { CSSProperties } from "react";
 
 interface ImageProperty {
@@ -39,33 +40,33 @@ export const HERO_COUNT = 9;
 const galleryImageProperties: ImageProperty[] = [
     // --- Hero cross (fixed 9 slots: video + 2 top + 2 left + 2 right + 2 bottom) ---
     {
-        src: '/videos/1_Glimpse_of_MM2k23.mp4',
+        src: cdn('/videos/1_Glimpse_of_MM2k23.mp4'),
         type: 'video',
     },
-    { src: '/images/gallery/top1.webp', type: 'image' },         // top-left
-    { src: '/images/gallery/gallery1.webp', type: 'image' },     // top-right
-    { src: '/images/gallery/left-up.webp', type: 'image' },      // left-top
-    { src: '/images/gallery/left-bottom.webp', type: 'image' },  // left-bottom
-    { src: '/images/gallery/gallery5.webp', type: 'image' },     // right-top (beside the video, top)
-    { src: '/images/gallery/right-bottom.webp', type: 'image' }, // right-bottom
-    { src: '/images/gallery/mm1.webp', type: 'image' },         // bottom-left (under video - group with red carpet)
-    { src: '/images/gallery/mm2.webp', type: 'image' },         // bottom-right (under video - group with potted plants)
+    { src: cdn('/images/gallery/top1.webp'), type: 'image' },         // top-left
+    { src: cdn('/images/gallery/gallery1.webp'), type: 'image' },     // top-right
+    { src: cdn('/images/gallery/left-up.webp'), type: 'image' },      // left-top
+    { src: cdn('/images/gallery/left-bottom.webp'), type: 'image' },  // left-bottom
+    { src: cdn('/images/gallery/gallery5.webp'), type: 'image' },     // right-top (beside the video, top)
+    { src: cdn('/images/gallery/right-bottom.webp'), type: 'image' }, // right-bottom
+    { src: cdn('/images/gallery/mm1.webp'), type: 'image' },         // bottom-left (under video - group with red carpet)
+    { src: cdn('/images/gallery/mm2.webp'), type: 'image' },         // bottom-right (under video - group with potted plants)
 
     // --- Row 1: Concert Stage Triptych (Audience viewing the Singer in the center) ---
-    { src: '/images/gallery/gallery4.webp', type: 'image' },     // Left: cheering crowd of girls with phones raised
-    { src: '/images/gallery/mm7.webp', type: 'image' },          // Middle: the Singer in snakeskin jacket
-    { src: '/images/gallery/gallery3.webp', type: 'image' },     // Right: concert audience facing the stage/singer
+    { src: cdn('/images/gallery/gallery4.webp'), type: 'image' },     // Left: cheering crowd of girls with phones raised
+    { src: cdn('/images/gallery/mm7.webp'), type: 'image' },          // Middle: the Singer in snakeskin jacket
+    { src: cdn('/images/gallery/gallery3.webp'), type: 'image' },     // Right: concert audience facing the stage/singer
 
     // --- Remaining flowing festival gallery ---
-    { src: '/images/gallery/gallery2.webp', type: 'image' },     // Swapped from right-top slot beside video
-    { src: '/images/gallery/gallery6.webp', type: 'image' },     // Concert stage with full truss lights
-    { src: '/images/gallery/mm3.webp', type: 'image' },          // Guest with dancers in traditional attire
-    { src: '/images/gallery/mm4.webp', type: 'image' },          // Mohan Babu sir at festival stall
-    { src: '/images/gallery/mm5.webp', type: 'image' },
-    { src: '/images/gallery/mm6.webp', type: 'image' },
-    { src: '/images/gallery/kerala-dance.webp', type: 'image' },
-    { src: '/images/gallery/siv-man-in-action.webp', type: 'image' },
-    { src: '/images/gallery/students.webp', type: 'image' },
+    { src: cdn('/images/gallery/gallery2.webp'), type: 'image' },     // Swapped from right-top slot beside video
+    { src: cdn('/images/gallery/gallery6.webp'), type: 'image' },     // Concert stage with full truss lights
+    { src: cdn('/images/gallery/mm3.webp'), type: 'image' },          // Guest with dancers in traditional attire
+    { src: cdn('/images/gallery/mm4.webp'), type: 'image' },          // Mohan Babu sir at festival stall
+    { src: cdn('/images/gallery/mm5.webp'), type: 'image' },
+    { src: cdn('/images/gallery/mm6.webp'), type: 'image' },
+    { src: cdn('/images/gallery/kerala-dance.webp'), type: 'image' },
+    { src: cdn('/images/gallery/siv-man-in-action.webp'), type: 'image' },
+    { src: cdn('/images/gallery/students.webp'), type: 'image' },
 ];
 
 export default galleryImageProperties;

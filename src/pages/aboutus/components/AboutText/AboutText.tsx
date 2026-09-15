@@ -1,6 +1,7 @@
+import { cdn } from "../../../../utils/cdn";
 import styles from"../../AboutUs.module.scss"
-import abtus from "/svgs/aboutus/abtus.svg";
-import aboutTextBG from "/images/aboutus/abtbck.webp";
+const abtus = cdn("/svgs/aboutus/abtus.svg");
+const aboutTextBG = cdn("/images/aboutus/abtbck.webp");
 
 interface AboutTextProps {
   isMobile: boolean;

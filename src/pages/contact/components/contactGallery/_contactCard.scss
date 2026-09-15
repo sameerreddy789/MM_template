@@ -111,7 +111,7 @@ $tag-rule: rgba(90, 60, 30, 0.28);
         // what lets the tag body size every element as a fraction of the tag.
         container-type: inline-size;
 
-        background-image: url("/images/contact/ContactCard1.webp");
+        background-image: url("https://d3hw0wgw9j5gvz.cloudfront.net/images/contact/ContactCard1.webp");
         // Oversized and bottom-anchored, cropping most of the hanging string off
         // the top - see the geometry notes above.
         background-size: 100% $tag-draw-height;

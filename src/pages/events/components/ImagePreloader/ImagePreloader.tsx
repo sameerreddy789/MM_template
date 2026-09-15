@@ -1,5 +1,6 @@
+import { cdn } from "../../../../utils/cdn";
 import { useEffect, useState } from "react";
-import Logo from "/images/logo.webp";
+const Logo = cdn("/images/logo.webp");
 interface EventImageProps {
   imageUrl?: string | string[];
   alt?: string;

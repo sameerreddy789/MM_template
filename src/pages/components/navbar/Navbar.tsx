@@ -1,3 +1,4 @@
+import { cdn } from "../../../utils/cdn";
 import styles from "./Navbar.module.scss";
 import { useEffect, useContext, useRef } from "react";
 import { useNavVisibilityStore, useMainHamStore } from "../../../utils/store";
@@ -5,14 +6,14 @@ import { navContext } from "../../../App";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion } from "framer-motion";
-import moon from "/svgs/landing/moon1.svg";
-import moonHam from "/svgs/landing/moonHam.svg";
-import cloud1 from "/svgs/landing/hamClouds/cloud1.min.svg";
-import cloud2 from "/svgs/landing/hamClouds/cloud2.min.svg";
-import cloud3 from "/svgs/landing/hamClouds/cloud3.min.svg";
-import cloud4 from "/svgs/landing/hamClouds/cloud4.min.svg";
-import cloud5 from "/svgs/landing/hamClouds/cloud5.min.svg";
-import cloud6 from "/svgs/landing/hamClouds/cloud6.min.svg";
+const moon = cdn("/svgs/landing/moon1.svg");
+const moonHam = cdn("/svgs/landing/moonHam.svg");
+const cloud1 = cdn("/svgs/landing/hamClouds/cloud1.min.svg");
+const cloud2 = cdn("/svgs/landing/hamClouds/cloud2.min.svg");
+const cloud3 = cdn("/svgs/landing/hamClouds/cloud3.min.svg");
+const cloud4 = cdn("/svgs/landing/hamClouds/cloud4.min.svg");
+const cloud5 = cdn("/svgs/landing/hamClouds/cloud5.min.svg");
+const cloud6 = cdn("/svgs/landing/hamClouds/cloud6.min.svg");
 // import debouncedHandler from "../../../utils/debounce";
 // import { rect } from "framer-motion/client";
 
