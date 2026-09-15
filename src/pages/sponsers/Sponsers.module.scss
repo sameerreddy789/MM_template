@@ -158,6 +158,7 @@
         margin: 0;
         text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
         background: linear-gradient(180deg, #ffffff 40%, #e0e0e0 100%);
+        background-clip: text;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
 
