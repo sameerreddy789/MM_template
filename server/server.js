@@ -18,6 +18,7 @@ const admin = require("firebase-admin");
 const crypto = require("crypto");
 const cors = require("cors");
 const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 const { generateIdCard } = require("./services/idcard");
 const { generateQRCode } = require("./services/qr");
 const { sendIdCardEmail } = require("./services/email");
@@ -75,28 +76,68 @@ const app = express();
 // Security headers
 app.use(helmet());
 
-// CORS — allow frontend (localhost, Vercel, or custom domain) to talk to this backend
+// CORS — allow only verified frontend origins (localhost, project Vercel domains, and festival domain)
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
+  "https://mm-template.vercel.app",
+  "https://mohanamantra.com",
+  "https://www.mohanamantra.com",
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
 app.use(
- cors({
- origin: (origin, callback) => {
- // Allow requests with no origin (mobile apps, curl, postman) or matching allowed domains.
- // The previous version accepted every origin in both branches of this if, which meant the
- // allowlist below was decorative; tighten it back up here.
- if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app") || origin.includes("mohanamantra")) {
- callback(null, true);
-  } else {
- callback(new Error(`Origin ${origin} not allowed by CORS`), false);
- }
- },
- methods: ["GET", "POST"],
- })
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, server-to-server, curl, webhooks)
+      if (!origin) return callback(null, true);
+
+      // Verify origin against allowlist or legitimate project preview deployments
+      const isAllowed =
+        allowedOrigins.includes(origin) ||
+        /^https:\/\/mm-template(-[a-z0-9-]+)?\.vercel\.app$/.test(origin);
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Origin ${origin} not allowed by CORS policy.`), false);
+      }
+    },
+    methods: ["GET", "POST"],
+  })
 );
+
+// ==========================================
+// RATE LIMITING (DOS & BRUTE FORCE DEFENSE)
+// ==========================================
+
+// Global rate limiter across all endpoints
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200, // max 200 requests per IP per 15 min
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: "Too many requests from this IP. Please try again later." },
+});
+app.use(generalLimiter);
+
+// Strict rate limiter for gatekeeper admin authentication & verification
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // max 10 attempts per 15 minutes
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: "Too many login/verification attempts. Please wait 15 minutes." },
+});
+
+// Rate limiter for Razorpay registration order creation
+const registerLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 25, // max 25 orders created per IP per 10 minutes
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: "Too many registration attempts. Please wait a few minutes before trying again." },
+});
 
 // JSON body parser with RAW BODY preservation
 // Why? Razorpay webhook verification needs the EXACT raw bytes of the request
@@ -199,7 +240,7 @@ async function generateIdCardAndSendEmail({ ticketId, name, college, rollNo, ema
 //   Without this, a student could open browser DevTools and change the amount
 //   from ₹1000 to ₹1. With server-side orders, Razorpay enforces the exact
 //   amount we set here.
-app.post("/api/register", async (req, res) => {
+app.post("/api/register", registerLimiter, async (req, res) => {
   try {
     if (!razorpayInstance) {
       return res.status(400).json({
@@ -210,11 +251,45 @@ app.post("/api/register", async (req, res) => {
 
     const { name, email, phone, college, roll_no } = req.body;
 
-    // Validate all required fields
-    if (!name || !email || !phone || !college || !roll_no) {
+    // Sanitize and trim strings to prevent whitespace or type tampering
+    const cleanName = typeof name === "string" ? name.trim() : "";
+    const cleanEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+    const cleanPhone = typeof phone === "string" ? phone.trim() : "";
+    const cleanCollege = typeof college === "string" ? college.trim() : "";
+    const cleanRollNo = typeof roll_no === "string" ? roll_no.trim().toUpperCase() : "";
+
+    // Validate presence of all required fields
+    if (!cleanName || !cleanEmail || !cleanPhone || !cleanCollege || !cleanRollNo) {
       return res.status(400).json({
         success: false,
         error: "All student fields are required (name, email, phone, college, roll_no)",
+      });
+    }
+
+    // Length validation to prevent payload bloat and database corruption
+    if (cleanName.length > 100 || cleanCollege.length > 150 || cleanRollNo.length > 50) {
+      return res.status(400).json({
+        success: false,
+        error: "One or more fields exceed maximum allowed character length.",
+      });
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail) || cleanEmail.length > 120) {
+      return res.status(400).json({
+        success: false,
+        error: "Please provide a valid email address.",
+      });
+    }
+
+    // Phone format validation (10 to 15 digits)
+    const phoneCleanDigits = cleanPhone.replace(/[\s\-\(\)]/g, "");
+    const phoneRegex = /^\+?[0-9]{10,15}$/;
+    if (!phoneRegex.test(phoneCleanDigits)) {
+      return res.status(400).json({
+        success: false,
+        error: "Please provide a valid 10-digit phone number.",
       });
     }
 
@@ -225,18 +300,18 @@ app.post("/api/register", async (req, res) => {
       currency: "INR",
       receipt: `mm26_${Date.now()}`,
       notes: {
-        student_name: name,
-        student_email: email,
-        student_phone: phone,
-        college_name: college,
-        roll_no: roll_no,
+        student_name: cleanName,
+        student_email: cleanEmail,
+        student_phone: phoneCleanDigits,
+        college_name: cleanCollege,
+        roll_no: cleanRollNo,
         fest: "MohanaMantra 2K26",
       },
     };
 
     const order = await razorpayInstance.orders.create(orderOptions);
 
-    console.log(`📋 Order created: ${order.id} for ${name} (${college})`);
+    console.log(`📋 Order created: ${order.id} for ${cleanName} (${cleanCollege})`);
 
     // Return order details to the frontend
     res.status(200).json({
@@ -385,22 +460,29 @@ app.get("/api/health", (_req, res) => {
 // GATEKEEPER API ENDPOINTS (ADMIN AUTHENTICATION)
 // ==========================================
 
+// Timing-safe string comparison to eliminate side-channel timing attacks
+function timingSafeCompare(a, b) {
+  if (typeof a !== "string" || typeof b !== "string") return false;
+  const hashA = crypto.createHash("sha256").update(a).digest();
+  const hashB = crypto.createHash("sha256").update(b).digest();
+  return crypto.timingSafeEqual(hashA, hashB);
+}
+
 // Helper to validate Admin Key-Value Credentials
 function isValidAdmin(adminKey, adminSecret) {
- // Refuse to start with a guessable secret. JWTs signed with this would be forgeable by anyone
- // who reads the public repo. If the env vars are missing, fail closed — the operator has
- // to set them on Render before the server can boot into a usable state.
- const expectedKey = process.env.ADMIN_KEY;
- const expectedSecret = process.env.ADMIN_SECRET;
- if (!expectedKey || !expectedSecret) {
- console.error("❌ ADMIN_KEY / ADMIN_SECRET not configured on server.");
-  return false;
- }
- return adminKey === expectedKey && adminSecret === expectedSecret;
+  const expectedKey = process.env.ADMIN_KEY;
+  const expectedSecret = process.env.ADMIN_SECRET;
+  if (!expectedKey || !expectedSecret) {
+    console.error("❌ ADMIN_KEY / ADMIN_SECRET not configured on server.");
+    return false;
+  }
+  const isKeyValid = timingSafeCompare(adminKey, expectedKey);
+  const isSecretValid = timingSafeCompare(adminSecret, expectedSecret);
+  return isKeyValid && isSecretValid;
 }
 
 // ROUTE: POST /api/gatekeeper/login
-app.post("/api/gatekeeper/login", (req, res) => {
+app.post("/api/gatekeeper/login", authLimiter, (req, res) => {
   const { adminKey, adminSecret } = req.body;
   if (!adminKey || !adminSecret || !isValidAdmin(adminKey, adminSecret)) {
     return res.status(401).json({
@@ -417,7 +499,7 @@ app.post("/api/gatekeeper/login", (req, res) => {
 });
 
 // ROUTE: POST /api/gatekeeper/verify
-app.post("/api/gatekeeper/verify", async (req, res) => {
+app.post("/api/gatekeeper/verify", authLimiter, async (req, res) => {
   try {
     const { token, ticketId, adminKey, adminSecret } = req.body;
 
@@ -498,7 +580,7 @@ const SESSION_NAMES = {
 };
 
 // ROUTE: POST /api/gatekeeper/checkin
-app.post("/api/gatekeeper/checkin", async (req, res) => {
+app.post("/api/gatekeeper/checkin", authLimiter, async (req, res) => {
   try {
     const { ticketId, sessionKey = "day1_am", adminKey, adminSecret } = req.body;
 
