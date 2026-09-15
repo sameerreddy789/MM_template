@@ -340,7 +340,7 @@ const Register = forwardRef<HTMLDivElement, PropsType>(
               strokeWidth="0.16"
             />
           </svg>
-          <span>PROCEED TO PAY ₹1000</span>
+          <span>PROCEED TO PAY</span>
           <svg
             width="50"
             height="8"
