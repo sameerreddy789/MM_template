@@ -40,7 +40,7 @@ function generateVerificationToken(ticketId, studentName, secureToken) {
  * @returns {string} The full verification URL
  */
 function buildVerificationUrl(token) {
-  const baseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  const baseUrl = process.env.FRONTEND_URL || "https://mm-template.vercel.app";
   return `${baseUrl}/gatekeeper/verify/${token}`;
 }
 

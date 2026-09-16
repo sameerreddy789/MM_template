@@ -116,7 +116,7 @@ async function runFullPipelineSimulation() {
     console.log(`   College      : ${student.college}`);
     console.log(`   Status       : ${student.paymentStatus}`);
     console.log(`   Local QR File: ./server/test_output/test_qr_${ticketId}.png`);
-    console.log(`\n👉 NEXT STEP: Open http://localhost:5173/gatekeeper and verify Ticket ID '${ticketId}' or Drag & Drop the QR image!`);
+    console.log(`\n👉 NEXT STEP: Open https://mm-template.vercel.app/gatekeeper and verify Ticket ID '${ticketId}' or Drag & Drop the QR image!`);
     console.log("==========================================\n");
   } catch (error) {
     console.error("\n❌ Simulation Failed:", error);
