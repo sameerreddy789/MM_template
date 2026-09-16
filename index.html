@@ -2,7 +2,59 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image" href="https://d3hw0wgw9j5gvz.cloudfront.net/images/logo.webp" />
+
+    <!-- Every image, sound and video now comes from CloudFront (see src/utils/cdn.ts),
+         so the very first asset request would otherwise have to pay for a DNS
+         lookup, TCP handshake and TLS negotiation to a brand new origin. Opening
+         that connection during HTML parse takes those round trips off the critical
+         path. Two tags are needed because credentialled and uncredentialled
+         requests use separate connection pools: <img> fetches are uncredentialled,
+         while the preloader's fetch() of the sketch SVG is a CORS request. -->
+    <link rel="preconnect" href="https://d3hw0wgw9j5gvz.cloudfront.net" />
+    <link rel="preconnect" href="https://d3hw0wgw9j5gvz.cloudfront.net" crossorigin />
+    <link rel="dns-prefetch" href="https://d3hw0wgw9j5gvz.cloudfront.net" />
+
+    <!-- The first screen, requested before React has even been parsed. These are
+         the same URLs as CRITICAL_LANDING_ASSETS in src/assetManifest.generated.ts;
+         keep the two in step. paper-texture and ink-spread-4 are the drawing
+         preloader's own background and mask, and LatestProcessed.svg is the sketch
+         it animates, so all three are needed for the literal first paint. -->
+    <link rel="preload" as="image" fetchpriority="high" type="image/webp"
+          href="https://d3hw0wgw9j5gvz.cloudfront.net/images/paper-texture.webp" />
+    <link rel="preload" as="image" fetchpriority="high" type="image/webp"
+          href="https://d3hw0wgw9j5gvz.cloudfront.net/videos/ink-spread-4.webp" />
+    <link rel="preload" as="fetch" fetchpriority="high" type="image/svg+xml" crossorigin
+          href="https://d3hw0wgw9j5gvz.cloudfront.net/svgs/landing/LatestProcessed.svg" />
+    <link rel="preload" as="image" fetchpriority="high" type="image/webp"
+          href="https://d3hw0wgw9j5gvz.cloudfront.net/images/logo.webp" />
+
+    <!-- Landing hero, sitting behind the preloader overlay. media= lets the browser
+         skip the variant it will never paint, so a phone does not spend its first
+         megabyte on the 4K desktop hills. -->
+    <link rel="preload" as="image" type="image/webp" media="(min-width: 901px)"
+          href="https://d3hw0wgw9j5gvz.cloudfront.net/images/hero_hills.webp" />
+    <link rel="preload" as="image" type="image/webp" media="(min-width: 901px)"
+          href="https://d3hw0wgw9j5gvz.cloudfront.net/images/landing/tirumala_hills_4k.webp" />
+    <link rel="preload" as="image" type="image/webp" media="(max-width: 900px)"
+          href="https://d3hw0wgw9j5gvz.cloudfront.net/images/hero_mobile.webp" />
+    <link rel="preload" as="image" type="image/webp"
+          href="https://d3hw0wgw9j5gvz.cloudfront.net/images/landing/new_tree.webp" />
+    <link rel="preload" as="image" type="image/webp"
+          href="https://d3hw0wgw9j5gvz.cloudfront.net/images/landing/cloud_1.webp" />
+
+    <!-- First-screen SVG furniture. All tiny once CloudFront has Brotli'd them, and
+         the register button is the page's primary call to action, so it should
+         never be the thing the visitor waits on. -->
+    <link rel="preload" as="image" type="image/svg+xml" media="(min-width: 901px)"
+          href="https://d3hw0wgw9j5gvz.cloudfront.net/svgs/landing/registerBtn.svg" />
+    <link rel="preload" as="image" type="image/svg+xml" media="(max-width: 900px)"
+          href="https://d3hw0wgw9j5gvz.cloudfront.net/svgs/landing/mobileRegisterBtn.svg" />
+    <link rel="preload" as="image" type="image/svg+xml"
+          href="https://d3hw0wgw9j5gvz.cloudfront.net/svgs/landing/moon1.svg" />
+    <link rel="preload" as="image" type="image/svg+xml"
+          href="https://d3hw0wgw9j5gvz.cloudfront.net/svgs/landing/wire.svg" />
+
+    <link rel="icon" type="image/webp" href="https://d3hw0wgw9j5gvz.cloudfront.net/images/logo.webp" />
 
     <title>MohanaMantra 2K26 | MBU Cultural & Technical Fest</title>
     <link rel="canonical" href="https://mm-template.vercel.app/" />

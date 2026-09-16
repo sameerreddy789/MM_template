@@ -9,6 +9,7 @@ import Contact from "./pages/contact/ContactPage";
 
 import assetList from "./assetList";
 import useCanonicalUrl from "./UseCanonicalUrl";
+import { startAssetWarmup } from "./utils/assetWarmup";
 
 // import Eventspage from "./pages/events/components/Eventspage";
 
@@ -51,6 +52,18 @@ export default function App() {
  page: location.pathname + location.search,
  });
  }, [location]);
+
+ // Pull the entire image catalogue into cache from the moment the app boots.
+ //
+ // Every page other than the landing one is gated behind a preloader that blocks
+ // rendering until its images land, which is what makes navigation feel slow.
+ // Warming here means those gates find everything cached and resolve on the
+ // first frame. Critical assets go first, the remaining ~14 MB follows on idle at
+ // low fetch priority, and the whole thing backs off on Save-Data or 2G.
+ // Runs once - startAssetWarmup guards against re-entry.
+ useEffect(() => {
+ startAssetWarmup();
+ }, []);
 
  const pageList = [
  "home",
