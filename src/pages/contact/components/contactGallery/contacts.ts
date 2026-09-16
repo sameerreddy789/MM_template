@@ -37,7 +37,12 @@ export const FEST_EMAIL = "mohanamantra@mbu.asia";
 
 const registrations: ContactSection = {
     section: "Registrations",
-    people: [{ name: "Murali" }],
+    people: [
+        {
+            name: "Murali",
+            phone: "+91 63028 84402",
+        },
+    ],
 };
 
 const sponsorship: ContactSection = {
