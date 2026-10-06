@@ -22,7 +22,7 @@ const dummyEventsData = [
   {
      category_name: "Band Night",
     events: [
-      { name: "Band Battle", club_name: "Music Club", venue: "Main Auditorium", description: "Battle of the musical bands.", image_url: cdn("/images/events/Eventpics/Band_Battle.webp") },
+      { name: "Band Battle", club_name: "Music Club", venue: "Main Auditorium", description: "Battle of the musical bands.", image_url: cdn("/images/events/Eventpics/Band_Battle.webp"), scale: 0.88 },
       { name: "Dedicate a song", club_name: "Music Club", venue: "Campus Radio", description: "Dedicate your favorite song to someone special.", image_url: cdn("/images/events/Eventpics/Dedicate_a_song.webp") },
       { name: "Solo and Group Singing", club_name: "Music Club", venue: "Main Auditorium", description: "Melodious vocal performances in solo & group categories.", image_url: cdn("/images/events/Eventpics/Solo_and_group_singing.webp") },
       { name: "Fashion Show", club_name: "Fashion Club", venue: "Main Stage", description: "Walk the ramp in style.", image_url: cdn("/images/events/Eventpics/Fashion_show.webp"), object_position: "center top" }

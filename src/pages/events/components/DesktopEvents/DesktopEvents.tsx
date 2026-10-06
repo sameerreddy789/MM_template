@@ -41,7 +41,11 @@ const DesktopEvents: React.FC<DesktopEventsProps> = ({
               alt={events[currentIndex]?.name}
               className={styles.imagenewFull}
               previewClass={styles.imagenewpreviewFull}
-              style={events[currentIndex]?.object_position ? { objectPosition: events[currentIndex].object_position } : undefined}
+              style={{
+                objectPosition: events[currentIndex]?.object_position,
+                objectFit: events[currentIndex]?.object_fit,
+                transform: events[currentIndex]?.scale ? `scale(${events[currentIndex].scale})` : undefined,
+              }}
             />
           </div>
 
