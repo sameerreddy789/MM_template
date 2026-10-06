@@ -39,8 +39,9 @@ const registrations: ContactSection = {
     section: "Registrations",
     people: [
         {
-            name: "Murali",
-            phone: "+91 63028 84402",
+            name: "P Jubella Khan ",
+            phone: "+91 86394 59052",
+            
         },
     ],
 };
@@ -70,9 +71,9 @@ const marketing: ContactSection = {
 const website: ContactSection = {
     section: "Website",
     people: [
-        { name: "Sameer", phone: "+91 89851 37419" },
-        { name: "Monish", phone: "+91 63021 68359" },
-        { name: "Krishna Chaitanya", phone: "+91 93987 67703" },
+        { name: "V Sameer ", phone: "+91 89851 37419" },
+        { name: "G Monish ", phone: "+91 63021 68359" },
+        { name: "K Krishna Chaitanya", phone: "+91 93987 67703" },
     ],
 };
 

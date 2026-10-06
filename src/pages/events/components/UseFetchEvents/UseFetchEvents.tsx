@@ -47,7 +47,6 @@ const dummyEventsData = [
   {
     category_name: "Spot Events",
     events: [
-      { name: "Spot Photography", club_name: "Photography Club", venue: "Campus", description: "Capture the moment.", image_url: cdn("/images/events/Eventpics/Spot_photography.webp") },
       { name: "Jenga", club_name: "Fun Club", venue: "Food Court", description: "Don't let the tower fall.", image_url: cdn("/images/events/Eventpics/Jenga.webp") },
       { name: "Tug of War", club_name: "Sports Club", venue: "Ground", description: "Show your team strength.", image_url: cdn("/images/events/Eventpics/Tug_of_war.webp") },
       { name: "Food Challenge", club_name: "Food & Fun Club", venue: "Food Court", description: "Eat fast, win big! Ultimate eating challenge.", image_url: cdn("/images/events/Eventpics/Food_challenge.webp") },

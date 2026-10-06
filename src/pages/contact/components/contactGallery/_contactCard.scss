@@ -248,7 +248,10 @@ $tag-rule: rgba(90, 60, 30, 0.28);
         list-style: none;
         margin: 0;
         padding: 0;
-        width: 100%;
+        // Narrower than the paper so the hairlines sit centred under the label,
+        // like the solo tags' centred text, rather than running edge to edge.
+        width: 86%;
+        align-self: center;
         min-width: 0;
         display: flex;
         flex-direction: column;
@@ -258,9 +261,19 @@ $tag-rule: rgba(90, 60, 30, 0.28);
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.15cqw;
+        gap: 0.8cqw;
         min-width: 0;
-        padding: 0.45cqw 0;
+        // Equal air either side of each hairline; the block's outer edges sit
+        // flush so only the gaps between people carry padding.
+        padding: 1.6cqw 0;
+
+        &:first-child {
+            padding-top: 0;
+        }
+
+        &:last-child {
+            padding-bottom: 0;
+        }
 
         // Hairline between members: keeps three people from reading as one block
         // while staying quieter than boxing each row.
@@ -271,21 +284,20 @@ $tag-rule: rgba(90, 60, 30, 0.28);
 
     // The roster carries three names where a solo tag carries one, so its type
     // steps down. Sized off the same tag width, so the ratio holds at every size.
-    // Three names where a solo tag carries one, so the roster runs tighter: smaller
-    // type and closer leading. The line-heights are pulled in as well - at the tag
-    // sizes that fitting one screen implies, leading is a bigger share of the
-    // roster's height than the glyphs are.
+    // Spacing is budgeted in cqw too: label gap, name/phone grouping and the
+    // padding around each hairline come to roughly 48cqw of the ~52.6cqw of paper
+    // height, leaving headroom for where the clamp font floors bind on small tags.
     .contactCardRoster {
-        gap: 0.6cqw;
+        gap: 2.4cqw;
 
         .personName {
             font-size: clamp(0.78rem, 5.2cqw, 1.3rem);
-            line-height: 1.08;
+            line-height: 1.12;
         }
 
         .personPhone {
             font-size: clamp(0.74rem, 4.3cqw, 1.05rem);
-            line-height: 1.12;
+            line-height: 1.2;
         }
     }
 }
