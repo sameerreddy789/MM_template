@@ -188,6 +188,14 @@ function generateTicketId() {
   return `MM26-${randomHex}`;
 }
 
+// Timing-safe string comparison to eliminate side-channel timing attacks
+function timingSafeCompare(a, b) {
+  if (typeof a !== "string" || typeof b !== "string") return false;
+  const hashA = crypto.createHash("sha256").update(a).digest();
+  const hashB = crypto.createHash("sha256").update(b).digest();
+  return crypto.timingSafeEqual(hashA, hashB);
+}
+
 // ==========================================
 // 5. PIPELINE — Generate ID Card + Send Email
 // ==========================================
@@ -349,13 +357,22 @@ app.post("/api/payment-webhook", async (req, res) => {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
   const signature = req.headers["x-razorpay-signature"];
 
-  // --- STEP A: Verify the signature ---
+  if (!secret) {
+    console.error("❌ RAZORPAY_WEBHOOK_SECRET not configured on server.");
+    return res.status(500).json({ error: "Webhook secret not configured" });
+  }
+
+  if (!signature || typeof signature !== "string" || !req.rawBody) {
+    return res.status(400).json({ error: "Invalid or missing webhook signature/payload" });
+  }
+
+  // --- STEP A: Verify the signature with timing-safe comparison ---
   const expectedSignature = crypto
     .createHmac("sha256", secret)
     .update(req.rawBody)
     .digest("hex");
 
-  if (expectedSignature !== signature) {
+  if (!timingSafeCompare(expectedSignature, signature)) {
     console.warn("⚠️  Webhook signature mismatch — possible spoofing attempt!");
     return res.status(400).json({ error: "Invalid signature" });
   }
@@ -459,14 +476,6 @@ app.get("/api/health", (_req, res) => {
 // ==========================================
 // GATEKEEPER API ENDPOINTS (ADMIN AUTHENTICATION)
 // ==========================================
-
-// Timing-safe string comparison to eliminate side-channel timing attacks
-function timingSafeCompare(a, b) {
-  if (typeof a !== "string" || typeof b !== "string") return false;
-  const hashA = crypto.createHash("sha256").update(a).digest();
-  const hashB = crypto.createHash("sha256").update(b).digest();
-  return crypto.timingSafeEqual(hashA, hashB);
-}
 
 // Helper to validate Admin Key-Value Credentials
 function isValidAdmin(adminKey, adminSecret) {

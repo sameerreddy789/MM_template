@@ -77,8 +77,23 @@ async function sendIdCardEmail({ toEmail, studentName, ticketId, college, idCard
 
 /**
  * Build the HTML email body with inline styles (email clients don't support CSS files)
+/**
+ * Escape HTML special characters to prevent HTML injection attacks in email clients
  */
+function escapeHtml(str) {
+  if (typeof str !== "string") return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function buildEmailHtml(studentName, ticketId, college) {
+  const safeName = escapeHtml(studentName);
+  const safeTicketId = escapeHtml(ticketId);
+  const safeCollege = escapeHtml(college);
   return `
 <!DOCTYPE html>
 <html>
@@ -115,7 +130,7 @@ function buildEmailHtml(studentName, ticketId, college) {
           <tr>
             <td style="padding: 30px 40px;">
               <p style="color: #fff9e9; font-size: 18px; margin: 0 0 15px;">
-                Dear <strong style="color: #d4a843;">${studentName}</strong>,
+                Dear <strong style="color: #d4a843;">${safeName}</strong>,
               </p>
               <p style="color: #e2dccb; font-size: 15px; line-height: 1.7; margin: 0 0 15px;">
                 Welcome to MohanaMantra 2K26! Your registration is confirmed and payment of 
@@ -134,15 +149,15 @@ function buildEmailHtml(studentName, ticketId, college) {
               <table width="100%" style="background-color: #1a0a0e; border: 1px solid #b8922f; border-radius: 8px; padding: 20px;">
                 <tr>
                   <td style="padding: 12px 20px; color: #c4a265; font-size: 13px;">TICKET ID</td>
-                  <td style="padding: 12px 20px; color: #fff9e9; font-size: 16px; font-weight: bold; text-align: right;">${ticketId}</td>
+                  <td style="padding: 12px 20px; color: #fff9e9; font-size: 16px; font-weight: bold; text-align: right;">${safeTicketId}</td>
                 </tr>
                 <tr>
                   <td style="padding: 12px 20px; color: #c4a265; font-size: 13px; border-top: 1px solid #2a1218;">NAME</td>
-                  <td style="padding: 12px 20px; color: #fff9e9; font-size: 16px; text-align: right; border-top: 1px solid #2a1218;">${studentName}</td>
+                  <td style="padding: 12px 20px; color: #fff9e9; font-size: 16px; text-align: right; border-top: 1px solid #2a1218;">${safeName}</td>
                 </tr>
                 <tr>
                   <td style="padding: 12px 20px; color: #c4a265; font-size: 13px; border-top: 1px solid #2a1218;">COLLEGE</td>
-                  <td style="padding: 12px 20px; color: #fff9e9; font-size: 16px; text-align: right; border-top: 1px solid #2a1218;">${college}</td>
+                  <td style="padding: 12px 20px; color: #fff9e9; font-size: 16px; text-align: right; border-top: 1px solid #2a1218;">${safeCollege}</td>
                 </tr>
               </table>
             </td>
