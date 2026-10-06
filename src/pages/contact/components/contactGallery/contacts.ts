@@ -39,9 +39,8 @@ const registrations: ContactSection = {
     section: "Registrations",
     people: [
         {
-            name: "P Jubella Khan ",
+            name: "P Jubella Khan",
             phone: "+91 86394 59052",
-            
         },
     ],
 };
@@ -68,15 +67,6 @@ const marketing: ContactSection = {
     ],
 };
 
-const website: ContactSection = {
-    section: "Website",
-    people: [
-        { name: "V Sameer ", phone: "+91 89851 37419" },
-        { name: "G Monish ", phone: "+91 63021 68359" },
-        { name: "K Krishna Chaitanya", phone: "+91 93987 67703" },
-    ],
-};
-
 const queries: ContactSection = {
     section: "Queries",
     people: [
@@ -88,19 +78,60 @@ const queries: ContactSection = {
     ],
 };
 
+const discipline: ContactSection = {
+    section: "Discipline",
+    people: [
+        {
+            name: "K. Murali Krishna",
+            title: "Student Head, Discipline Committee",
+            phone: "+91 63028 84402",
+        },
+    ],
+};
+
+const websiteDeveloper: ContactSection = {
+    section: "Website",
+    people: [
+        {
+            name: "V Sameer Reddy",
+            title: "Lead Web Developer",
+            phone: "+91 89851 37419",
+        },
+    ],
+};
+
+const websiteCloud: ContactSection = {
+    section: "Website",
+    people: [
+        {
+            name: "G Monish Reddy",
+            title: "Cloud & DevOps Lead",
+            phone: "+91 63021 68359",
+        },
+    ],
+};
+
+const websiteDesign: ContactSection = {
+    section: "Website",
+    people: [
+        {
+            name: "K Krishna Chaitanya",
+            title: "UI/UX Design Lead",
+            phone: "+91 93987 67703",
+        },
+    ],
+};
+
 /**
- * How the tags are arranged, on both the `/contact` page and the landing-page
- * doors. Each inner array is a row: one tag centred on the first, the three
- * delivery-side sections across the second, one centred on the last.
- *
- * Re-ordering the page means moving entries between these arrays - no layout
- * change needed. Rows collapse to fewer columns on smaller screens, at which
- * point the tags read top to bottom in exactly this order.
+ * How the tags are arranged on both the `/contact` page and the landing-page doors:
+ * - Row 1: Registrations, Sponsorship, Marketing
+ * - Row 2: Queries, Discipline
+ * - Row 3: Website team (Lead Developer, Cloud & DevOps, UI/UX Design)
  */
 export const contactRows: ContactSection[][] = [
-    [registrations],
-    [sponsorship, marketing, website],
-    [queries],
+    [registrations, sponsorship, marketing],
+    [queries, discipline],
+    [websiteDeveloper, websiteCloud, websiteDesign],
 ];
 
 /** Flat list in row order, for consumers that lay the tags out themselves. */

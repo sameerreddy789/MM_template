@@ -263,8 +263,8 @@ export default function ContactDoors({
             <div className={styles.contactRows}>
               {contactRows.map((row, rowIndex) => (
                 <div className={styles.contactRow} key={rowIndex}>
-                  {row.map((contact) => (
-                    <div className={styles.contactItem} key={contact.section}>
+                  {row.map((contact, contactIndex) => (
+                    <div className={styles.contactItem} key={`${contact.section}-${contact.people[0]?.name || contactIndex}`}>
                       <ContactCardBody contact={contact} styles={styles} />
                     </div>
                   ))}
