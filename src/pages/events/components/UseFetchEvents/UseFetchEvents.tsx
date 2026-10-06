@@ -2,12 +2,11 @@ import { cdn } from "../../../../utils/cdn";
 import { useEffect, useState } from "react";
 
 const categoryAliases: Record<string, string[]> = {
-  kalakshetra: ["kalakshetra", "kalakshera", "drama & theatre", "drama and theatre", "drama"],
+  kalakshetra: ["kalakshetra", "dance", "drama", "drama & theatre", "drama and theatre"],
   technoholic: ["technoholic", "tech"],
-  "spot events": ["spot events", "photography", "spot"],
-  "pro shows": ["dj night", "pro shows", "por shows", "proshow"],
-  music: ["band night", "music", "misc", "fashion"],
-  misc: ["misc", "music", "fashion"],
+  "band night": ["band night", "music"],
+  "spot events": ["spot events", "spot", "misc"],
+  "dj night": ["dj night", "pro shows", "proshow", "photography"],
 };
 
 const dummyEventsData = [
@@ -15,11 +14,8 @@ const dummyEventsData = [
     category_name: "Kalakshetra",
     events: [
       { name: "Fusion Dance", club_name: "Dance Club", venue: "Main Stage", description: "Combine dance styles and showcase your energy on stage.", image_url: cdn("/images/events/Eventpics/Fusion_dance.webp") },
-      { name: "Push-up Challenge", club_name: "Fitness Club", venue: "Open Ground", description: "Test your ultimate upper body strength.", image_url: cdn("/images/events/Eventpics/Push_up_challenge.webp") },
-      { name: "Shoot and Edit", club_name: "Media Club", venue: "Campus Wide", description: "Capture reels & videos and edit them on the spot.", image_url: cdn("/images/events/Eventpics/Shoota_and_edit.webp") },
-      { name: "Spot Photography", club_name: "Photography Club", venue: "Campus Wide", description: "Capture spontaneous aesthetics across campus.", image_url: cdn("/images/events/Eventpics/Spot_photography.webp") },
-      { name: "Traditional Dressing Competition", club_name: "Cultural Club", venue: "Main Stage", description: "Flaunt authentic traditional attire and grace.", image_url: cdn("/images/events/Eventpics/Traditional_Dressing_competition.webp") },
       { name: "Folk Dance", club_name: "Dance Club", venue: "Main Stage", description: "Celebrate cultural roots through vibrant folk dance.", image_url: cdn("/images/events/Eventpics/Folk_dance.webp") },
+      { name: "Traditional Dressing Competition", club_name: "Cultural Club", venue: "Main Stage", description: "Flaunt authentic traditional attire and grace.", image_url: cdn("/images/events/Eventpics/Traditional_Dressing_competition.webp") },
       { name: "Talent show", club_name: "Cultural Club", venue: "Open Air Theatre", description: "Showcase your unique skills and extraordinary talents.", image_url: cdn("/images/events/Eventpics/Talent_show.webp") }
     ]
   },
@@ -47,6 +43,9 @@ const dummyEventsData = [
   {
     category_name: "Spot Events",
     events: [
+      { name: "Spot Photography", club_name: "Photography Club", venue: "Campus Wide", description: "Capture spontaneous aesthetics across campus.", image_url: cdn("/images/events/Eventpics/Spot_photography.webp") },
+      { name: "Push-up Challenge", club_name: "Fitness Club", venue: "Open Ground", description: "Test your ultimate upper body strength.", image_url: cdn("/images/events/Eventpics/Push_up_challenge.webp") },
+      { name: "Shoot and Edit", club_name: "Media Club", venue: "Campus Wide", description: "Capture reels & videos and edit them on the spot.", image_url: cdn("/images/events/Eventpics/Shoota_and_edit.webp") },
       { name: "Jenga", club_name: "Fun Club", venue: "Food Court", description: "Don't let the tower fall.", image_url: cdn("/images/events/Eventpics/Jenga.webp") },
       { name: "Tug of War", club_name: "Sports Club", venue: "Ground", description: "Show your team strength.", image_url: cdn("/images/events/Eventpics/Tug_of_war.webp") },
       { name: "Food Challenge", club_name: "Food & Fun Club", venue: "Food Court", description: "Eat fast, win big! Ultimate eating challenge.", image_url: cdn("/images/events/Eventpics/Food_challenge.webp") },
@@ -70,8 +69,10 @@ export const useFetchEvents = (category: string) => {
   useEffect(() => {
     const fetchEvents = () => {
       try {
-        const normalizedCategory = category.toLowerCase();
-        const validCategories = categoryAliases[normalizedCategory] || [normalizedCategory];
+        const normalizedCategory = category.trim().toLowerCase();
+        const validCategories = (categoryAliases[normalizedCategory] || [normalizedCategory]).map(
+          (c) => c.toLowerCase()
+        );
 
         const matchedCats = dummyEventsData.filter((cat: any) =>
           validCategories.includes(cat.category_name.toLowerCase())

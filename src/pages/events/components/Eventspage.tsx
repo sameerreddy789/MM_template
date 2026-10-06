@@ -7,7 +7,8 @@ const topright = cdn("/svgs/events/topright.svg");
 import BackButton from "../../components/backButton/BackButton";
 import { useEffect, useState } from "react";
 const Star = cdn("/svgs/events/star.svg");
-const Star2 = cdn("/svgs/events/star.svg");
+const Star2 = cdn("/svgs/events/star2.svg");
+const EVENT_ICONS = [Star, Star2];
 import { useFetchEvents } from "./UseFetchEvents/UseFetchEvents";
 import FlyingIcons from "./FlyingIcons/FlyingIcons";
 import MobileEvents from "./MobileEvents/MobileEvents";
@@ -63,7 +64,7 @@ const events = useFetchEvents(category);
           className={styles.aboutBB}
           onClick={onBack}
         />
-         <FlyingIcons icons={[Star, Star2]} /> 
+         <FlyingIcons icons={EVENT_ICONS} /> 
 
         <div className={styles.evntcontainer}>
           {isMobile ? (
