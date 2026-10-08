@@ -146,3 +146,5 @@ source-images/
 # Local downloads of video assets (served from CloudFront CDN in production)
 public/videos/
 
+# DJ promo assets (untracked for now)
+DJ/
