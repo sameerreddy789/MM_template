@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import styles from './Gallery.module.scss';
-import { type ImageProperty } from './galleryItemList';
+import { HERO_COUNT, type ImageProperty } from './galleryItemList';
+import { useVideoSegmentLoop } from './useVideoSegmentLoop';
 
 interface GalleryItemProps {
     galleryItem: ImageProperty;
@@ -8,9 +9,16 @@ interface GalleryItemProps {
     onClick: ()  => void;
 }
 
+// First photo in the hero cross (index 0 is the video): the one image worth fetching ahead of the rest.
+const PRIORITY_IMAGE_INDEX = 1;
+
 function GalleryItem({ galleryItem, index, onClick }: GalleryItemProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    // Only the first 13 s of the showreel plays, looping back to 0:00. Does nothing for photo tiles.
+    useVideoSegmentLoop(videoRef, galleryItem.type === 'video');
+    const isHero = index < HERO_COUNT;
 
     const handleLoad = () => {
         setIsLoading(false);
@@ -64,11 +72,12 @@ function GalleryItem({ galleryItem, index, onClick }: GalleryItemProps) {
                 />
             ) : galleryItem.type === 'video' ? (
                 <video 
+                    ref={videoRef}
                     className={styles.galleryImage} 
                     style={galleryItem.modifiers}
                     src={galleryItem.src} 
                     id={`gallery-image-${index}`}
-                    autoPlay loop playsInline
+                    autoPlay playsInline
                     onClick={(e) => {
                         e.stopPropagation();
                         const video = e.currentTarget;
@@ -88,9 +97,13 @@ function GalleryItem({ galleryItem, index, onClick }: GalleryItemProps) {
                         className={styles.galleryImage} 
                         style={galleryItem.modifiers}
                         src={galleryItem.src} 
+                        width={galleryItem.width}
+                        height={galleryItem.height}
                         onLoad={handleLoad}
                         onError={handleError}
-                        loading='lazy'
+                        loading={isHero ? 'eager' : 'lazy'}
+                        decoding={isHero ? undefined : 'async'}
+                        fetchPriority={index === PRIORITY_IMAGE_INDEX ? 'high' : undefined}
                         id={`gallery-image-${index}`}
                         alt={`gallery-image-${index}`}
                     />

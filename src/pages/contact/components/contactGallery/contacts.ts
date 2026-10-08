@@ -94,7 +94,7 @@ const websiteDeveloper: ContactSection = {
     people: [
         {
             name: "V Sameer Reddy",
-            title: "Lead Web Developer",
+            title: "Web Developer",
             phone: "+91 89851 37419",
         },
     ],
@@ -105,7 +105,7 @@ const websiteCloud: ContactSection = {
     people: [
         {
             name: "G Monish Reddy",
-            title: "Cloud & DevOps Lead",
+            title: "Web Dev, Cloud & DevOps",
             phone: "+91 63021 68359",
         },
     ],
@@ -116,7 +116,7 @@ const websiteDesign: ContactSection = {
     people: [
         {
             name: "K Krishna Chaitanya",
-            title: "UI/UX Design Lead",
+            title: "UI/UX Design",
             phone: "+91 93987 67703",
         },
     ],

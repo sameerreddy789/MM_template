@@ -6,6 +6,9 @@ interface ImageProperty {
     type?: 'image' | 'video' | 'youtube' | 'streamable';
     modifiers?: CSSProperties;
     containerModifiers?: CSSProperties;
+    /** Intrinsic pixel size. Lets the browser reserve a tile's space before its lazy image arrives. */
+    width?: number;
+    height?: number;
 }
 
 /**
@@ -32,6 +35,11 @@ interface ImageProperty {
  * 1600px, which took them from 57.5 MB to 2.05 MB across the thirteen. If more
  * are added, do the same rather than dropping raw JPGs in: unconverted, these
  * alone outweighed the entire JS bundle by fifty times.
+ *
+ * The last six entries (JAN*, MOU_*) are the exception to "everything is on the
+ * CDN": they are served from public/images/gallery. They were converted to WebP
+ * at 2048px, quality 82, EXIF/GPS stripped (98.1 MB down to 1.4 MB) and the camera
+ * JPEGs were deleted from the repo.
  */
 
 /** Video + 8 photos in the fixed cross. Keep in sync with the `.galleryHero` rules in Gallery.module.scss. */
@@ -62,13 +70,13 @@ const galleryImageProperties: ImageProperty[] = [
     { src: cdn('/images/gallery/mm5.webp'), type: 'image' },
     { src: cdn('/images/gallery/mm6.webp'), type: 'image' },
 
-    // --- Newly added local photos (98 MB) ---
-    { src: '/images/gallery/JAN04159.JPG.jpeg', type: 'image' },
-    { src: '/images/gallery/JAN04195.JPG.jpeg', type: 'image' },
-    { src: '/images/gallery/JAN04821.JPG.jpeg', type: 'image' },
-    { src: '/images/gallery/MOU_0710.JPG.jpeg', type: 'image' },
-    { src: '/images/gallery/MOU_2321.JPG.jpeg', type: 'image' },
-    { src: '/images/gallery/MOU_6557.JPG.jpeg', type: 'image' },
+    // --- Local photos: 2048px WebP in public/images/gallery (not on the CDN) ---
+    { src: '/images/gallery/JAN04159.webp', type: 'image', width: 2048, height: 1366 },
+    { src: '/images/gallery/JAN04195.webp', type: 'image', width: 2048, height: 1366 },
+    { src: '/images/gallery/JAN04821.webp', type: 'image', width: 2048, height: 1366 },
+    { src: '/images/gallery/MOU_0710.webp', type: 'image', width: 2048, height: 1367 },
+    { src: '/images/gallery/MOU_2321.webp', type: 'image', width: 2048, height: 1367 },
+    { src: '/images/gallery/MOU_6557.webp', type: 'image', width: 2048, height: 1367 },
 ];
 
 export default galleryImageProperties;

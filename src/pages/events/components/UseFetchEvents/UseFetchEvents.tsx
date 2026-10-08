@@ -16,7 +16,9 @@ const dummyEventsData = [
       { name: "Fusion Dance", club_name: "Dance Club", venue: "Main Stage", description: "Combine dance styles and showcase your energy on stage.", image_url: cdn("/images/events/Eventpics/Fusion_dance.webp") },
       { name: "Folk Dance", club_name: "Dance Club", venue: "Main Stage", description: "Celebrate cultural roots through vibrant folk dance.", image_url: cdn("/images/events/Eventpics/Folk_dance.webp") },
       { name: "Traditional Dressing Competition", club_name: "Cultural Club", venue: "Main Stage", description: "Flaunt authentic traditional attire and grace.", image_url: cdn("/images/events/Eventpics/Traditional_Dressing_competition.webp") },
-      { name: "Talent show", club_name: "Cultural Club", venue: "Open Air Theatre", description: "Showcase your unique skills and extraordinary talents.", image_url: cdn("/images/events/Eventpics/Talent_show.webp") }
+      { name: "Talent show", club_name: "Cultural Club", venue: "Open Air Theatre", description: "Showcase your unique skills and extraordinary talents.", image_url: cdn("/images/events/Eventpics/Talent_show.webp") },
+      { name: "Fashion Show", club_name: "Fashion Club", venue: "Main Stage", description: "Walk the ramp in style.", image_url: cdn("/images/events/Eventpics/Fashion_show.webp"), object_position: "center top" },
+      { name: "Spot Photography", club_name: "Photography Club", venue: "Campus Wide", description: "Capture spontaneous aesthetics across campus.", image_url: cdn("/images/events/Eventpics/Spot_photography.webp") }
     ]
   },
   {
@@ -24,8 +26,7 @@ const dummyEventsData = [
     events: [
       { name: "Band Battle", club_name: "Music Club", venue: "Main Auditorium", description: "Battle of the musical bands.", image_url: cdn("/images/events/Eventpics/Band_Battle.webp"), scale: 0.88 },
       { name: "Dedicate a song", club_name: "Music Club", venue: "Campus Radio", description: "Dedicate your favorite song to someone special.", image_url: cdn("/images/events/Eventpics/Dedicate_a_song.webp") },
-      { name: "Solo and Group Singing", club_name: "Music Club", venue: "Main Auditorium", description: "Melodious vocal performances in solo & group categories.", image_url: cdn("/images/events/Eventpics/Solo_and_group_singing.webp") },
-      { name: "Fashion Show", club_name: "Fashion Club", venue: "Main Stage", description: "Walk the ramp in style.", image_url: cdn("/images/events/Eventpics/Fashion_show.webp"), object_position: "center top" }
+      { name: "Solo and Group Singing", club_name: "Music Club", venue: "Main Auditorium", description: "Melodious vocal performances in solo & group categories.", image_url: cdn("/images/events/Eventpics/Solo_and_group_singing.webp") }
     ]
   },
   {
@@ -43,7 +44,6 @@ const dummyEventsData = [
   {
     category_name: "Spot Events",
     events: [
-      { name: "Spot Photography", club_name: "Photography Club", venue: "Campus Wide", description: "Capture spontaneous aesthetics across campus.", image_url: cdn("/images/events/Eventpics/Spot_photography.webp") },
       { name: "Push-up Challenge", club_name: "Fitness Club", venue: "Open Ground", description: "Test your ultimate upper body strength.", image_url: cdn("/images/events/Eventpics/Push_up_challenge.webp") },
       { name: "Shoot and Edit", club_name: "Media Club", venue: "Campus Wide", description: "Capture reels & videos and edit them on the spot.", image_url: cdn("/images/events/Eventpics/Shoota_and_edit.webp") },
       { name: "Jenga", club_name: "Fun Club", venue: "Food Court", description: "Don't let the tower fall.", image_url: cdn("/images/events/Eventpics/Jenga.webp") },

@@ -1,7 +1,8 @@
 import { cdn } from "../../utils/cdn";
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import styles from './Gallery.module.scss';
 import galleryItemList from './galleryItemList';
+import { useVideoSegmentLoop } from './useVideoSegmentLoop';
 import { FaLeftLong, FaRightLong } from 'react-icons/fa6';
 const closeButton = cdn("/images/gallery/close_button.webp");
 interface ImagePopupProps {
@@ -12,6 +13,9 @@ interface ImagePopupProps {
 export default function ImagePopup({ index, onClose }: ImagePopupProps) {
     
     const [currentImageIndex, setCurrentImageIndex] = useState(index);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    // Same 13 s loop as the grid tile, so the enlarged view never plays past 0:13 either.
+    useVideoSegmentLoop(videoRef, galleryItemList[currentImageIndex].type === 'video');
 
     return (
         <div className={styles.imagePopup}>
@@ -42,9 +46,10 @@ export default function ImagePopup({ index, onClose }: ImagePopupProps) {
                         />
                     ) : galleryItemList[currentImageIndex].type === 'video' ? (
                         <video
+                            ref={videoRef}
                             className={styles.imagePopupImage}
                             src={galleryItemList[currentImageIndex].src}
-                            autoPlay loop controls
+                            autoPlay controls
                             onClick={(e) => {
                                 const video = e.currentTarget;
                                 if (video.paused) {
