@@ -44,13 +44,13 @@ const galleryImageProperties: ImageProperty[] = [
         type: 'video',
     },
     { src: cdn('/images/gallery/top1.webp'), type: 'image' },         // top-left
-    { src: cdn('/images/gallery/gallery1.webp'), type: 'image' },     // top-right
+    { src: cdn('/images/gallery/mm1.webp'), type: 'image' },          // top-right (group on red flower petal steps)
     { src: cdn('/images/gallery/left-up.webp'), type: 'image' },      // left-top
     { src: cdn('/images/gallery/left-bottom.webp'), type: 'image' },  // left-bottom
     { src: cdn('/images/gallery/gallery5.webp'), type: 'image' },     // right-top (beside the video, top)
     { src: cdn('/images/gallery/right-bottom.webp'), type: 'image' }, // right-bottom
-    { src: cdn('/images/gallery/mm1.webp'), type: 'image' },         // bottom-left (under video - group with red carpet)
-    { src: cdn('/images/gallery/mm2.webp'), type: 'image' },         // bottom-right (under video - group with potted plants)
+    { src: cdn('/images/gallery/gallery1.webp'), type: 'image' },     // bottom-left (under video - live concert with neon blue lights)
+    { src: cdn('/images/gallery/gallery6.webp'), type: 'image' },     // bottom-right (under video - concert stage with full truss lights)
 
     // --- Row 1: Concert Stage Triptych (Audience viewing the Singer in the center) ---
     { src: cdn('/images/gallery/gallery4.webp'), type: 'image' },     // Left: cheering crowd of girls with phones raised
@@ -58,12 +58,17 @@ const galleryImageProperties: ImageProperty[] = [
     { src: cdn('/images/gallery/gallery3.webp'), type: 'image' },     // Right: concert audience facing the stage/singer
 
     // --- Remaining flowing festival gallery ---
-    { src: cdn('/images/gallery/gallery2.webp'), type: 'image' },     // Swapped from right-top slot beside video
-    { src: cdn('/images/gallery/gallery6.webp'), type: 'image' },     // Concert stage with full truss lights
-    { src: cdn('/images/gallery/mm3.webp'), type: 'image' },          // Guest with dancers in traditional attire
     { src: cdn('/images/gallery/mm4.webp'), type: 'image' },          // Mohan Babu sir at festival stall
     { src: cdn('/images/gallery/mm5.webp'), type: 'image' },
     { src: cdn('/images/gallery/mm6.webp'), type: 'image' },
+
+    // --- Newly added local photos (98 MB) ---
+    { src: '/images/gallery/JAN04159.JPG.jpeg', type: 'image' },
+    { src: '/images/gallery/JAN04195.JPG.jpeg', type: 'image' },
+    { src: '/images/gallery/JAN04821.JPG.jpeg', type: 'image' },
+    { src: '/images/gallery/MOU_0710.JPG.jpeg', type: 'image' },
+    { src: '/images/gallery/MOU_2321.JPG.jpeg', type: 'image' },
+    { src: '/images/gallery/MOU_6557.JPG.jpeg', type: 'image' },
 ];
 
 export default galleryImageProperties;

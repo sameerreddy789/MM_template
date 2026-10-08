@@ -142,3 +142,7 @@ open-seo/
 # To add more: drop the originals here, then convert with
 #   ffmpeg -i in.jpg -vf "scale='min(1600,iw)':-2" -c:v libwebp -quality 82 out.webp
 source-images/
+
+# Local downloads of video assets (served from CloudFront CDN in production)
+public/videos/
+
