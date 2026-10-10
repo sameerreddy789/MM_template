@@ -315,14 +315,14 @@ const Events: React.FC = () => {
  innerImageSrc={img.innerImageSrc}
  objectPosition={img.objectPosition}
  scale={img.scale}
- alt={img.alt}
+ alt={isMobile ? (img.shape === 'music' ? 'DJ Night' : img.shape === 'photography' ? 'Band Night' : img.alt) : img.alt}
  data-nosnippet
  ref={(el) => {
  imageRefs.current[i] = el;
  }}
  className={`${img.className} ${foldFan ? `${styles.fold} ${styles.folding}` : ""
  }`}
- onClick={() => handleImageClick(img.alt)}
+ onClick={() => handleImageClick(isMobile ? (img.shape === 'music' ? 'DJ Night' : img.shape === 'photography' ? 'Band Night' : img.alt) : img.alt)}
  />
  );
  })}

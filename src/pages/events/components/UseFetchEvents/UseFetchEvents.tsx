@@ -57,7 +57,7 @@ const dummyEventsData = [
     category_name: "DJ Night",
     events: [
       { name: "DJ OnEDGE", club_name: "Cultural Club", venue: "Main Stage", description: "High-energy EDM and DJ tracks to light up the night.", image_url: "/images/events/dj/onedge.jpg", isDj: true, instagram: "https://www.instagram.com/onedgeofficial/?hl=en", logo: "/images/events/dj/onedge-logo.png" },
-      { name: "Lera NOVA", club_name: "Cultural Club", venue: "Main Stage", description: "Electrifying performance to keep the crowd moving.", image_url: "/images/events/dj/leranova.jpg", isDj: true, instagram: "https://www.instagram.com/lera_audio/?hl=en", logo: "/images/events/dj/leranova-logo.png", object_position: "top center" },
+      { name: "Lera NOVA", club_name: "Cultural Club", venue: "Main Stage", description: "Electrifying performance to keep the crowd moving.", image_url: "/images/events/dj/leranova.jpg", isDj: true, instagram: "https://www.instagram.com/lera_audio/?hl=en", logo: "/images/events/dj/leranova-logo.png" },
       { name: "Stunt show", club_name: "Sports & Adventure Club", venue: "Outdoor Arena", description: "Thrilling professional bike and stunt performances.", image_url: cdn("/images/events/Eventpics/Stunt_show.webp") },
       { name: "Talk Show", club_name: "Media & Cultural Club", venue: "Main Auditorium", description: "Interactive talk show and Q&A session with popular guests.", image_url: cdn("/images/events/Eventpics/Talk_shows.webp") }
     ]

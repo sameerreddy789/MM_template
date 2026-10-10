@@ -40,14 +40,16 @@ const DesktopEvents: React.FC<DesktopEventsProps> = ({
                   className={styles.imagenewFull}
                   previewClass={styles.imagenewpreviewFull}
                   style={{
-                    objectPosition: events[currentIndex]?.object_position,
-                    objectFit: events[currentIndex]?.object_fit,
-                    transform: events[currentIndex]?.scale ? `scale(${events[currentIndex].scale})` : undefined,
+                    objectPosition: "center top",
+                    objectFit: "cover",
+                    transform: "scale(1.8)",
                   }}
                 />
               </div>
               <div className={styles.djRight}>
-                {events[currentIndex].logo && <img src={events[currentIndex].logo} alt="Logo" className={styles.djLogo} />}
+                {events[currentIndex].logo && (
+                  <img src={events[currentIndex].logo} alt="Logo" className={styles.djLogo} />
+                )}
                 <p>{events[currentIndex].description}</p>
                 <div className={styles.djSocials}>
                   <a href={events[currentIndex].instagram} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>

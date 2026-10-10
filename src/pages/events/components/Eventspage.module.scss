@@ -1028,20 +1028,12 @@
   .djRight {
     flex: 1;
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* Stack logo above text */
     justify-content: center;
-    align-items: flex-start;
+    align-items: center; /* Center everything */
     gap: 24px;
     padding: 0 10px;
-
-    h4 {
-      color: white;
-      font: clamp(28px, 4vw, 54px) $primaryFont;
-      margin: 0;
-      text-transform: lowercase;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-      letter-spacing: 2px;
-    }
+    text-align: center; /* Center the text */
 
     .djLogo {
       height: 120px;

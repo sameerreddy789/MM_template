@@ -238,8 +238,8 @@
         clip-path: polygon(
     100% 20%,   /* top-right */
     10% 10%,    /* tip at upper-left */
-    0% 30%,
-    90% 100%, /* bottom-left taper */
+    0% 24%,     /* perfectly aligns with Band Night's top edge */
+    75% 100%, /* stretched to perfectly tuck under Band Night */
     100% 100% /* bottom-right base */
   );
 
