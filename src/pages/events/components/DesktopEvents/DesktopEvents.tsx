@@ -40,9 +40,9 @@ const DesktopEvents: React.FC<DesktopEventsProps> = ({
                   className={styles.imagenewFull}
                   previewClass={styles.imagenewpreviewFull}
                   style={{
-                    objectPosition: "center top",
+                    objectPosition: events[currentIndex]?.name === "DJ OnEDGE" ? "center top" : "center",
                     objectFit: "cover",
-                    transform: "scale(1.8)",
+                    transform: events[currentIndex]?.name === "DJ OnEDGE" ? "scale(1.8)" : "scale(1.1)",
                   }}
                 />
               </div>

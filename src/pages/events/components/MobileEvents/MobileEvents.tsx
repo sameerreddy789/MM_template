@@ -41,9 +41,9 @@ const MobileEvents: React.FC<MobileEventsProps> = ({
                     className={styles.imagenewFullMobile}
                     previewClass={styles.imagenewpreviewFullMobile}
                     style={{
-                      objectPosition: "center top",
+                      objectPosition: events[currentIndex]?.name === "DJ OnEDGE" ? "center top" : "center",
                       objectFit: "cover",
-                      transform: "scale(1.8)",
+                      transform: events[currentIndex]?.name === "DJ OnEDGE" ? "scale(1.8)" : "scale(1.1)",
                     }}
                   />
                 </div>
