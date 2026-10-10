@@ -48,7 +48,14 @@ const MobileEvents: React.FC<MobileEventsProps> = ({
                   />
                 </div>
                 <div className={styles.djRightMobile}>
-                  {events[currentIndex].logo && <img src={events[currentIndex].logo} alt="Logo" className={styles.djLogoMobile} />}
+                  {events[currentIndex].logo && (
+                    <img 
+                      src={events[currentIndex].logo} 
+                      alt="Logo" 
+                      className={styles.djLogoMobile} 
+                      style={{ height: events[currentIndex].name === "Lera NOVA" ? "160px" : "100px" }}
+                    />
+                  )}
                   <p>{events[currentIndex].description}</p>
                   <div className={styles.djSocialsMobile}>
                     <a href={events[currentIndex].instagram} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>

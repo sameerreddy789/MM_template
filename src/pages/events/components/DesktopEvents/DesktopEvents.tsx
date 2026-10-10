@@ -48,7 +48,12 @@ const DesktopEvents: React.FC<DesktopEventsProps> = ({
               </div>
               <div className={styles.djRight}>
                 {events[currentIndex].logo && (
-                  <img src={events[currentIndex].logo} alt="Logo" className={styles.djLogo} />
+                  <img 
+                    src={events[currentIndex].logo} 
+                    alt="Logo" 
+                    className={styles.djLogo} 
+                    style={{ height: events[currentIndex].name === "Lera NOVA" ? "200px" : "120px" }}
+                  />
                 )}
                 <p>{events[currentIndex].description}</p>
                 <div className={styles.djSocials}>
