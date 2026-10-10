@@ -181,7 +181,7 @@ body {
       padding: 0;
       
       @media (max-width: 800px) {
-        display: none; // the original was effectively hidden or collapsed
+        display: none !important; // the original was effectively hidden or collapsed
       }
 
       li {

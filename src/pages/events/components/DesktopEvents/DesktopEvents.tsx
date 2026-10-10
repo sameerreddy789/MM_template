@@ -20,9 +20,9 @@ const DesktopEvents: React.FC<DesktopEventsProps> = ({
   handlePrev,
   category,
 }) => (
-  <AnimatePresence mode="wait">
-    {events.length > 0 ? (
-      <div className={styles.eventdesktop}>
+  <div className={styles.eventdesktop}>
+    <AnimatePresence mode="wait">
+      {events.length > 0 ? (
         <motion.div
           className={styles.eventContentWrapperSingle}
           key={currentIndex}
@@ -31,23 +31,52 @@ const DesktopEvents: React.FC<DesktopEventsProps> = ({
           exit={{ opacity: 0, scale: 1.05 }}
           transition={{ duration: 0.5, ease: "easeInOut" }}
         >
-          <div className={styles.titleContainer}>
-            <h4>{events[currentIndex].name}</h4>
-          </div>
+          {events[currentIndex].isDj ? (
+            <div className={styles.djSplitContainer}>
+              <div className={styles.djLeft}>
+                <EventImage
+                  imageUrl={events[currentIndex]?.image_url}
+                  alt={events[currentIndex]?.name}
+                  className={styles.imagenewFull}
+                  previewClass={styles.imagenewpreviewFull}
+                  style={{
+                    objectPosition: events[currentIndex]?.object_position,
+                    objectFit: events[currentIndex]?.object_fit,
+                    transform: events[currentIndex]?.scale ? `scale(${events[currentIndex].scale})` : undefined,
+                  }}
+                />
+              </div>
+              <div className={styles.djRight}>
+                {events[currentIndex].logo && <img src={events[currentIndex].logo} alt="Logo" className={styles.djLogo} />}
+                <p>{events[currentIndex].description}</p>
+                <div className={styles.djSocials}>
+                  <a href={events[currentIndex].instagram} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
+                    <img src={cdn("/svgs/landing/insta.svg")} alt="Instagram" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className={styles.titleContainer}>
+                <h4>{events[currentIndex].name}</h4>
+              </div>
 
-          <div className={styles.imageholderFull}>
-            <EventImage
-              imageUrl={events[currentIndex]?.image_url}
-              alt={events[currentIndex]?.name}
-              className={styles.imagenewFull}
-              previewClass={styles.imagenewpreviewFull}
-              style={{
-                objectPosition: events[currentIndex]?.object_position,
-                objectFit: events[currentIndex]?.object_fit,
-                transform: events[currentIndex]?.scale ? `scale(${events[currentIndex].scale})` : undefined,
-              }}
-            />
-          </div>
+              <div className={styles.imageholderFull}>
+                <EventImage
+                  imageUrl={events[currentIndex]?.image_url}
+                  alt={events[currentIndex]?.name}
+                  className={styles.imagenewFull}
+                  previewClass={styles.imagenewpreviewFull}
+                  style={{
+                    objectPosition: events[currentIndex]?.object_position,
+                    objectFit: events[currentIndex]?.object_fit,
+                    transform: events[currentIndex]?.scale ? `scale(${events[currentIndex].scale})` : undefined,
+                  }}
+                />
+              </div>
+            </>
+          )}
 
           <div className={styles.bottomControls}>
             <div className={styles.venue}>
@@ -56,22 +85,28 @@ const DesktopEvents: React.FC<DesktopEventsProps> = ({
             </div>
 
             <div className={styles.controlsBelow}>
-              <div className={styles.leftBtn} onClick={handlePrev}>
+              <div className={styles.leftBtn} onClick={(e) => { e.stopPropagation(); handlePrev(); }}>
                 <img src={Right} alt="Prev" className={styles.prevBtn} />
               </div>
-              <div className={styles.rightBtn} onClick={handleNext}>
+              <div className={styles.rightBtn} onClick={(e) => { e.stopPropagation(); handleNext(); }}>
                 <img src={Right} alt="Next" className={styles.nextBtn} />
               </div>
             </div>
           </div>
         </motion.div>
-      </div>
-    ) : (
-      <p className={styles.centerText}>
-        {`No events found in "${category}"`}
-      </p>
-    )}
-  </AnimatePresence>
+      ) : (
+        <motion.p 
+          key="no-events"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className={styles.centerText}
+        >
+          {`No events found in "${category}"`}
+        </motion.p>
+      )}
+    </AnimatePresence>
+  </div>
 );
 
 export default DesktopEvents;

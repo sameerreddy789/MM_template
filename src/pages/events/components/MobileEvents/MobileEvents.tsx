@@ -21,9 +21,9 @@ const MobileEvents: React.FC<MobileEventsProps> = ({
   category,
 }) => (
   <div className={styles.mobileEvents}>
-    <AnimatePresence mode="wait">
-      {events.length > 0 ? (
-        <div className={styles.mobileCard}>
+    <div className={styles.mobileCard}>
+      <AnimatePresence mode="wait">
+        {events.length > 0 ? (
           <motion.div
             className={styles.eventContentWrapperSingleMobile}
             key={currentIndex}
@@ -32,23 +32,52 @@ const MobileEvents: React.FC<MobileEventsProps> = ({
             exit={{ opacity: 0, y: -50 }}
             transition={{ duration: 0.3 }}
           >
-            <div className={styles.titleContainerMobile}>
-              <h4>{events[currentIndex].name}</h4>
-            </div>
+            {events[currentIndex].isDj ? (
+              <div className={styles.djSplitContainerMobile}>
+                <div className={styles.djLeftMobile}>
+                  <EventImage
+                    imageUrl={events[currentIndex]?.image_url}
+                    alt={events[currentIndex]?.name}
+                    className={styles.imagenewFullMobile}
+                    previewClass={styles.imagenewpreviewFullMobile}
+                    style={{
+                      objectPosition: events[currentIndex]?.object_position,
+                      objectFit: events[currentIndex]?.object_fit,
+                      transform: events[currentIndex]?.scale ? `scale(${events[currentIndex].scale})` : undefined,
+                    }}
+                  />
+                </div>
+                <div className={styles.djRightMobile}>
+                  {events[currentIndex].logo && <img src={events[currentIndex].logo} alt="Logo" className={styles.djLogoMobile} />}
+                  <p>{events[currentIndex].description}</p>
+                  <div className={styles.djSocialsMobile}>
+                    <a href={events[currentIndex].instagram} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
+                      <img src={cdn("/svgs/landing/insta.svg")} alt="Instagram" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className={styles.titleContainerMobile}>
+                  <h4>{events[currentIndex].name}</h4>
+                </div>
 
-            <div className={styles.imageholderFullMobile}>
-              <EventImage
-                imageUrl={events[currentIndex]?.image_url}
-                alt={events[currentIndex]?.name}
-                className={styles.imagenewFullMobile}
-                previewClass={styles.imagenewpreviewFullMobile}
-                style={{
-                  objectPosition: events[currentIndex]?.object_position,
-                  objectFit: events[currentIndex]?.object_fit,
-                  transform: events[currentIndex]?.scale ? `scale(${events[currentIndex].scale})` : undefined,
-                }}
-              />
-            </div>
+                <div className={styles.imageholderFullMobile}>
+                  <EventImage
+                    imageUrl={events[currentIndex]?.image_url}
+                    alt={events[currentIndex]?.name}
+                    className={styles.imagenewFullMobile}
+                    previewClass={styles.imagenewpreviewFullMobile}
+                    style={{
+                      objectPosition: events[currentIndex]?.object_position,
+                      objectFit: events[currentIndex]?.object_fit,
+                      transform: events[currentIndex]?.scale ? `scale(${events[currentIndex].scale})` : undefined,
+                    }}
+                  />
+                </div>
+              </>
+            )}
 
             <div className={styles.bottomControlsMobile}>
               <div className={styles.venue}>
@@ -57,22 +86,28 @@ const MobileEvents: React.FC<MobileEventsProps> = ({
               </div>
 
               <div className={styles.controlsBelowMobile}>
-                <div className={styles.leftBtnMobile} onClick={handlePrev}>
+                <div className={styles.leftBtnMobile} onClick={(e) => { e.stopPropagation(); handlePrev(); }}>
                   <img src={Right} alt="Prev" className={styles.prevBtnMobile} />
                 </div>
-                <div className={styles.rightBtnMobile} onClick={handleNext}>
+                <div className={styles.rightBtnMobile} onClick={(e) => { e.stopPropagation(); handleNext(); }}>
                   <img src={Right} alt="Next" className={styles.nextBtnMobile} />
                 </div>
               </div>
             </div>
           </motion.div>
-        </div>
-      ) : (
-        <p className={styles.centerText}>
-          {`No events found in "${category}"`}
-        </p>
-      )}
-    </AnimatePresence>
+        ) : (
+          <motion.p 
+            key="no-events-mob"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className={styles.centerText}
+          >
+            {`No events found in "${category}"`}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </div>
   </div>
 );
 
