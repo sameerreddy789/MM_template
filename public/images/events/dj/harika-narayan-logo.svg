@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" width="100%" height="100%">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&amp;family=Playfair+Display:ital,wght@0,700;1,700&amp;display=swap');
+      .brand-title {
+        font-family: 'Cinzel Decorative', 'Playfair Display', 'Times New Roman', serif;
+        font-size: 155px;
+        font-weight: 900;
+        fill: url(#goldGrad);
+        letter-spacing: 14px;
+        text-anchor: middle;
+        filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 30px rgba(242, 221, 124, 0.35));
+      }
+      .flourish-line {
+        stroke: url(#goldGrad);
+        stroke-width: 2.5;
+        opacity: 0.8;
+      }
+    </style>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="25%" stop-color="#FFF8DC"/>
+      <stop offset="65%" stop-color="#F2DD7C"/>
+      <stop offset="100%" stop-color="#D4AF37"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Top delicate flourish -->
+  <g transform="translate(500, 30)">
+    <circle cx="0" cy="0" r="4.5" fill="#f2dd7c"/>
+    <circle cx="-20" cy="0" r="2.5" fill="#f2dd7c" opacity="0.6"/>
+    <circle cx="20" cy="0" r="2.5" fill="#f2dd7c" opacity="0.6"/>
+    <line x1="-160" y1="0" x2="-35" y2="0" class="flourish-line" />
+    <line x1="35" y1="0" x2="160" y2="0" class="flourish-line" />
+  </g>
+
+  <!-- HARIKA -->
+  <text x="500" y="200" class="brand-title">HARIKA</text>
+
+  <!-- NARAYAN -->
+  <text x="500" y="390" class="brand-title">NARAYAN</text>
+
+  <!-- Bottom flourish -->
+  <g transform="translate(500, 460)">
+    <polygon points="0,-6 6,0 0,6 -6,0" fill="#f2dd7c"/>
+    <circle cx="-22" cy="0" r="2.5" fill="#f2dd7c" opacity="0.6"/>
+    <circle cx="22" cy="0" r="2.5" fill="#f2dd7c" opacity="0.6"/>
+    <line x1="-140" y1="0" x2="-36" y2="0" class="flourish-line" />
+    <line x1="36" y1="0" x2="140" y2="0" class="flourish-line" />
+  </g>
+</svg>

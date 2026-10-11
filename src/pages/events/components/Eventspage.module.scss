@@ -1035,6 +1035,25 @@
     padding: 0 10px;
     text-align: center; /* Center the text */
 
+    .liveBandBadge {
+      font-family: $primaryFont;
+      font-size: clamp(14px, 1.2vw, 20px);
+      color: #f2dd7c;
+      text-transform: uppercase;
+      letter-spacing: 6px;
+      padding: 8px 28px;
+      border: 1.5px solid rgba(242, 221, 124, 0.5);
+      border-radius: 4px;
+      background: linear-gradient(135deg, rgba(242, 221, 124, 0.08) 0%, rgba(212, 175, 55, 0.12) 100%);
+      text-shadow: 0 0 12px rgba(242, 221, 124, 0.4);
+      animation: badgePulse 3s ease-in-out infinite;
+    }
+
+    @keyframes badgePulse {
+      0%, 100% { border-color: rgba(242, 221, 124, 0.5); box-shadow: 0 0 8px rgba(242, 221, 124, 0.1); }
+      50% { border-color: rgba(242, 221, 124, 0.8); box-shadow: 0 0 16px rgba(242, 221, 124, 0.25); }
+    }
+
     .djLogo {
       height: 120px;
       max-width: 100%;
@@ -1077,9 +1096,11 @@
   padding-bottom: 30px;
 
   .djLeftMobile {
-    width: 100%;
-    height: auto;
+    width: auto;
+    height: clamp(180px, 32svh, 260px);
     aspect-ratio: 3 / 4;
+    max-width: 88vw;
+    flex-shrink: 0;
     border: 8px solid;
     border-image-source: url('https://d3hw0wgw9j5gvz.cloudfront.net/images/events/image.webp');
     border-image-slice: 40;
@@ -1103,6 +1124,19 @@
     align-items: center;
     gap: 10px;
     text-align: center;
+
+    .liveBandBadgeMobile {
+      font-family: $primaryFont;
+      font-size: clamp(11px, 3.5vw, 16px);
+      color: #f2dd7c;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      padding: 6px 20px;
+      border: 1px solid rgba(242, 221, 124, 0.5);
+      border-radius: 3px;
+      background: linear-gradient(135deg, rgba(242, 221, 124, 0.08) 0%, rgba(212, 175, 55, 0.12) 100%);
+      text-shadow: 0 0 10px rgba(242, 221, 124, 0.4);
+    }
 
     h4 {
       color: white;

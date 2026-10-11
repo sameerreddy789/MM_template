@@ -40,19 +40,22 @@ const DesktopEvents: React.FC<DesktopEventsProps> = ({
                   className={styles.imagenewFull}
                   previewClass={styles.imagenewpreviewFull}
                   style={{
-                    objectPosition: events[currentIndex]?.name === "DJ OnEDGE" ? "center top" : "center",
+                    objectPosition: events[currentIndex]?.name === "DJ OnEDGE" ? "center top" : events[currentIndex]?.name === "Harika Narayan" ? "center 38%" : "center",
                     objectFit: "cover",
-                    transform: events[currentIndex]?.name === "DJ OnEDGE" ? "scale(1.8)" : "scale(1.1)",
+                    transform: events[currentIndex]?.name === "DJ OnEDGE" ? "scale(1.8)" : events[currentIndex]?.name === "Harika Narayan" ? "scale(1.05)" : "scale(1.1)",
                   }}
                 />
               </div>
               <div className={styles.djRight}>
+                {events[currentIndex].isLiveBand && (
+                  <span className={styles.liveBandBadge}>Live Band</span>
+                )}
                 {events[currentIndex].logo && (
                   <img 
                     src={events[currentIndex].logo} 
                     alt="Logo" 
                     className={styles.djLogo} 
-                    style={{ height: events[currentIndex].name === "Lera NOVA" ? "200px" : "120px" }}
+                    style={{ height: events[currentIndex].name === "Lera NOVA" ? "200px" : events[currentIndex].name === "Harika Narayan" ? "160px" : "120px" }}
                   />
                 )}
                 <p>{events[currentIndex].description}</p>

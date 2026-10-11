@@ -41,19 +41,22 @@ const MobileEvents: React.FC<MobileEventsProps> = ({
                     className={styles.imagenewFullMobile}
                     previewClass={styles.imagenewpreviewFullMobile}
                     style={{
-                      objectPosition: events[currentIndex]?.name === "DJ OnEDGE" ? "center top" : "center",
+                      objectPosition: events[currentIndex]?.name === "DJ OnEDGE" ? "center top" : events[currentIndex]?.name === "Harika Narayan" ? "center 38%" : "center",
                       objectFit: "cover",
-                      transform: events[currentIndex]?.name === "DJ OnEDGE" ? "scale(1.8)" : "scale(1.1)",
+                      transform: events[currentIndex]?.name === "DJ OnEDGE" ? "scale(1.8)" : events[currentIndex]?.name === "Harika Narayan" ? "scale(1.05)" : "scale(1.1)",
                     }}
                   />
                 </div>
                 <div className={styles.djRightMobile}>
+                  {events[currentIndex].isLiveBand && (
+                    <span className={styles.liveBandBadgeMobile}>Live Band</span>
+                  )}
                   {events[currentIndex].logo && (
                     <img 
                       src={events[currentIndex].logo} 
                       alt="Logo" 
                       className={styles.djLogoMobile} 
-                      style={{ height: events[currentIndex].name === "Lera NOVA" ? "160px" : "100px" }}
+                      style={{ height: events[currentIndex].name === "Lera NOVA" ? "160px" : events[currentIndex].name === "Harika Narayan" ? "120px" : "100px" }}
                     />
                   )}
                   <p>{events[currentIndex].description}</p>
