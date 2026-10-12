@@ -60,7 +60,7 @@ const DesktopEvents: React.FC<DesktopEventsProps> = ({
                     />
                   )}
                   <div className={styles.goldDivider} />
-                  <p style={{ color: events[currentIndex]?.name === "DJ OnEDGE" ? "#A9C7FF" : undefined }}>
+                  <p style={{ color: events[currentIndex]?.name === "DJ OnEDGE" ? "#A9C7FF" : events[currentIndex]?.name === "Lera NOVA" ? "#FF8B9C" : undefined }}>
                     {events[currentIndex].description}
                   </p>
                   <div className={styles.djSocials}>

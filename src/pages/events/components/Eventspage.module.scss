@@ -999,16 +999,18 @@
 .djSplitContainer {
   display: flex;
   flex-direction: row;
-  width: 75vw;
-  height: 60svh;
+  width: min(75vw, 1100px);
+  max-width: 100%;
+  height: min(60svh, 560px);
   gap: 3vw;
   align-items: center;
   justify-content: center;
-  transform: translateX(6vw); /* Shifts the entire layout to the right */
+  margin: 0 auto;
 
   .djLeft {
     flex: none; /* Don't stretch the width */
     height: 100%;
+    max-width: 42%; /* Prevent the frame from overpowering the card on short/wide viewports */
     aspect-ratio: 3 / 4; /* Perfect portrait frame */
     border: 15px solid;
     border-image-source: url('https://d3hw0wgw9j5gvz.cloudfront.net/images/events/image.webp');
@@ -1135,19 +1137,52 @@
   }
 }
 
+/* Short / landscape viewports (e.g. ~1200x420): keep the DJ layout balanced */
+@media (max-height: 600px) and (orientation: landscape) {
+  .djSplitContainer {
+    height: 88svh;
+    gap: 2vw;
+
+    .djLeft {
+      max-width: 34%;
+      border-width: 10px;
+    }
+
+    .djRight .djGlassCard {
+      min-height: 0;
+      max-width: 560px;
+      gap: 12px;
+      padding: clamp(16px, 3svh, 28px) clamp(20px, 2.4vw, 40px);
+
+      .djLogo {
+        height: clamp(70px, 14svh, 110px) !important;
+      }
+
+      p {
+        font-size: clamp(13px, 1.2vw, 18px);
+        line-height: 1.4;
+      }
+
+      .djSocials a img {
+        height: 32px;
+      }
+    }
+  }
+}
+
 .djSplitContainerMobile {
   display: flex;
   flex-direction: column;
-  width: min(88vw, 360px);
+  width: min(88vw, 340px);
   height: auto;
-  min-height: 65svh;
-  gap: 15px;
+  min-height: 0;
+  gap: 12px;
   align-items: center;
-  padding-bottom: 30px;
+  padding-bottom: 14px;
 
   .djLeftMobile {
-    width: auto;
-    height: clamp(180px, 32svh, 260px);
+    width: min(56vw, 205px);
+    height: auto;
     aspect-ratio: 3 / 4;
     max-width: 88vw;
     flex-shrink: 0;
@@ -1174,13 +1209,13 @@
 
     .djGlassCardMobile {
       width: 100%;
-      max-width: 380px;
+      max-width: 300px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 12px;
-      padding: 20px 22px;
+      gap: 10px;
+      padding: 16px 18px;
       box-sizing: border-box;
       background: radial-gradient(130% 120% at 50% 5%, rgba(242, 221, 124, 0.18) 0%, rgba(38, 22, 16, 0.46) 45%, rgba(12, 6, 10, 0.68) 100%);
       backdrop-filter: blur(14px) saturate(175%);

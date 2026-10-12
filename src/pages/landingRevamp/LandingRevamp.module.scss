@@ -206,9 +206,14 @@ body {
     width: 27.6svw;
     will-change: auto;
     z-index: 300;
+    // Purely decorative: its large transparent box was overlapping the register
+    // button and swallowing taps on mobile. It has no click handler, so let all
+    // pointer events pass straight through to whatever sits behind it.
+    pointer-events: none;
 
     .logo {
       width: 100%;
+      pointer-events: none;
     }
   }
 
@@ -676,12 +681,11 @@ body {
         position: absolute;
         right: 3svw;
         top: calc(100svh - 3svw);
-        // Keep a transform here even though only Y is offset: .registerBtn is
-        // position: fixed, so this transform is what makes this element its
-        // containing block. Without it that child resolves width: 100% against
-        // the viewport and blows out to full screen width.
+        // Shift the button up by its own height so `top` marks its bottom edge.
         transform: translateY(-100%);
-        z-index: 1000;
+        // Above the music controls (1001). Previously 1000, which let the
+        // controls overlap and swallow taps on the register graphic.
+        z-index: 1002;
         width: 22svw;
         will-change: auto;
         display: grid;
@@ -701,12 +705,16 @@ body {
           filter: brightness(0.8);
         }
 
+        // Keep the graphic in normal grid flow (NOT position: fixed). As a fixed
+        // element its width:100% could resolve against the viewport and blow out
+        // across the screen, detaching the visible button from its clickable box
+        // and parking it under the music controls - which was eating the taps.
         .registerBtn {
-          position: fixed;
           grid-row: 1/2;
           grid-column: 1/2;
           width: 100%;
           transform: rotate(-2.5deg) translateY(2px);
+          pointer-events: none; // taps fall through to the container's onClick
         }
 
         .mobileRegisterBtn {
@@ -714,6 +722,7 @@ body {
           grid-column: 1/2;
           width: 100%;
           display: none;
+          pointer-events: none;
         }
 
         .registerBtnText {
@@ -724,6 +733,7 @@ body {
           grid-row: 1/2;
           grid-column: 1/2;
           z-index: inherit;
+          pointer-events: none;
         }
       }
 
@@ -992,12 +1002,24 @@ body {
       @media (aspect-ratio < 8/12),
       (max-width: 730px) {
         .registerBtnContainer {
-          width: 180px;
+          /* Pin to the viewport so the button escapes the .scroller stacking
+             context (GSAP/Lenis put transforms on the scroll ancestors, which
+             was trapping the button under the foreground and killing taps). */
+          position: fixed;
+          width: 190px;
+          min-height: 60px;
           left: 15px;
           bottom: 110px;
           top: auto;
           right: auto;
           transform: none;
+          padding: 8px;
+          box-sizing: border-box;
+          /* Make the whole box a reliable tap target */
+          pointer-events: auto;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
+          z-index: 5000; /* above the scroller content & music controls (1001) */
 
           .registerBtn {
             display: none;
@@ -1005,10 +1027,19 @@ body {
 
           .mobileRegisterBtn {
             display: block;
+            width: 100%;
+            height: auto;
+            /* Let taps fall through to the container's onClick */
+            pointer-events: none;
           }
 
           .registerBtnText {
             font-size: 1.5rem;
+            pointer-events: none;
+          }
+
+          &:active {
+            filter: brightness(0.8);
           }
         }
       }

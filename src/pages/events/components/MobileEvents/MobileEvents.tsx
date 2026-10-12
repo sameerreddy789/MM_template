@@ -57,11 +57,11 @@ const MobileEvents: React.FC<MobileEventsProps> = ({
                         src={events[currentIndex].logo} 
                         alt="Logo" 
                         className={styles.djLogoMobile} 
-                        style={{ height: events[currentIndex].name === "Lera NOVA" ? "160px" : events[currentIndex].name === "Harika Narayan" ? "120px" : "100px" }}
+                        style={{ height: events[currentIndex].name === "Lera NOVA" ? "92px" : events[currentIndex].name === "Harika Narayan" ? "82px" : "72px" }}
                       />
                     )}
                     <div className={styles.goldDividerMobile} />
-                    <p style={{ color: events[currentIndex]?.name === "DJ OnEDGE" ? "#A9C7FF" : undefined }}>
+                    <p style={{ color: events[currentIndex]?.name === "DJ OnEDGE" ? "#A9C7FF" : events[currentIndex]?.name === "Lera NOVA" ? "#FF8B9C" : undefined }}>
                       {events[currentIndex].description}
                     </p>
                     <div className={styles.djSocialsMobile}>
