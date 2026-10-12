@@ -18,15 +18,16 @@ const dummyEventsData = [
       { name: "Traditional Dressing Competition", club_name: "Cultural Club", venue: "Main Stage", description: "Flaunt authentic traditional attire and grace.", image_url: cdn("/images/events/Eventpics/Traditional_Dressing_competition.webp") },
       { name: "Talent show", club_name: "Cultural Club", venue: "Open Air Theatre", description: "Showcase your unique skills and extraordinary talents.", image_url: cdn("/images/events/Eventpics/Talent_show.webp") },
       { name: "Fashion Show", club_name: "Fashion Club", venue: "Main Stage", description: "Walk the ramp in style.", image_url: cdn("/images/events/Eventpics/Fashion_show.webp"), object_position: "center top" },
-      { name: "Spot Photography", club_name: "Photography Club", venue: "Campus Wide", description: "Capture spontaneous aesthetics across campus.", image_url: cdn("/images/events/Eventpics/Spot_photography.webp") }
+      { name: "Spot Photography", club_name: "Photography Club", venue: "Campus Wide", description: "Capture spontaneous aesthetics across campus.", image_url: cdn("/images/events/Eventpics/Spot_photography.webp") },
+      { name: "Band Battle", club_name: "Music Club", venue: "Main Auditorium", description: "Battle of the musical bands.", image_url: cdn("/images/events/Eventpics/Band_Battle.webp"), scale: 0.88 },
+      { name: "Dedicate a song", club_name: "Music Club", venue: "Campus Radio", description: "Dedicate your favorite song to someone special.", image_url: cdn("/images/events/Eventpics/Dedicate_a_song.webp") },
+      { name: "Solo and Group Singing", club_name: "Music Club", venue: "Main Auditorium", description: "Melodious vocal performances in solo & group categories.", image_url: cdn("/images/events/Eventpics/Solo_and_group_singing.webp") }
     ]
   },
   {
      category_name: "Band Night",
     events: [
-      { name: "Band Battle", club_name: "Music Club", venue: "Main Auditorium", description: "Battle of the musical bands.", image_url: cdn("/images/events/Eventpics/Band_Battle.webp"), scale: 0.88 },
-      { name: "Dedicate a song", club_name: "Music Club", venue: "Campus Radio", description: "Dedicate your favorite song to someone special.", image_url: cdn("/images/events/Eventpics/Dedicate_a_song.webp") },
-      { name: "Solo and Group Singing", club_name: "Music Club", venue: "Main Auditorium", description: "Melodious vocal performances in solo & group categories.", image_url: cdn("/images/events/Eventpics/Solo_and_group_singing.webp") }
+      { name: "Harika Narayan", club_name: "Cultural Club", venue: "Main Stage", description: "Sensational live band performance by playback singer Harika Narayan.", image_url: "/images/events/dj/harika-narayan.jpg", isDj: true, instagram: "https://www.instagram.com/harikanarayan/", logo: "/images/events/dj/harika-narayan-logo.svg", isLiveBand: true }
     ]
   },
   {
@@ -57,10 +58,7 @@ const dummyEventsData = [
     category_name: "DJ Night",
     events: [
       { name: "DJ OnEDGE", club_name: "Cultural Club", venue: "Main Stage", description: "High-energy EDM and DJ tracks to light up the night.", image_url: "/images/events/dj/onedge.jpg", isDj: true, instagram: "https://www.instagram.com/onedgeofficial/?hl=en", logo: "/images/events/dj/onedge-logo.png" },
-      { name: "Lera NOVA", club_name: "Cultural Club", venue: "Main Stage", description: "Electrifying performance to keep the crowd moving.", image_url: "/images/events/dj/leranova.jpg", isDj: true, instagram: "https://www.instagram.com/lera_audio/?hl=en", logo: "/images/events/dj/leranova-logo-transparent.png" },
-      { name: "Harika Narayan", club_name: "Cultural Club", venue: "Main Stage", description: "Sensational live band performance by playback singer Harika Narayan.", image_url: "/images/events/dj/harika-narayan.jpg", isDj: true, instagram: "https://www.instagram.com/harikanarayan/", logo: "/images/events/dj/harika-narayan-logo.svg", isLiveBand: true },
-      { name: "Stunt show", club_name: "Sports & Adventure Club", venue: "Outdoor Arena", description: "Thrilling professional bike and stunt performances.", image_url: cdn("/images/events/Eventpics/Stunt_show.webp") },
-      { name: "Talk Show", club_name: "Media & Cultural Club", venue: "Main Auditorium", description: "Interactive talk show and Q&A session with popular guests.", image_url: cdn("/images/events/Eventpics/Talk_shows.webp") }
+      { name: "Lera NOVA", club_name: "Cultural Club", venue: "Main Stage", description: "Electrifying performance to keep the crowd moving.", image_url: "/images/events/dj/leranova.jpg", isDj: true, instagram: "https://www.instagram.com/lera_audio/?hl=en", logo: "/images/events/dj/leranova-logo-transparent.png" }
     ]
   }
 ];

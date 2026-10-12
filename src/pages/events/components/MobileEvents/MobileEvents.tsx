@@ -48,22 +48,27 @@ const MobileEvents: React.FC<MobileEventsProps> = ({
                   />
                 </div>
                 <div className={styles.djRightMobile}>
-                  {events[currentIndex].isLiveBand && (
-                    <span className={styles.liveBandBadgeMobile}>Live Band</span>
-                  )}
-                  {events[currentIndex].logo && (
-                    <img 
-                      src={events[currentIndex].logo} 
-                      alt="Logo" 
-                      className={styles.djLogoMobile} 
-                      style={{ height: events[currentIndex].name === "Lera NOVA" ? "160px" : events[currentIndex].name === "Harika Narayan" ? "120px" : "100px" }}
-                    />
-                  )}
-                  <p>{events[currentIndex].description}</p>
-                  <div className={styles.djSocialsMobile}>
-                    <a href={events[currentIndex].instagram} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
-                      <img src={cdn("/svgs/landing/insta.svg")} alt="Instagram" />
-                    </a>
+                  <div className={styles.djGlassCardMobile}>
+                    {events[currentIndex].isLiveBand && (
+                      <span className={styles.liveBandBadgeMobile}>Live Band</span>
+                    )}
+                    {events[currentIndex].logo && (
+                      <img 
+                        src={events[currentIndex].logo} 
+                        alt="Logo" 
+                        className={styles.djLogoMobile} 
+                        style={{ height: events[currentIndex].name === "Lera NOVA" ? "160px" : events[currentIndex].name === "Harika Narayan" ? "120px" : "100px" }}
+                      />
+                    )}
+                    <div className={styles.goldDividerMobile} />
+                    <p style={{ color: events[currentIndex]?.name === "DJ OnEDGE" ? "#A9C7FF" : undefined }}>
+                      {events[currentIndex].description}
+                    </p>
+                    <div className={styles.djSocialsMobile}>
+                      <a href={events[currentIndex].instagram} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
+                        <img src={cdn("/svgs/landing/insta.svg")} alt="Instagram" />
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>

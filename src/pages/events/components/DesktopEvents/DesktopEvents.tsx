@@ -47,22 +47,27 @@ const DesktopEvents: React.FC<DesktopEventsProps> = ({
                 />
               </div>
               <div className={styles.djRight}>
-                {events[currentIndex].isLiveBand && (
-                  <span className={styles.liveBandBadge}>Live Band</span>
-                )}
-                {events[currentIndex].logo && (
-                  <img 
-                    src={events[currentIndex].logo} 
-                    alt="Logo" 
-                    className={styles.djLogo} 
-                    style={{ height: events[currentIndex].name === "Lera NOVA" ? "200px" : events[currentIndex].name === "Harika Narayan" ? "160px" : "120px" }}
-                  />
-                )}
-                <p>{events[currentIndex].description}</p>
-                <div className={styles.djSocials}>
-                  <a href={events[currentIndex].instagram} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
-                    <img src={cdn("/svgs/landing/insta.svg")} alt="Instagram" />
-                  </a>
+                <div className={styles.djGlassCard}>
+                  {events[currentIndex].isLiveBand && (
+                    <span className={styles.liveBandBadge}>Live Band</span>
+                  )}
+                  {events[currentIndex].logo && (
+                    <img 
+                      src={events[currentIndex].logo} 
+                      alt="Logo" 
+                      className={styles.djLogo} 
+                      style={{ height: events[currentIndex].name === "Lera NOVA" ? "200px" : events[currentIndex].name === "Harika Narayan" ? "160px" : "120px" }}
+                    />
+                  )}
+                  <div className={styles.goldDivider} />
+                  <p style={{ color: events[currentIndex]?.name === "DJ OnEDGE" ? "#A9C7FF" : undefined }}>
+                    {events[currentIndex].description}
+                  </p>
+                  <div className={styles.djSocials}>
+                    <a href={events[currentIndex].instagram} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
+                      <img src={cdn("/svgs/landing/insta.svg")} alt="Instagram" />
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
