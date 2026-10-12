@@ -13,6 +13,7 @@
 
 const jwt = require("jsonwebtoken");
 const QRCode = require("qrcode");
+const { isConfiguredSecret } = require("./registration");
 require("dotenv").config();
 
 /**
@@ -30,7 +31,10 @@ function generateVerificationToken(ticketId, studentName, secureToken) {
   };
 
   // Sign with our secret. Token never expires (we check status in DB instead)
-  const token = jwt.sign(payload, process.env.JWT_SECRET || "mohanamantra2k26_super_secret_jwt_key_change_me");
+  if (!isConfiguredSecret(process.env.JWT_SECRET, 32)) {
+    throw new Error("A valid ticket-signing secret must be configured before issuing QR passes.");
+  }
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { algorithm: "HS256" });
   return token;
 }
 
@@ -40,7 +44,7 @@ function generateVerificationToken(ticketId, studentName, secureToken) {
  * @returns {string} The full verification URL
  */
 function buildVerificationUrl(token) {
-  const baseUrl = process.env.FRONTEND_URL || "https://mm-template.vercel.app";
+  const baseUrl = (process.env.FRONTEND_URL || "https://www.mohanamantra.com").replace(/\/$/, "");
   return `${baseUrl}/gatekeeper/verify/${token}`;
 }
 

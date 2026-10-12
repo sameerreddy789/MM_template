@@ -16,14 +16,24 @@
 // ==========================================
 
 const nodemailer = require("nodemailer");
+const { isConfiguredSecret } = require("./registration");
 require("dotenv").config();
+
+function isEmailConfigured(config = process.env) {
+  return typeof config.GMAIL_USER === "string" &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(config.GMAIL_USER) &&
+    isConfiguredSecret(config.GMAIL_APP_PASSWORD?.replace(/\s/g, ""));
+}
 
 // Configure Gmail SMTP transport
 const transporter = nodemailer.createTransport({
   service: "gmail",
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 20000,
   auth: {
     user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
+    pass: process.env.GMAIL_APP_PASSWORD?.replace(/\s/g, ""),
   },
 });
 
@@ -67,6 +77,9 @@ async function sendIdCardEmail({ toEmail, studentName, ticketId, college, idCard
 
   try {
     const result = await transporter.sendMail(mailOptions);
+    if (!result.accepted?.some(address => String(address).toLowerCase() === toEmail.toLowerCase())) {
+      throw new Error("The mail provider did not accept the entry pass recipient.");
+    }
     console.log(`📧 Email sent to ${toEmail} with ${attachments.length} attachments — Message ID: ${result.messageId}`);
     return result;
   } catch (error) {
@@ -204,4 +217,4 @@ function buildEmailHtml(studentName, ticketId, college) {
 </html>`;
 }
 
-module.exports = { sendIdCardEmail };
+module.exports = { sendIdCardEmail, isEmailConfigured };
