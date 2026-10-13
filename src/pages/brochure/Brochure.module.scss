@@ -55,10 +55,14 @@
                 @media (max-width: 1024px) {width: 81%;}
                 @media (max-width: 768px) {width: 100%;}
                 .brochureIframe {
+                    display: block;
                     border: 1px solid #DB6365;
                     height: 100%;
                     width: 100%;
                     min-height: 450px;
+                    @media (max-width: 768px) {
+                        min-height: 320px;
+                    }
                 }
                 .downloadButton {
                     position: absolute;
