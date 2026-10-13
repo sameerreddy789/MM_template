@@ -132,14 +132,10 @@ const Sponsors = () => {
               className={styles.sponsorCard}
               variants={cardVariants}
               whileHover={{
-                scale: 1.05,
-                y: -8,
-                rotateX: 4,
-                rotateY: -4,
+                scale: 1.08,
                 transition: { type: "spring", stiffness: 300, damping: 15 },
               }}
               whileTap={{ scale: 0.97 }}
-              style={{ transformStyle: "preserve-3d" }}
             >
               <div className={styles.logoWrapper}>
                 <img
