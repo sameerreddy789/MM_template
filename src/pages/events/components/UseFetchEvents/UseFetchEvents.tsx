@@ -27,7 +27,7 @@ const dummyEventsData = [
   {
      category_name: "Band Night",
     events: [
-      { name: "Harika Narayan", club_name: "Cultural Club", venue: "Main Stage", description: "Sensational live band performance by playback singer Harika Narayan.", image_url: "/images/events/dj/harika-narayan.jpg", isDj: true, instagram: "https://www.instagram.com/harikanarayan/", logo: "/images/events/dj/harika-narayan-logo.svg", isLiveBand: true }
+      { name: "Harika Narayan", club_name: "Cultural Club", venue: "Main Stage", description: "Sensational live band performance by playback singer Harika Narayan.", image_url: "/images/events/dj/harika-narayan.jpg", isDj: true, instagram: "https://www.instagram.com/harika_narayan", logo: "/images/events/dj/harika-narayan-logo.svg", isLiveBand: true }
     ]
   },
   {
