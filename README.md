@@ -105,7 +105,7 @@ src/
     landingRevamp/ Hero, music player, social links
     events/        Event categories and listings
     gallery/       Image and video grid with lightbox
-    registration/  Multi-step registration form
+    registration/  Student form, Razorpay checkout, ticket confirmation
     aboutus/  contact/  brochure/  sponsers/  mediaPartners/  comingSoon/
     components/    Shared: navbar, preloaders, door transition, background music
 docs/screenshots/  Images used by this README
@@ -144,6 +144,13 @@ the same budget; a few oversized PNGs previously accounted for the bulk of page 
 ---
 
 ## Deployment
+
+Registration uses the website's student form, the existing Express API, Razorpay,
+and Firebase Firestore. The API creates an order, verifies its captured payment,
+and issues one ticket. Entry-pass emails can be sent by the backend locally or
+queued for the local Google mail sender. The form shows payment availability
+from the API and enables checkout only when the required configuration is present.
+See [registration setup and local testing](docs/registration-setup.md).
 
 Two paths are configured:
 

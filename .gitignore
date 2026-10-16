@@ -11,6 +11,8 @@ server/.env
 server/.env.*
 serviceAccountKey.json
 server/serviceAccountKey.json
+# Razorpay dashboard credential export (private local test input)
+/rzp.csv
 !.env.example
 
 

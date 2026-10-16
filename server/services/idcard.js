@@ -62,7 +62,8 @@ const COLORS = {
  * @returns {Promise<Buffer>} PNG image buffer
  */
 async function generateIdCard(studentData) {
-  const { ticketId, name, college, rollNo, secureToken } = studentData;
+  const { ticketId, name, college, rollNo, secureToken, paymentMode } = studentData;
+  const test = paymentMode === "test";
 
   // =========================================
   // 1. Create the canvas
@@ -117,7 +118,7 @@ async function generateIdCard(studentData) {
   // Subtitle
   ctx.fillStyle = COLORS.textMuted;
   ctx.font = "20px serif";
-  ctx.fillText("✦  OFFICIAL FEST PASS  ✦", CARD_WIDTH / 2, 205);
+  ctx.fillText(test ? "TEST PASS — NOT VALID FOR ENTRY" : "✦  OFFICIAL FEST PASS  ✦", CARD_WIDTH / 2, 205);
 
   ctx.beginPath();
   ctx.moveTo(180, 222);
@@ -168,7 +169,7 @@ async function generateIdCard(studentData) {
   ctx.textAlign = "center";
   ctx.fillStyle = COLORS.textMuted;
   ctx.font = "italic 16px serif";
-  ctx.fillText("Scan QR code at gate for entry verification", CARD_WIDTH / 2, 800);
+  ctx.fillText(test ? "Local test QR — not valid at the event" : "Scan QR code at gate for entry verification", CARD_WIDTH / 2, 800);
 
   // =========================================
   // 7. Footer tagline

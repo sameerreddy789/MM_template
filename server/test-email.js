@@ -5,10 +5,14 @@
 // It generates a sample ID Card + Standalone QR Code and sends a test email with both attached!
 // ==========================================
 
+require("dotenv").config({ path: require("node:path").join(__dirname, ".env.payment-test"), quiet: true });
+if (process.env.PAYMENT_MODE !== "test" || !/^rzp_test_/.test(process.env.RAZORPAY_KEY_ID || "")) {
+  console.error("Configure the separate payment test environment before sending a diagnostic email.");
+  process.exit(1);
+}
 const { sendIdCardEmail } = require("./services/email");
 const { generateIdCard } = require("./services/idcard");
 const { generateQRCode } = require("./services/qr");
-require("dotenv").config();
 
 async function runEmailTest() {
   console.log("📧 Testing MohanaMantra Email Automation with Attachments...\n");
@@ -23,11 +27,12 @@ async function runEmailTest() {
   }
 
   const testStudent = {
-    ticketId: "MM26-TEST01",
+    ticketId: "MM26-TEST-000001",
+    paymentMode: "test",
     name: "Sameer Reddy (Test)",
     college: "Mohan Babu University",
     rollNo: "22CS101",
-    secureToken: "test_secure_token_12345",
+    secureToken: require("node:crypto").randomBytes(16).toString("hex"),
   };
 
   try {
@@ -45,6 +50,7 @@ async function runEmailTest() {
       college: testStudent.college,
       idCardBuffer,
       qrBuffer,
+      paymentMode: "test",
     });
 
     console.log(`\n🎉 EMAIL SENT SUCCESSFULLY!`);

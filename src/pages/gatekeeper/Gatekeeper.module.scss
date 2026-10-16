@@ -11,6 +11,20 @@
   align-items: center;
   padding: 2rem 1rem;
   box-sizing: border-box;
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  button:focus-visible, input:focus-visible {
+    outline: 2px solid #e5c384;
+    outline-offset: 3px;
+  }
 }
 
 .header {
@@ -19,12 +33,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid rgba(212, 168, 67, 0.3);
 }
 
 .titleGroup {
+  min-width: 0;
+
   h1 {
     font-family: 'Georgia', serif;
     color: #d4a843;
@@ -38,6 +55,12 @@
     margin: 0.2rem 0 0 0;
     letter-spacing: 2px;
   }
+}
+
+.badge {
+  color: #e5c384;
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .adminBadge {
@@ -79,6 +102,7 @@
   padding: 2.5rem 2rem;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
   margin-top: 2rem;
+  min-width: 0;
 }
 
 .loginHeader {
@@ -166,6 +190,44 @@
   font-size: 0.85rem;
   margin-bottom: 1.5rem;
   text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.modeBanner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid #d4a843;
+  border-radius: 8px;
+  background: rgba(212, 168, 67, 0.12);
+  color: #e5c384;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.successBanner {
+  background: rgba(46, 204, 113, 0.2);
+  border: 1px solid #2ecc71;
+  color: #2ecc71;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.fieldLabel {
+  display: block;
+  color: #d4a843;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.helperText {
+  color: #e5c384;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 0;
 }
 
 /* MAIN SCANNER DASHBOARD */
@@ -175,6 +237,7 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  min-width: 0;
 }
 
 .controlsCard {
@@ -191,6 +254,7 @@
 
   input {
     flex: 1;
+    min-width: 0;
     padding: 0.85rem 1rem;
     background: rgba(10, 4, 6, 0.8);
     border: 1px solid #b8922f;
@@ -319,7 +383,7 @@
 
   .matrixGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 0.75rem;
   }
 
@@ -329,6 +393,8 @@
     padding: 0.75rem;
     border-radius: 8px;
     text-align: center;
+    min-width: 0;
+    overflow-wrap: anywhere;
 
     .matrixSessionName {
       font-size: 0.75rem;
@@ -344,6 +410,13 @@
     }
   }
 
+  .matrixTimestamp {
+    color: #e5c384;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    margin-top: 0.4rem;
+  }
+
   .matrixCheckedIn {
     background: rgba(46, 204, 113, 0.15) !important;
     border-color: rgba(46, 204, 113, 0.5) !important;
@@ -355,6 +428,9 @@
 }
 
 .dropzone {
+  display: block;
+  width: 100%;
+  font-family: inherit;
   margin-top: 1.2rem;
   border: 2px dashed #b8922f;
   border-radius: 12px;
@@ -371,11 +447,13 @@
   }
 
   .dropIcon {
+    display: block;
     font-size: 2.2rem;
     margin-bottom: 0.4rem;
   }
 
   .dropText {
+    display: block;
     color: #e5c384;
     font-weight: 600;
     font-size: 1rem;
@@ -412,6 +490,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  overflow-wrap: anywhere;
 
   &.valid {
     background: rgba(46, 204, 113, 0.2);
@@ -423,6 +502,12 @@
     background: rgba(241, 196, 15, 0.2);
     border-bottom: 2px solid #f1c40f;
     color: #f1c40f;
+  }
+
+  &.testTicket {
+    background: rgba(212, 168, 67, 0.15);
+    border-bottom: 2px solid #d4a843;
+    color: #e5c384;
   }
 
   &.invalid {
@@ -447,6 +532,8 @@
 }
 
 .detailItem {
+  min-width: 0;
+
   .label {
     color: #c4a265;
     font-size: 0.75rem;
@@ -458,6 +545,7 @@
     color: #fff9e9;
     font-size: 1.1rem;
     font-weight: 600;
+    overflow-wrap: anywhere;
   }
 }
 
@@ -499,4 +587,50 @@
   color: #f1c40f;
   font-size: 0.9rem;
   font-style: italic;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .titleGroup h1 {
+    font-size: 1.5rem;
+  }
+
+  .titleGroup p {
+    letter-spacing: 0.5px;
+    line-height: 1.5;
+  }
+
+  .loginCard, .controlsCard, .studentDetails, .actionSection {
+    padding: 1.25rem 1rem;
+  }
+
+  .inputRow {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .sessionBar .sessionPills {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sessionBar .sessionPill {
+    min-width: 0;
+    padding: 0.65rem 0.5rem;
+  }
+
+  .sessionMatrix .matrixGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .statusHeader {
+    padding: 1rem;
+    font-size: 1rem;
+  }
 }

@@ -19,10 +19,16 @@ const crypto = require("crypto");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const fs = require("fs");
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env"), quiet: true });
 const { generateIdCard } = require("./services/idcard");
 const { generateQRCode } = require("./services/qr");
-const { sendIdCardEmail } = require("./services/email");
-require("dotenv").config();
+const { sendIdCardEmail, isEmailConfigured } = require("./services/email");
+const { createRegistrationService, RegistrationError, isConfiguredSecret, REGISTRATION_AMOUNT, REGISTRATION_CURRENCY } = require("./services/registration");
+const { paymentEnvironment, recordMatchesMode } = require("./services/paymentEnvironment");
+const { SESSION_NAMES, normalizeCheckInSessions } = require("./services/checkInSessions");
+const environment = paymentEnvironment(process.env);
 
 // ==========================================
 // 1. FIREBASE ADMIN INITIALIZATION
@@ -33,8 +39,6 @@ require("dotenv").config();
 
 const { cert } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
-const fs = require("fs");
-const path = require("path");
 
 let serviceAccount = null;
 const keyPath = path.join(__dirname, "serviceAccountKey.json");
@@ -46,13 +50,13 @@ if (fs.existsSync(keyPath)) {
   try {
     serviceAccount = JSON.parse(fs.readFileSync(renderSecretPath, "utf8"));
   } catch (err) {
-    console.error("❌ Failed to parse Render secret file at /etc/secrets/serviceAccountKey.json:", err.message);
+    console.error("❌ Render service-account secret file is not valid JSON.");
   }
 } else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   try {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
   } catch (err) {
-    console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT env variable:", err.message);
+    console.error("❌ FIREBASE_SERVICE_ACCOUNT is not valid JSON.");
   }
 }
 
@@ -63,7 +67,7 @@ if (serviceAccount) {
     credential: cert(serviceAccount),
   });
   db = getFirestore();
-  console.log(`✅ Firebase Admin connected to Firestore (${serviceAccount.project_id})`);
+  console.log(`✅ Firebase Admin initialized for Firestore (${serviceAccount.project_id})`);
 } else {
   console.error("⚠️ Firebase Admin NOT initialized — service account missing.");
 }
@@ -119,15 +123,27 @@ const generalLimiter = rateLimit({
   legacyHeaders: false,
   message: { success: false, error: "Too many requests from this IP. Please try again later." },
 });
-app.use(generalLimiter);
+const staffPaths = new Set(["/api/gatekeeper/verify", "/api/gatekeeper/checkin"]);
+app.use((req, res, next) => req.path === "/api/payment-webhook" || staffPaths.has(req.path)
+  ? next() : generalLimiter(req, res, next));
 
-// Strict rate limiter for gatekeeper admin authentication & verification
+// Strict brute-force limiter applies to staff login, not every entry scan.
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10, // max 10 attempts per 15 minutes
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, error: "Too many login/verification attempts. Please wait 15 minutes." },
+});
+
+// Authenticated gates can share one event Wi-Fi address. A public-form or login
+// limit must not stop that queue after only a handful of verified admissions.
+const staffLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 1200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: "Too many gate requests. Please try again shortly." },
 });
 
 // Rate limiter for Razorpay registration order creation
@@ -146,8 +162,9 @@ const registerLimiter = rateLimit({
 // byte order as the original payload.
 app.use(
   express.json({
+    limit: "64kb",
     verify: (req, _res, buf) => {
-      req.rawBody = buf.toString();
+      req.rawBody = Buffer.from(buf);
     },
   })
 );
@@ -164,18 +181,18 @@ app.use((err, _req, res, next) => {
 // 3. RAZORPAY INSTANCE
 // ==========================================
 let razorpayInstance = null;
-if (process.env.RAZORPAY_KEY_ID) {
+if (process.env.RAZORPAY_KEY_ID && isConfiguredSecret(process.env.RAZORPAY_KEY_SECRET)) {
   try {
     razorpayInstance = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID,
-      key_secret: process.env.RAZORPAY_KEY_SECRET || "dummy_secret",
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
     });
     console.log("✅ Razorpay client initialized");
   } catch (err) {
     console.warn("⚠️ Razorpay client initialization warning:", err.message);
   }
 } else {
-  console.log("ℹ️  RAZORPAY_KEY_ID not set — direct client-side checkout mode active.");
+  console.log("ℹ️ Razorpay payment credentials are missing or placeholders; checkout is unavailable.");
 }
 
 // ==========================================
@@ -183,9 +200,9 @@ if (process.env.RAZORPAY_KEY_ID) {
 // ==========================================
 // Format: MM26-A3F1B2 (prefix + 6 random hex chars, uppercase)
 // This gives us 16 million unique combinations — more than enough for a college fest.
-function generateTicketId() {
+function generateTicketId(mode = environment.mode) {
   const randomHex = crypto.randomBytes(3).toString("hex").toUpperCase();
-  return `MM26-${randomHex}`;
+  return `${mode === "test" ? "MM26-TEST-" : "MM26-"}${randomHex}`;
 }
 
 // Timing-safe string comparison to eliminate side-channel timing attacks
@@ -203,9 +220,9 @@ function timingSafeCompare(a, b) {
 //   1. Generate the ID card image (with QR code, logo, student details)
 //   2. Email it to the student as an attachment
 //
-// It's called as a background task from the webhook handler so it doesn't
-// block the webhook response to Razorpay.
-async function generateIdCardAndSendEmail({ ticketId, name, college, rollNo, email, secureToken }) {
+// Payment confirmation tracks this delivery in Firestore. A failed delivery
+// can be retried by a webhook or the student's confirmation request.
+async function generateIdCardAndSendEmail({ ticketId, name, college, rollNo, email, secureToken, paymentMode }) {
   console.log(`\n🎨 Starting ID card & QR pipeline for ${name} (${ticketId})...`);
 
   // Step 1: Generate the ID card image
@@ -215,6 +232,7 @@ async function generateIdCardAndSendEmail({ ticketId, name, college, rollNo, ema
     college,
     rollNo,
     secureToken,
+    paymentMode,
   });
 
   console.log(`✅ ID card image generated (${(idCardBuffer.length / 1024).toFixed(1)} KB)`);
@@ -224,230 +242,87 @@ async function generateIdCardAndSendEmail({ ticketId, name, college, rollNo, ema
   console.log(`✅ Standalone QR code generated (${(qrBuffer.length / 1024).toFixed(1)} KB)`);
 
   // Step 3: Send the email with ID card & QR code attached
-  await sendIdCardEmail({
+  const delivery = await sendIdCardEmail({
     toEmail: email,
     studentName: name,
     ticketId,
     college,
     idCardBuffer,
     qrBuffer,
+    paymentMode,
   });
 
   console.log(`✅ Full pipeline complete for ${name} (${ticketId})\n`);
+  return delivery;
 }
 
-// ==========================================
-// ROUTE: POST /api/register
-// ==========================================
-// What it does:
-//   1. Receives student form data (name, email, phone, college, roll_no)
-//   2. Creates a Razorpay Order (server-side, so the amount can't be tampered with)
-//   3. Returns the order_id to the frontend to open the Razorpay checkout popup
-//
-// Why server-side order creation matters:
-//   Without this, a student could open browser DevTools and change the amount
-//   from ₹1000 to ₹1. With server-side orders, Razorpay enforces the exact
-//   amount we set here.
+const registrationService = createRegistrationService({
+  db,
+  razorpay: razorpayInstance,
+  config: process.env,
+  serverTimestamp: () => FieldValue.serverTimestamp(),
+  sendTicketEmail: generateIdCardAndSendEmail,
+  emailConfigured: isEmailConfigured,
+  generateTicketId,
+});
+
+function registrationFailure(error, res) {
+  if (error instanceof RegistrationError) {
+    return res.status(error.status).json({ success: false, code: error.code, error: error.message });
+  }
+  console.error("Registration request failed:", error.code || error.name || "UnknownError");
+  return res.status(503).json({ success: false, code: "REGISTRATION_UNAVAILABLE", error: "Registration confirmation is temporarily unavailable. Please try again shortly." });
+}
+
+app.get("/api/registration-status", (_req, res) => {
+  res.set("Cache-Control", "no-store");
+  const status = registrationService.configurationStatus();
+  res.json({
+    ready: status.ready,
+    registrationsOpen: status.registrationsOpen,
+    amount: REGISTRATION_AMOUNT,
+    currency: REGISTRATION_CURRENCY,
+    paymentMode: environment.mode,
+    configuration: { payment: status.payment, database: status.database, webhook: status.webhook, tickets: status.tickets, email: status.email },
+  });
+});
+
+// Create and persist an order before the browser can open checkout.
 app.post("/api/register", registerLimiter, async (req, res) => {
   try {
-    if (!razorpayInstance) {
-      return res.status(400).json({
-        success: false,
-        error: "Razorpay keys not configured on server.",
-      });
-    }
-
-    const { name, email, phone, college, roll_no } = req.body;
-
-    // Sanitize and trim strings to prevent whitespace or type tampering
-    const cleanName = typeof name === "string" ? name.trim() : "";
-    const cleanEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
-    const cleanPhone = typeof phone === "string" ? phone.trim() : "";
-    const cleanCollege = typeof college === "string" ? college.trim() : "";
-    const cleanRollNo = typeof roll_no === "string" ? roll_no.trim().toUpperCase() : "";
-
-    // Validate presence of all required fields
-    if (!cleanName || !cleanEmail || !cleanPhone || !cleanCollege || !cleanRollNo) {
-      return res.status(400).json({
-        success: false,
-        error: "All student fields are required (name, email, phone, college, roll_no)",
-      });
-    }
-
-    // Length validation to prevent payload bloat and database corruption
-    if (cleanName.length > 100 || cleanCollege.length > 150 || cleanRollNo.length > 50) {
-      return res.status(400).json({
-        success: false,
-        error: "One or more fields exceed maximum allowed character length.",
-      });
-    }
-
-    // Email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(cleanEmail) || cleanEmail.length > 120) {
-      return res.status(400).json({
-        success: false,
-        error: "Please provide a valid email address.",
-      });
-    }
-
-    // Phone format validation (10 to 15 digits)
-    const phoneCleanDigits = cleanPhone.replace(/[\s\-\(\)]/g, "");
-    const phoneRegex = /^\+?[0-9]{10,15}$/;
-    if (!phoneRegex.test(phoneCleanDigits)) {
-      return res.status(400).json({
-        success: false,
-        error: "Please provide a valid 10-digit phone number.",
-      });
-    }
-
-    // Create Razorpay Order
-    // Amount is in PAISE (₹1000 = 100000 paise)
-    const orderOptions = {
-      amount: 100000,
-      currency: "INR",
-      receipt: `mm26_${Date.now()}`,
-      notes: {
-        student_name: cleanName,
-        student_email: cleanEmail,
-        student_phone: phoneCleanDigits,
-        college_name: cleanCollege,
-        roll_no: cleanRollNo,
-        fest: "MohanaMantra 2K26",
-      },
-    };
-
-    const order = await razorpayInstance.orders.create(orderOptions);
-
-    console.log(`📋 Order created: ${order.id} for ${cleanName} (${cleanCollege})`);
-
-    // Return order details to the frontend
-    res.status(200).json({
-      success: true,
-      order_id: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      key_id: process.env.RAZORPAY_KEY_ID,
-    });
+    res.status(200).json(await registrationService.createOrder(req.body));
   } catch (error) {
-    console.error("❌ Order Creation Error:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to create payment order. Please try again.",
-    });
+    registrationFailure(error, res);
   }
 });
 
-// ==========================================
-// ROUTE: POST /api/payment-webhook
-// ==========================================
-// What it does:
-//   1. Receives async payment notifications from Razorpay
-//   2. Verifies the request is genuinely from Razorpay using HMAC-SHA256
-//   3. On successful payment: saves student record to Firestore with status "Paid"
-//   4. Generates a unique Ticket ID and secure verification token
-//
-// How HMAC verification works (in plain English):
-//   Razorpay sends a "signature" header with every webhook.
-//   We take the raw body bytes + our secret key, run them through the SHA-256
-//   hash algorithm, and check if our result matches Razorpay's signature.
-//   If they match → the request is genuine.
-//   If they don't → someone is trying to fake a payment notification.
+const verificationLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: "Please wait a few minutes before checking payment again." },
+});
+
+// Verify the checkout proof, captured payment, and durable ticket independently.
+app.post("/api/payment-verify", verificationLimiter, async (req, res) => {
+  res.set("Cache-Control", "no-store");
+  try {
+    const result = await registrationService.verifyCheckout(req.body);
+    res.status(result.success ? 200 : 202).json(result);
+  } catch (error) {
+    registrationFailure(error, res);
+  }
+});
+
+// Razorpay can redeliver notifications; the transaction issues one ticket per order.
 app.post("/api/payment-webhook", async (req, res) => {
-  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
-  const signature = req.headers["x-razorpay-signature"];
-
-  if (!secret) {
-    console.error("❌ RAZORPAY_WEBHOOK_SECRET not configured on server.");
-    return res.status(500).json({ error: "Webhook secret not configured" });
+  try {
+    await registrationService.processWebhook(req.rawBody, req.headers["x-razorpay-signature"], req.body);
+    res.status(200).json({ status: "ok" });
+  } catch (error) {
+    registrationFailure(error, res);
   }
-
-  if (!signature || typeof signature !== "string" || !req.rawBody) {
-    return res.status(400).json({ error: "Invalid or missing webhook signature/payload" });
-  }
-
-  // --- STEP A: Verify the signature with timing-safe comparison ---
-  const expectedSignature = crypto
-    .createHmac("sha256", secret)
-    .update(req.rawBody)
-    .digest("hex");
-
-  if (!timingSafeCompare(expectedSignature, signature)) {
-    console.warn("⚠️  Webhook signature mismatch — possible spoofing attempt!");
-    return res.status(400).json({ error: "Invalid signature" });
-  }
-
-  console.log("✅ Webhook signature verified — request is from Razorpay");
-
-  // --- STEP B: Check the event type ---
-  const event = req.body.event;
-
-  if (event === "payment.captured" || event === "order.paid") {
-    const paymentEntity = req.body.payload.payment.entity;
-    const orderId = paymentEntity.order_id;
-    const paymentId = paymentEntity.id;
-
-    try {
-      // Fetch original order to get the student's details from the notes
-      const orderDetails = await razorpayInstance.orders.fetch(orderId);
-      const notes = orderDetails.notes;
-
-      const name = notes.student_name;
-      const email = notes.student_email;
-      const phone = notes.student_phone;
-      const college = notes.college_name;
-      const rollNo = notes.roll_no;
-
-      // Generate unique identifiers
-      const ticketId = generateTicketId();
-      const secureToken = crypto.randomBytes(16).toString("hex");
-
-      // --- STEP C: Save to Firestore ---
-      await db.collection("registrations").doc(ticketId).set({
-        ticketId,
-        name,
-        email,
-        phone,
-        college,
-        rollNo,
-        orderId,
-        paymentId,
-        paymentStatus: "Paid",
-        checkInStatus: "Not Checked In",
-        checkedInAt: null,
-        secureToken,
-        createdAt: FieldValue.serverTimestamp(),
-      });
-
-      console.log(`🎉 Registration CONFIRMED & saved to Firestore!`);
-      console.log(`   Ticket ID : ${ticketId}`);
-      console.log(`   Student   : ${name} (${college})`);
-      console.log(`   Payment   : ${paymentId}`);
-      console.log(`   Token     : ${secureToken.substring(0, 8)}...`);
-
-      // =====================================================
-      // STEP 3: Trigger ID card generation + email (background)
-      // =====================================================
-      // We run this in the background so the webhook response is fast.
-      // If this fails, the payment is still recorded in Firestore.
-      generateIdCardAndSendEmail({
-        ticketId, name, college, rollNo, email, secureToken,
-      }).catch((err) => {
-        console.error("❌ ID card/email pipeline error:", err.message);
-      });
-    } catch (dbError) {
-      console.error("❌ Firestore save error:", dbError);
-      // Still return 200 to Razorpay — we don't want them to retry
-      // and create duplicate records. We'll handle failures via logs.
-    }
-  } else {
-    console.log(`ℹ️  Received webhook event: ${event} (ignored)`);
-  }
-
-  // ALWAYS return 200 OK to Razorpay, even on errors.
-  // If we return an error, Razorpay will retry the webhook up to 24 hours,
-  // which could create duplicate records in our database.
-  res.status(200).json({ status: "ok" });
 });
 
 // ==========================================
@@ -492,7 +367,7 @@ function isValidAdmin(adminKey, adminSecret) {
 
 // ROUTE: POST /api/gatekeeper/login
 app.post("/api/gatekeeper/login", authLimiter, (req, res) => {
-  const { adminKey, adminSecret } = req.body;
+  const { adminKey, adminSecret } = req.body || {};
   if (!adminKey || !adminSecret || !isValidAdmin(adminKey, adminSecret)) {
     return res.status(401).json({
       success: false,
@@ -504,45 +379,51 @@ app.post("/api/gatekeeper/login", authLimiter, (req, res) => {
     success: true,
     message: "Admin authentication successful",
     adminKey,
+    paymentMode: environment.mode,
   });
 });
 
 // ROUTE: POST /api/gatekeeper/verify
-app.post("/api/gatekeeper/verify", authLimiter, async (req, res) => {
+app.post("/api/gatekeeper/verify", staffLimiter, async (req, res) => {
   try {
-    const { token, ticketId, adminKey, adminSecret } = req.body;
+    const { token, ticketId, adminKey, adminSecret } = req.body || {};
 
     if (!isValidAdmin(adminKey, adminSecret)) {
       return res.status(401).json({ success: false, error: "Unauthorized admin credentials." });
     }
 
     let targetTicketId = ticketId;
+    let decodedTicket;
 
     // If token is provided, verify JWT signature
     if (token) {
      try {
     const jwt = require("jsonwebtoken");
     const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
+    if (!isConfiguredSecret(jwtSecret, 32)) {
     console.error("❌ JWT_SECRET not configured on server — cannot verify QR token.");
     return res.status(500).json({ success: false, error: "QR verification is not configured on this server." });
     }
-    const decoded = jwt.verify(token, jwtSecret);
+    const decoded = jwt.verify(token, jwtSecret, { algorithms: ["HS256"] });
+    if ((decoded.mode || "live") !== environment.mode) {
+      return res.status(400).json({ success: false, error: "This QR pass belongs to a different payment environment." });
+    }
+    decodedTicket = decoded;
     targetTicketId = decoded.tid;
     } catch (jwtErr) {
     return res.status(400).json({ success: false, error: "Invalid or forged QR token signature." });
     }
     }
 
-    if (!targetTicketId) {
-      return res.status(400).json({ success: false, error: "Ticket ID or token required." });
+    if (typeof targetTicketId !== "string" || !new RegExp(`^${environment.ticketPrefix}[A-F0-9]{6}$`).test(targetTicketId)) {
+      return res.status(400).json({ success: false, error: "Enter a valid ticket ID for this payment environment." });
     }
 
     if (!db) {
-      return res.status(500).json({ success: false, error: "Firestore database not connected." });
+      return res.status(503).json({ success: false, error: "Firestore database not connected." });
     }
 
-    const docRef = db.collection("registrations").doc(targetTicketId);
+    const docRef = db.collection(environment.registrationsCollection).doc(targetTicketId);
     const docSnap = await docRef.get();
 
     if (!docSnap.exists) {
@@ -550,15 +431,14 @@ app.post("/api/gatekeeper/verify", authLimiter, async (req, res) => {
     }
 
     const student = docSnap.data();
+    if (student.ticketId !== targetTicketId || !recordMatchesMode(student, environment.mode) || student.paymentStatus !== "Paid") {
+      return res.status(400).json({ success: false, error: "This pass does not have a confirmed payment in this environment." });
+    }
+    if (decodedTicket && !timingSafeCompare(decodedTicket.stk, student.secureToken)) {
+      return res.status(400).json({ success: false, error: "This QR code does not match the issued pass." });
+    }
 
-    const defaultSessions = {
-      day1_am: { checkedIn: false, timestamp: null },
-      day1_pm: { checkedIn: false, timestamp: null },
-      day2_am: { checkedIn: false, timestamp: null },
-      day2_pm: { checkedIn: false, timestamp: null },
-    };
-
-    const checkInSessions = student.checkInSessions || defaultSessions;
+    const checkInSessions = normalizeCheckInSessions(student.checkInSessions);
 
     return res.status(200).json({
       success: true,
@@ -570,95 +450,76 @@ app.post("/api/gatekeeper/verify", authLimiter, async (req, res) => {
         email: student.email,
         phone: student.phone,
         paymentStatus: student.paymentStatus || "Paid",
+        paymentMode: environment.mode,
         checkInStatus: student.checkInStatus || "Not Checked In",
         checkedInAt: student.checkedInAt ? student.checkedInAt.toDate?.() || student.checkedInAt : null,
         checkInSessions,
       },
     });
   } catch (error) {
-    console.error("❌ Gatekeeper verify error:", error);
-    return res.status(500).json({ success: false, error: "Failed to verify ticket." });
+    console.error("❌ Gatekeeper verify error:", error.code || error.name);
+    return res.status(503).json({ success: false, error: "Ticket verification is temporarily unavailable. Please try again." });
   }
 });
 
-const SESSION_NAMES = {
-  day1_am: "Day 1 Morning",
-  day1_pm: "Day 1 Evening",
-  day2_am: "Day 2 Morning",
-  day2_pm: "Day 2 Evening",
-};
-
 // ROUTE: POST /api/gatekeeper/checkin
-app.post("/api/gatekeeper/checkin", authLimiter, async (req, res) => {
+app.post("/api/gatekeeper/checkin", staffLimiter, async (req, res) => {
   try {
-    const { ticketId, sessionKey = "day1_am", adminKey, adminSecret } = req.body;
+    const { ticketId, sessionKey = "day1_am", adminKey, adminSecret } = req.body || {};
 
     if (!isValidAdmin(adminKey, adminSecret)) {
       return res.status(401).json({ success: false, error: "Unauthorized admin credentials." });
     }
 
-    if (!ticketId) {
+    if (typeof ticketId !== "string" || !new RegExp(`^${environment.ticketPrefix}[A-F0-9]{6}$`).test(ticketId)) {
       return res.status(400).json({ success: false, error: "Ticket ID is required for check-in." });
     }
-
-    const docRef = db.collection("registrations").doc(ticketId);
-    const docSnap = await docRef.get();
-
-    if (!docSnap.exists) {
-      return res.status(404).json({ success: false, error: "Ticket not found." });
+    if (typeof sessionKey !== "string" || !Object.hasOwn(SESSION_NAMES, sessionKey)) {
+      return res.status(400).json({ success: false, error: "Select a valid event check-in session." });
     }
 
-    const student = docSnap.data();
-
-    const defaultSessions = {
-      day1_am: { checkedIn: false, timestamp: null },
-      day1_pm: { checkedIn: false, timestamp: null },
-      day2_am: { checkedIn: false, timestamp: null },
-      day2_pm: { checkedIn: false, timestamp: null },
-    };
-
-    const sessions = student.checkInSessions || defaultSessions;
-    const currentSession = sessions[sessionKey] || { checkedIn: false, timestamp: null };
-    const sessionName = SESSION_NAMES[sessionKey] || sessionKey;
-
-    if (currentSession.checkedIn) {
-      return res.status(400).json({
-        success: false,
-        error: `Student is already checked in for ${sessionName}!`,
-        checkedInAt: currentSession.timestamp,
-        sessionKey,
-      });
-    }
-
-    const nowIso = new Date().toISOString();
-    const updatedSessions = {
-      ...sessions,
-      [sessionKey]: {
-        checkedIn: true,
-        timestamp: nowIso,
-        gatekeeper: adminKey,
-      },
-    };
-
-    await docRef.update({
-      checkInSessions: updatedSessions,
-      checkInStatus: "Checked In",
-      checkedInAt: FieldValue.serverTimestamp(),
+    if (!db) return res.status(503).json({ success: false, error: "Firestore database not connected." });
+    const docRef = db.collection(environment.registrationsCollection).doc(ticketId);
+    const sessionName = SESSION_NAMES[sessionKey];
+    const result = await db.runTransaction(async transaction => {
+      const snapshot = await transaction.get(docRef);
+      if (!snapshot.exists) throw new RegistrationError(404, "TICKET_NOT_FOUND", "Ticket not found.");
+      const student = snapshot.data();
+      if (student.ticketId !== ticketId || !recordMatchesMode(student, environment.mode) || student.paymentStatus !== "Paid") {
+        throw new RegistrationError(400, "PAYMENT_INCOMPLETE", "This pass does not have a confirmed payment in this environment.");
+      }
+      const sessions = normalizeCheckInSessions(student.checkInSessions);
+      const currentSession = sessions[sessionKey] || { checkedIn: false, timestamp: null };
+      if (currentSession.checkedIn) {
+        const error = new RegistrationError(400, "ALREADY_CHECKED_IN", `Student is already checked in for ${sessionName}!`);
+        error.checkedInAt = currentSession.timestamp;
+        error.checkInSessions = sessions;
+        error.sessionKey = sessionKey;
+        throw error;
+      }
+      const nowIso = new Date().toISOString();
+      const updatedSessions = { ...sessions, [sessionKey]: { checkedIn: true, timestamp: nowIso, gatekeeper: adminKey } };
+      transaction.update(docRef, { checkInSessions: updatedSessions, checkInStatus: "Checked In", checkedInAt: FieldValue.serverTimestamp() });
+      return { name: student.name, nowIso, updatedSessions };
     });
 
-    console.log(`🎟️ Gate Check-in SUCCESS for ${student.name} (${ticketId}) - Session: ${sessionName}`);
+    console.log(`🎟️ Gate Check-in SUCCESS for ${result.name} (${ticketId}) - Session: ${sessionName}`);
 
     return res.status(200).json({
       success: true,
-      message: `Successfully checked in ${student.name} for ${sessionName}`,
+      message: `Successfully checked in ${result.name} for ${sessionName}`,
       ticketId,
       sessionKey,
-      checkedInAt: nowIso,
-      checkInSessions: updatedSessions,
+      checkedInAt: result.nowIso,
+      checkInSessions: result.updatedSessions,
     });
   } catch (error) {
-    console.error("❌ Gatekeeper check-in error:", error);
-    return res.status(500).json({ success: false, error: error.message || "Check-in failed." });
+    if (error instanceof RegistrationError) {
+      return res.status(error.status).json({ success: false, code: error.code, error: error.message,
+        ...(error.code === "ALREADY_CHECKED_IN" ? { checkedInAt: error.checkedInAt, checkInSessions: error.checkInSessions, sessionKey: error.sessionKey } : {}) });
+    }
+    console.error("❌ Gatekeeper check-in error:", error.code || error.name);
+    return res.status(503).json({ success: false, error: "Check-in is temporarily unavailable. Please try again." });
   }
 });
 
@@ -666,9 +527,10 @@ app.post("/api/gatekeeper/checkin", authLimiter, async (req, res) => {
 // START SERVER
 // ==========================================
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, "0.0.0.0", () => {
+app.listen(PORT, process.env.HOST || "0.0.0.0", () => {
   console.log(`\n🚀 MohanaMantra 2K26 Backend running on port ${PORT}`);
   console.log(`   Health check: http://localhost:${PORT}/api/health`);
   console.log(`   Register:     POST http://localhost:${PORT}/api/register`);
   console.log(`   Webhook:      POST http://localhost:${PORT}/api/payment-webhook\n`);
+  console.log(`   Payment mode: ${environment.mode}; records: ${environment.registrationsCollection}`);
 });

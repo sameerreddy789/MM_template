@@ -13,7 +13,9 @@
 
 const jwt = require("jsonwebtoken");
 const QRCode = require("qrcode");
-require("dotenv").config();
+const { isConfiguredSecret } = require("./registration");
+const { paymentEnvironment } = require("./paymentEnvironment");
+require("dotenv").config({ path: require("node:path").join(__dirname, "..", ".env"), quiet: true });
 
 /**
  * Generate a signed JWT token for a student's ticket
@@ -27,10 +29,14 @@ function generateVerificationToken(ticketId, studentName, secureToken) {
     tid: ticketId,
     name: studentName,
     stk: secureToken,
+    mode: paymentEnvironment().mode,
   };
 
   // Sign with our secret. Token never expires (we check status in DB instead)
-  const token = jwt.sign(payload, process.env.JWT_SECRET || "mohanamantra2k26_super_secret_jwt_key_change_me");
+  if (!isConfiguredSecret(process.env.JWT_SECRET, 32)) {
+    throw new Error("A valid ticket-signing secret must be configured before issuing QR passes.");
+  }
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { algorithm: "HS256" });
   return token;
 }
 
@@ -40,7 +46,7 @@ function generateVerificationToken(ticketId, studentName, secureToken) {
  * @returns {string} The full verification URL
  */
 function buildVerificationUrl(token) {
-  const baseUrl = process.env.FRONTEND_URL || "https://mm-template.vercel.app";
+  const baseUrl = (process.env.FRONTEND_URL || "https://www.mohanamantra.com").replace(/\/$/, "");
   return `${baseUrl}/gatekeeper/verify/${token}`;
 }
 
@@ -55,7 +61,7 @@ async function generateQRCode(ticketId, studentName, secureToken) {
   const token = generateVerificationToken(ticketId, studentName, secureToken);
   const verificationUrl = buildVerificationUrl(token);
 
-  console.log(`🔐 QR Verification URL: ${verificationUrl.substring(0, 60)}...`);
+  console.log(`🔐 QR generated for ${ticketId}`);
 
   // Generate QR code as PNG buffer
   const qrBuffer = await QRCode.toBuffer(verificationUrl, {

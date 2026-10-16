@@ -1,7 +1,18 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import styles from "./Gatekeeper.module.scss";
 import { Html5Qrcode } from "html5-qrcode";
 import { Helmet } from "react-helmet-async";
+
+const SESSION_KEYS = ["day1_am", "day1_pm", "day2_am", "day2_pm"] as const;
+type SessionKey = typeof SESSION_KEYS[number];
+type PaymentMode = "test" | "live";
+const SESSION_LABELS: Record<SessionKey, string> = {
+  day1_am: "DAY 1 MORNING",
+  day1_pm: "DAY 1 EVENING",
+  day2_am: "DAY 2 MORNING",
+  day2_pm: "DAY 2 EVENING",
+};
 
 interface CheckInSessionInfo {
   checkedIn: boolean;
@@ -17,293 +28,412 @@ interface StudentData {
   email: string;
   phone: string;
   paymentStatus: string;
+  paymentMode: PaymentMode;
   checkInStatus: string;
   checkedInAt?: string | null;
-  checkInSessions?: Record<string, CheckInSessionInfo>;
+  checkInSessions?: Partial<Record<SessionKey, CheckInSessionInfo>>;
 }
 
-const SESSION_LABELS: Record<string, string> = {
-  day1_am: "DAY 1 MORNING",
-  day1_pm: "DAY 1 EVENING",
-  day2_am: "DAY 2 MORNING",
-  day2_pm: "DAY 2 EVENING",
-};
+interface GatekeeperResponse {
+  success: boolean;
+  error?: string;
+  code?: string;
+  paymentMode?: PaymentMode;
+  student?: StudentData;
+  ticketId?: string;
+  sessionKey?: SessionKey;
+  checkedInAt?: string;
+  checkInSessions?: Partial<Record<SessionKey, CheckInSessionInfo>>;
+}
+
+interface Operation {
+  id: number;
+  controller: AbortController;
+  timeout: number;
+}
+
+interface Camera {
+  scanner: Html5Qrcode;
+  start?: Promise<unknown>;
+  cleanup?: Promise<void>;
+}
+
+// Local staff tests must keep credentials and signed passes on the Vite proxy.
+const backendUrl = import.meta.env.DEV
+  ? ""
+  : (import.meta.env.VITE_BACKEND_URL || "https://mohanamantra-backend.onrender.com").replace(/\/$/, "");
+
+async function fetchBackend(endpoint: string, options: RequestInit) {
+  const response = await fetch(backendUrl + endpoint, {
+    ...options, credentials: "omit", cache: "no-store",
+  });
+  const data: GatekeeperResponse = await response.json();
+  return { status: response.status, data };
+}
+
+// Camera, file, paste, manual input and emailed links share the same parser.
+// A URL is decoded locally; only its signed token is sent to our own API.
+function parsePass(value: string): { token: string } | { ticketId: string } | null {
+  const raw = value.trim();
+  if (!raw || raw.length > 4096) return null;
+  if (/^MM26-(?:TEST-)?[A-F0-9]{6}$/i.test(raw)) return { ticketId: raw.toUpperCase() };
+  const isToken = (token: string) => /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token);
+  if (isToken(raw)) return { token: raw };
+  try {
+    const url = new URL(raw, window.location.origin);
+    if (!["http:", "https:"].includes(url.protocol)) return null;
+    const prefix = "/gatekeeper/verify/";
+    const token = url.pathname.startsWith(prefix)
+      ? decodeURIComponent(url.pathname.slice(prefix.length).replace(/\/$/, ""))
+      : url.searchParams.get("token");
+    if (token && isToken(token)) return { token };
+  } catch { /* An invalid link is handled as an invalid pass below. */ }
+  return null;
+}
+
+function formatCheckInTime(timestamp: string | null | undefined) {
+  if (!timestamp || !Number.isFinite(new Date(timestamp).getTime())) return "Time unavailable";
+  return new Date(timestamp).toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata", day: "2-digit", month: "short",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+  });
+}
+
+async function disposeCamera(camera: Camera) {
+  if (!camera.cleanup) {
+    camera.cleanup = (async () => {
+      try { await camera.start; } catch { /* Permission/start failures still need cleanup. */ }
+      try { if (camera.scanner.isScanning) await camera.scanner.stop(); } catch { /* A revoked camera can already be stopped. */ }
+      try { camera.scanner.clear(); } catch { /* Its element may have unmounted. */ }
+    })();
+  }
+  await camera.cleanup;
+}
 
 const Gatekeeper: React.FC = () => {
-  // Active Gate Session State (day1_am, day1_pm, day2_am, day2_pm)
-  const [activeSession, setActiveSession] = useState<"day1_am" | "day1_pm" | "day2_am" | "day2_pm">("day1_am");
-
-  // Key-Value Pair Admin Credentials
-  const [adminKey, setAdminKey] = useState<string>(() => sessionStorage.getItem("mm26_admin_key") || "");
-  const [adminSecret, setAdminSecret] = useState<string>(() => sessionStorage.getItem("mm26_admin_secret") || "");
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => !!sessionStorage.getItem("mm26_admin_key"));
-
-  // Input fields for Login
-  const [inputKey, setInputKey] = useState<string>("");
-  const [inputSecret, setInputSecret] = useState<string>("");
-
-  // Verification & Search
-  const [ticketInput, setTicketInput] = useState<string>("");
+  const location = useLocation();
+  const linkedPass = location.pathname.startsWith("/gatekeeper/verify/")
+    ? location.pathname + location.search : "";
+  const [activeSession, setActiveSession] = useState<SessionKey>("day1_am");
+  const [adminKey, setAdminKey] = useState(() => sessionStorage.getItem("mm26_admin_key") || "");
+  const [adminSecret, setAdminSecret] = useState(() => sessionStorage.getItem("mm26_admin_secret") || "");
+  const [isAuthenticated, setIsAuthenticated] = useState(() =>
+    !!sessionStorage.getItem("mm26_admin_key") && !!sessionStorage.getItem("mm26_admin_secret"));
+  const [paymentMode, setPaymentMode] = useState<PaymentMode | null>(() => {
+    const mode = sessionStorage.getItem("mm26_admin_mode");
+    return mode === "test" || mode === "live" ? mode : null;
+  });
+  const [inputKey, setInputKey] = useState("");
+  const [inputSecret, setInputSecret] = useState("");
+  const [ticketInput, setTicketInput] = useState("");
   const [student, setStudent] = useState<StudentData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [checkinSuccess, setCheckinSuccess] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
+  const [successSession, setSuccessSession] = useState<SessionKey | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
-  // QR Scanner State
-  const [isScanning, setIsScanning] = useState<boolean>(false);
-  const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
+  const mountedRef = useRef(true);
+  const operationRef = useRef<Operation | null>(null);
+  const nextOperationRef = useRef(0);
+  const cameraRef = useRef<Camera | null>(null);
+  const cameraWantedRef = useRef(false);
+  const cameraEpochRef = useRef(0);
+  const cameraTimerRef = useRef<number | null>(null);
+  const cameraCleanupRef = useRef<Promise<void>>(Promise.resolve());
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Smart Backend API fetcher
-  const fetchBackend = async (endpoint: string, options: RequestInit) => {
-    const urls: string[] = [];
-    
-    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-      urls.push("http://localhost:4000");
-    }
-    if (import.meta.env.VITE_BACKEND_URL) {
-      urls.push(import.meta.env.VITE_BACKEND_URL);
-    }
-    urls.push("https://mohanamantra-backend.onrender.com");
-
-    const uniqueUrls = Array.from(new Set(urls));
-    let lastErr: any = null;
-
-    for (const baseUrl of uniqueUrls) {
-      try {
-        const res = await fetch(`${baseUrl}${endpoint}`, options);
-        const data = await res.json();
-        return data;
-      } catch (err) {
-        lastErr = err;
-      }
-    }
-    throw lastErr || new Error("Failed to connect to backend server.");
-  };
-
-  // Perform Admin Login
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const beginOperation = useCallback(() => {
+    // The ref closes the gap before React renders disabled controls.
+    if (operationRef.current || !mountedRef.current) return null;
+    const controller = new AbortController();
+    const operation: Operation = {
+      id: ++nextOperationRef.current,
+      controller,
+      timeout: window.setTimeout(() => controller.abort(), 90000),
+    };
+    operationRef.current = operation;
     setLoading(true);
     setError(null);
+    setSuccessSession(null);
+    return operation;
+  }, []);
 
-    try {
-      const data = await fetchBackend("/api/gatekeeper/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ adminKey: inputKey, adminSecret: inputSecret }),
-      });
+  const isCurrent = useCallback((operation: Operation) =>
+    mountedRef.current && operationRef.current?.id === operation.id, []);
 
-      if (data && data.success) {
-        setAdminKey(inputKey);
-        setAdminSecret(inputSecret);
-        sessionStorage.setItem("mm26_admin_key", inputKey);
-        sessionStorage.setItem("mm26_admin_secret", inputSecret);
-        setIsAuthenticated(true);
-      } else {
-        setError(data?.error || "Invalid Key-Value credentials.");
-      }
-    } catch (err: any) {
-      setError("Failed to connect to backend for authentication.");
-    } finally {
-      setLoading(false);
+  const finishOperation = useCallback((operation: Operation) => {
+    window.clearTimeout(operation.timeout);
+    if (operationRef.current?.id !== operation.id) return;
+    operationRef.current = null;
+    if (mountedRef.current) setLoading(false);
+  }, []);
+
+  const cancelOperations = useCallback(() => {
+    const operation = operationRef.current;
+    operationRef.current = null;
+    if (operation) {
+      window.clearTimeout(operation.timeout);
+      operation.controller.abort();
     }
-  };
+    if (mountedRef.current) setLoading(false);
+  }, []);
 
-  // Logout
-  const handleLogout = () => {
+  const stopScanner = useCallback(async () => {
+    cameraWantedRef.current = false;
+    ++cameraEpochRef.current;
+    if (cameraTimerRef.current !== null) {
+      window.clearTimeout(cameraTimerRef.current);
+      cameraTimerRef.current = null;
+    }
+    const camera = cameraRef.current;
+    cameraRef.current = null;
+    if (mountedRef.current) setIsScanning(false);
+    if (camera) {
+      cameraCleanupRef.current = Promise.all([
+        cameraCleanupRef.current, disposeCamera(camera),
+      ]).then(() => undefined);
+    }
+    await cameraCleanupRef.current;
+  }, []);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      cancelOperations();
+      void stopScanner();
+    };
+  }, [cancelOperations, stopScanner]);
+
+  const clearLogin = useCallback(() => {
+    cancelOperations();
+    void stopScanner();
     sessionStorage.removeItem("mm26_admin_key");
     sessionStorage.removeItem("mm26_admin_secret");
+    sessionStorage.removeItem("mm26_admin_mode");
+    setAdminKey("");
+    setAdminSecret("");
+    setInputSecret("");
+    setPaymentMode(null);
     setIsAuthenticated(false);
+    setTicketInput("");
     setStudent(null);
-    stopScanner();
-  };
+    setSuccessSession(null);
+    setDragActive(false);
+  }, [cancelOperations, stopScanner]);
 
-  // Verify Token or Ticket ID
-  const verifyTokenOrId = async (tokenOrId: string, isToken: boolean = false) => {
-    if (!tokenOrId.trim()) return;
-    setLoading(true);
-    setError(null);
-    setCheckinSuccess(false);
+  const expireLogin = useCallback(() => {
+    clearLogin();
+    setError("Admin session expired. Sign in again to verify this pass.");
+  }, [clearLogin]);
 
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const operation = beginOperation();
+    if (!operation) return;
+    const key = inputKey.trim();
+    const secret = inputSecret;
     try {
-      const payload: any = { adminKey, adminSecret };
-      if (isToken) payload.token = tokenOrId;
-      else payload.ticketId = tokenOrId;
-
-      const data = await fetchBackend("/api/gatekeeper/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      const { data } = await fetchBackend("/api/gatekeeper/login", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adminKey: key, adminSecret: secret }),
+        signal: operation.controller.signal,
       });
-
-      if (data && data.success) {
-        setStudent(data.student);
+      if (!isCurrent(operation)) return;
+      if (data.success && (data.paymentMode === "test" || data.paymentMode === "live")) {
+        sessionStorage.setItem("mm26_admin_key", key);
+        sessionStorage.setItem("mm26_admin_secret", secret);
+        sessionStorage.setItem("mm26_admin_mode", data.paymentMode);
+        setAdminKey(key);
+        setAdminSecret(secret);
+        setPaymentMode(data.paymentMode);
+        setInputSecret("");
+        setIsAuthenticated(true);
       } else {
-        setError(data?.error || "Invalid ticket or QR code.");
-        setStudent(null);
+        setError(data.error || "Sign-in could not be confirmed. Check the admin ID and password.");
       }
-    } catch (err: any) {
-      setError("Network error while verifying ticket.");
-    } finally {
-      setLoading(false);
-    }
+    } catch {
+      if (isCurrent(operation)) setError(operation.controller.signal.aborted
+        ? "Authentication timed out. Try again." : "Failed to connect to the backend for authentication.");
+    } finally { finishOperation(operation); }
   };
 
-  // Perform Session Check-in
+  const verifyPass = useCallback(async (value: string, operation: Operation) => {
+    const pass = parsePass(value);
+    if (!pass) {
+      if (isCurrent(operation)) setError("Enter a valid ticket ID or scan an entry-pass QR code.");
+      return;
+    }
+    try {
+      const { status, data } = await fetchBackend("/api/gatekeeper/verify", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adminKey, adminSecret, ...pass }),
+        signal: operation.controller.signal,
+      });
+      if (!isCurrent(operation)) return;
+      if (status === 401) { expireLogin(); return; }
+      const verified = data.student;
+      const correctMode = verified && (verified.paymentMode === "test" || verified.paymentMode === "live")
+        && (verified.paymentMode === "test" ? /^MM26-TEST-[A-F0-9]{6}$/ : /^MM26-[A-F0-9]{6}$/).test(verified.ticketId);
+      if (data.success && verified && correctMode && verified.paymentStatus === "Paid"
+        && (!("ticketId" in pass) || pass.ticketId === verified.ticketId)) {
+        setStudent(verified);
+        setPaymentMode(verified.paymentMode);
+        sessionStorage.setItem("mm26_admin_mode", verified.paymentMode);
+      } else {
+        setError(data.error || "Ticket verification could not be confirmed.");
+      }
+    } catch {
+      if (isCurrent(operation)) setError(operation.controller.signal.aborted
+        ? "Ticket verification timed out. Try again." : "Network error while verifying ticket. Try again.");
+    }
+  }, [adminKey, adminSecret, expireLogin, isCurrent]);
+
+  const verifyTokenOrId = useCallback(async (value: string) => {
+    if (!isAuthenticated || cameraWantedRef.current) return;
+    const operation = beginOperation();
+    if (!operation) return;
+    setStudent(null);
+    try { await verifyPass(value, operation); }
+    finally { finishOperation(operation); }
+  }, [isAuthenticated, beginOperation, verifyPass, finishOperation]);
+
+  // A changed route or logout invalidates a previous QR-link lookup.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    setStudent(null);
+    setSuccessSession(null);
+    if (linkedPass) void verifyTokenOrId(linkedPass);
+    return cancelOperations;
+  }, [isAuthenticated, linkedPass, verifyTokenOrId, cancelOperations]);
+
   const handleCheckin = async () => {
-    if (!student) return;
-    setLoading(true);
-    setError(null);
-
+    if (!student || student.checkInSessions?.[activeSession]?.checkedIn || cameraWantedRef.current) return;
+    const operation = beginOperation();
+    if (!operation) return;
+    const ticketId = student.ticketId;
+    const sessionKey = activeSession;
     try {
-      const data = await fetchBackend("/api/gatekeeper/checkin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ticketId: student.ticketId,
-          sessionKey: activeSession,
-          adminKey,
-          adminSecret,
-        }),
+      const { status, data } = await fetchBackend("/api/gatekeeper/checkin", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ticketId, sessionKey, adminKey, adminSecret }),
+        signal: operation.controller.signal,
       });
-
-      if (data && data.success) {
-        setCheckinSuccess(true);
-        const updatedSessions = data.checkInSessions || {
-          ...student.checkInSessions,
-          [activeSession]: { checkedIn: true, timestamp: data.checkedInAt },
-        };
-        setStudent((prev) =>
-          prev
-            ? {
-                ...prev,
-                checkInStatus: "Checked In",
-                checkedInAt: data.checkedInAt || new Date().toISOString(),
-                checkInSessions: updatedSessions,
-              }
-            : null
-        );
-      } else if (data?.error?.includes("already checked in")) {
-        const updatedSessions = data.checkInSessions || {
-          ...student.checkInSessions,
-          [activeSession]: { checkedIn: true, timestamp: data.checkedInAt || new Date().toISOString() },
-        };
-        setStudent((prev) =>
-          prev
-            ? {
-                ...prev,
-                checkInSessions: updatedSessions,
-              }
-            : null
-        );
-        setError(`⚠️ Student is already checked in for ${SESSION_LABELS[activeSession]}!`);
+      if (!isCurrent(operation)) return;
+      if (status === 401) { expireLogin(); return; }
+      if (data.success && data.ticketId === ticketId && data.sessionKey === sessionKey
+        && data.checkInSessions?.[sessionKey]?.checkedIn) {
+        setStudent(previous => previous?.ticketId === ticketId ? {
+          ...previous, checkInStatus: "Checked In", checkedInAt: data.checkedInAt,
+          checkInSessions: data.checkInSessions,
+        } : previous);
+        setSuccessSession(sessionKey);
+      } else if (data.code === "ALREADY_CHECKED_IN" && data.sessionKey === sessionKey
+        && data.checkInSessions?.[sessionKey]?.checkedIn) {
+        setStudent(previous => previous?.ticketId === ticketId
+          ? { ...previous, checkInSessions: data.checkInSessions } : previous);
+        setError("Check-in already recorded for " + SESSION_LABELS[sessionKey] + ". No second entry was recorded.");
       } else {
-        setError(data?.error || "Check-in failed.");
+        if (data.success) setStudent(null);
+        setError(data.error || "Check-in could not be confirmed. Verify the pass again before retrying.");
       }
-    } catch (err: any) {
-      setError("Failed to perform check-in.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const toggleScanner = async () => {
-    if (isScanning) await stopScanner();
-    else startScanner();
+    } catch {
+      if (isCurrent(operation)) {
+        setStudent(null);
+        setError("Check-in could not be confirmed. Verify the pass again before retrying.");
+      }
+    } finally { finishOperation(operation); }
   };
 
   const startScanner = () => {
+    if (operationRef.current || cameraWantedRef.current || !isAuthenticated) return;
+    cameraWantedRef.current = true;
+    const epoch = ++cameraEpochRef.current;
+    setStudent(null);
+    setSuccessSession(null);
+    setError(null);
     setIsScanning(true);
-    setTimeout(() => {
-      const html5QrCode = new Html5Qrcode("reader");
-      html5QrCodeRef.current = html5QrCode;
-      html5QrCode
-        .start(
+    // The tracked timer lets React reveal the reader before camera sizing.
+    cameraTimerRef.current = window.setTimeout(async () => {
+      cameraTimerRef.current = null;
+      await cameraCleanupRef.current;
+      if (!mountedRef.current || !cameraWantedRef.current || cameraEpochRef.current !== epoch) return;
+      try {
+        const camera: Camera = { scanner: new Html5Qrcode("reader") };
+        cameraRef.current = camera;
+        camera.start = camera.scanner.start(
           { facingMode: "environment" },
-          { fps: 10, qrbox: { width: 250, height: 250 } },
-          (decodedText) => {
-            if (decodedText.includes("/gatekeeper/verify/")) {
-              const token = decodedText.split("/gatekeeper/verify/")[1];
-              verifyTokenOrId(token, true);
-            } else if (decodedText.includes("token=")) {
-              const urlParams = new URLSearchParams(decodedText.split("?")[1]);
-              const token = urlParams.get("token");
-              if (token) verifyTokenOrId(token, true);
-            } else {
-              verifyTokenOrId(decodedText, false);
-            }
-            stopScanner();
+          { fps: 10, qrbox: (width, height) => {
+            const size = Math.floor(Math.min(250, Math.min(width, height) * 0.75));
+            return { width: size, height: size };
+          } },
+          decodedText => {
+            if (!cameraWantedRef.current || cameraEpochRef.current !== epoch || operationRef.current) return;
+            void stopScanner();
+            void verifyTokenOrId(decodedText);
           },
-          () => {}
-        )
-        .catch((err) => {
-          console.error(err);
-          setError("Could not access camera.");
-          setIsScanning(false);
-        });
-    }, 200);
-  };
-
-  const stopScanner = async () => {
-  if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
-  try {
-  await html5QrCodeRef.current.stop();
-  } catch (e) {
-  // Html5Qrcode throws "Cannot stop, scanner is not running" when the underlying
-  // camera was already torn down (tab switch, permission revoke, browser
-  // closing). That's expected — surface it as a warning so silent failures
-  // don't pile up in the console, but don't break the rest of the cleanup.
-  console.warn("html5Qrcode.stop() failed:", e);
-  }
-  }
-  setIsScanning(false);
-  };
-
-  const [dragActive, setDragActive] = useState<boolean>(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  const processQRImageFile = async (file: File) => {
-    setLoading(true);
-    try {
-      const html5QrCode = new Html5Qrcode("reader-hidden");
-      const decodedText = await html5QrCode.scanFile(file, true);
-      if (decodedText.includes("/gatekeeper/verify/")) {
-        const token = decodedText.split("/gatekeeper/verify/")[1];
-        verifyTokenOrId(token, true);
-      } else {
-        verifyTokenOrId(decodedText, false);
+          () => undefined,
+        );
+        await camera.start;
+      } catch {
+        if (mountedRef.current && cameraEpochRef.current === epoch) {
+          setError("Could not access camera. Allow camera permission or upload the pass QR image.");
+          void stopScanner();
+        }
       }
-    } catch (err: any) {
-      setError("Could not read QR code from image.");
-    } finally {
-      setLoading(false);
-    }
+    }, 0);
   };
+
+  const processQRImageFile = useCallback(async (file: File) => {
+    if (!isAuthenticated || cameraWantedRef.current) return;
+    const operation = beginOperation();
+    if (!operation) return;
+    setStudent(null);
+    let scanner: Html5Qrcode | null = null;
+    try {
+      if (!file.type.startsWith("image/") || file.size > 10 * 1024 * 1024) {
+        setError("Choose a QR image smaller than 10 MB.");
+        return;
+      }
+      scanner = new Html5Qrcode("reader-hidden");
+      const decodedText = await scanner.scanFile(file, false);
+      if (isCurrent(operation)) await verifyPass(decodedText, operation);
+    } catch {
+      if (isCurrent(operation)) setError("Could not read QR code from image. Upload a clear pass or QR image.");
+    } finally {
+      try { scanner?.clear(); } catch { /* The reader may have unmounted during logout. */ }
+      finishOperation(operation);
+    }
+  }, [isAuthenticated, beginOperation, isCurrent, verifyPass, finishOperation]);
 
   useEffect(() => {
-    const handlePaste = (e: ClipboardEvent) => {
-      if (!isAuthenticated) return;
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].type.indexOf("image") !== -1) {
-          const file = items[i].getAsFile();
-          if (file) processQRImageFile(file);
+    const handlePaste = (event: ClipboardEvent) => {
+      if (!isAuthenticated || operationRef.current || cameraWantedRef.current) return;
+      for (const item of event.clipboardData?.items || []) {
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          if (file) { event.preventDefault(); void processQRImageFile(file); }
           break;
         }
       }
     };
     window.addEventListener("paste", handlePaste);
     return () => window.removeEventListener("paste", handlePaste);
-  }, [isAuthenticated]);
+  }, [isAuthenticated, processQRImageFile]);
 
-  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setDragActive(true); };
-  const handleDragLeave = (e: React.DragEvent) => { e.preventDefault(); setDragActive(false); };
-  const handleDrop = (e: React.DragEvent) => { e.preventDefault(); setDragActive(false); if (e.dataTransfer.files[0]) processQRImageFile(e.dataTransfer.files[0]); };
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => { if (e.target.files && e.target.files[0]) processQRImageFile(e.target.files[0]); };
-
+  const controlsDisabled = loading || isScanning;
   const currentSessionInfo = student?.checkInSessions?.[activeSession];
   const isCheckedInForActiveSession = !!currentSessionInfo?.checkedIn;
+  const isTest = paymentMode === "test" || student?.paymentMode === "test";
+
+  const changeTicketInput = (value: string) => {
+    if (operationRef.current || cameraWantedRef.current) return;
+    setTicketInput(value);
+    setStudent(null);
+    setSuccessSession(null);
+    setError(null);
+  };
 
   return (
     <div className={styles.container}>
@@ -311,15 +441,16 @@ const Gatekeeper: React.FC = () => {
         <title>Gatekeeper | Private Admin</title>
         <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
         <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet" />
+        <meta name="referrer" content="no-referrer" />
       </Helmet>
       <div className={styles.header}>
-        <div className={styles.headerContent}>
+        <div className={styles.titleGroup}>
           <div className={styles.badge}>MOHANA MANTRA 2K26</div>
           <h1>Gatekeeper Verification Portal</h1>
-          <p>Scan or verify outsider pass QR codes across 4 sessions over 2 days.</p>
+          <p>Select a session, verify a pass, then confirm its check-in.</p>
         </div>
         {isAuthenticated && (
-          <button className={styles.logoutBtn} onClick={handleLogout}>
+          <button className={styles.logoutBtn} onClick={() => { clearLogin(); setError(null); }}>
             🔒 Exit Admin
           </button>
         )}
@@ -327,22 +458,22 @@ const Gatekeeper: React.FC = () => {
 
       {!isAuthenticated && (
         <div className={styles.loginCard}>
-          <div className={styles.cardHeader}>
-            <div className={styles.lockIcon}>🔐</div>
+          <div className={styles.loginHeader}>
+            <div className={styles.lockIcon} aria-hidden="true">🔐</div>
             <h2>Admin Authentication</h2>
-            <p>Enter your Key-Value credentials to access the gate scanner.</p>
+            <p>Enter your admin ID and password to access the gate scanner.</p>
           </div>
-
-          {error && <div className={styles.errorBanner}>{error}</div>}
-
+          {error && <div className={styles.errorBanner} role="alert">{error}</div>}
           <form onSubmit={handleLogin}>
             <div className={styles.formGroup}>
-              <label>ADMIN KEY</label>
-              <input type="text" value={inputKey} onChange={(e) => setInputKey(e.target.value)} required />
+              <label htmlFor="admin-key">ADMIN ID</label>
+              <input id="admin-key" name="username" type="text" autoComplete="username"
+                value={inputKey} onChange={event => setInputKey(event.target.value)} required disabled={loading} />
             </div>
             <div className={styles.formGroup}>
-              <label>ADMIN SECRET</label>
-              <input type="password" value={inputSecret} onChange={(e) => setInputSecret(e.target.value)} required />
+              <label htmlFor="admin-secret">PASSWORD</label>
+              <input id="admin-secret" name="password" type="password" autoComplete="current-password"
+                value={inputSecret} onChange={event => setInputSecret(event.target.value)} required disabled={loading} />
             </div>
             <button type="submit" className={styles.submitBtn} disabled={loading}>
               {loading ? "Authenticating..." : "Unlock Gatekeeper"}
@@ -352,107 +483,125 @@ const Gatekeeper: React.FC = () => {
       )}
 
       {isAuthenticated && (
-        <div className={styles.dashboard}>
+        <div className={styles.dashboard} aria-busy={loading}>
+          {isTest && (
+            <div className={styles.modeBanner} role="status">
+              <strong>RAZORPAY TEST MODE — NOT VALID FOR EVENT ENTRY</strong>
+              <span>These checks update test registrations only. No real admission is granted.</span>
+            </div>
+          )}
           <div className={styles.sessionBar}>
-            <div className={styles.sessionLabel}>ACTIVE GATE CHECK-IN SESSION:</div>
+            <div className={styles.sessionLabel}>1. SELECT CHECK-IN SESSION</div>
             <div className={styles.sessionPills}>
-              {["day1_am", "day1_pm", "day2_am", "day2_pm"].map((s) => (
-                <button
-                  key={s}
-                  className={`${styles.sessionPill} ${activeSession === s ? styles.activePill : ""}`}
-                  onClick={() => { setActiveSession(s as any); setCheckinSuccess(false); }}
-                >
-                  {s.includes("am") ? "🌅" : "🌙"} {SESSION_LABELS[s]}
+              {SESSION_KEYS.map(session => (
+                <button key={session} disabled={controlsDisabled} aria-pressed={activeSession === session}
+                  className={styles.sessionPill + (activeSession === session ? " " + styles.activePill : "")}
+                  onClick={() => {
+                    if (operationRef.current || cameraWantedRef.current) return;
+                    setActiveSession(session); setSuccessSession(null); setError(null);
+                  }}>
+                  {session.includes("am") ? "🌅" : "🌙"} {SESSION_LABELS[session]}
                 </button>
               ))}
             </div>
           </div>
 
           <div className={styles.controlsCard}>
+            <label htmlFor="ticket-id" className={styles.fieldLabel}>2. VERIFY THE PASS</label>
             <div className={styles.inputRow}>
-              <input
-                type="text"
-                placeholder="Enter Ticket ID (e.g. MM26-79A7F0)"
-                value={ticketInput}
-                onChange={(e) => setTicketInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && verifyTokenOrId(ticketInput, false)}
-              />
-              <button onClick={() => verifyTokenOrId(ticketInput, false)} disabled={loading}>
-                {loading ? "Searching..." : "Verify Ticket"}
+              <input id="ticket-id" type="text" autoComplete="off" spellCheck={false} maxLength={4096}
+                aria-label="Ticket ID or QR link" disabled={controlsDisabled}
+                placeholder={isTest ? "Ticket ID (MM26-TEST-XXXXXX) or QR link" : "Ticket ID (MM26-XXXXXX) or QR link"}
+                value={ticketInput} onChange={event => changeTicketInput(event.target.value)}
+                onKeyDown={event => {
+                  if (event.key === "Enter") { event.preventDefault(); void verifyTokenOrId(ticketInput); }
+                }} />
+              <button onClick={() => void verifyTokenOrId(ticketInput)} disabled={controlsDisabled || !ticketInput.trim()}>
+                {loading ? "Verifying..." : "Verify Ticket"}
               </button>
             </div>
-
             <div className={styles.scannerToggle}>
-              <button onClick={toggleScanner}>
+              <button onClick={() => isScanning ? void stopScanner() : startScanner()} disabled={loading}>
                 📷 {isScanning ? "Stop Camera Scanner" : "Open Camera Scanner"}
               </button>
             </div>
-
-            {isScanning && <div id="reader" className={styles.qrReaderBox}></div>}
-
-            <div
-              className={`${styles.dropzone} ${dragActive ? styles.dragActive : ""}`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <div className={styles.dropIcon}>📁 / 📋</div>
-              <p className={styles.dropText}>Drag & Drop QR Image or Paste</p>
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
-            </div>
-            <div id="reader-hidden" style={{ display: "none" }}></div>
+            <div id="reader" className={styles.qrReaderBox} hidden={!isScanning}></div>
+            <button type="button" disabled={controlsDisabled}
+              className={styles.dropzone + (dragActive ? " " + styles.dragActive : "")}
+              onDragOver={event => { event.preventDefault(); if (!controlsDisabled) setDragActive(true); }}
+              onDragLeave={event => { event.preventDefault(); setDragActive(false); }}
+              onDrop={event => {
+                event.preventDefault(); setDragActive(false);
+                if (!operationRef.current && !cameraWantedRef.current && event.dataTransfer.files[0])
+                  void processQRImageFile(event.dataTransfer.files[0]);
+              }}
+              onClick={() => fileInputRef.current?.click()}>
+              <span className={styles.dropIcon} aria-hidden="true">📁 / 📋</span>
+              <span className={styles.dropText}>Upload, drop or paste a pass QR image</span>
+            </button>
+            <input ref={fileInputRef} type="file" accept="image/*" aria-label="Upload pass QR image"
+              disabled={controlsDisabled} hidden onChange={event => {
+                const file = event.target.files?.[0];
+                event.target.value = "";
+                if (file) void processQRImageFile(file);
+              }} />
+            <div id="reader-hidden" hidden></div>
+            <p className={styles.helperText}>Scanning verifies the pass. Use the confirmation button below to save the selected session.</p>
           </div>
 
-          {checkinSuccess && (
-            <div style={{ background: "rgba(46, 204, 113, 0.2)", border: "1px solid #2ecc71", color: "#2ecc71", padding: "0.8rem 1rem", borderRadius: "8px", textAlign: "center", marginBottom: "1rem" }}>
-              🎉 Check-In Successful for <strong>{SESSION_LABELS[activeSession]}</strong>!
+          {successSession && (
+            <div className={styles.successBanner} role="status">
+              {isTest ? "Test check-in saved for " : "Check-in saved for "}
+              <strong>{SESSION_LABELS[successSession]}</strong>.
             </div>
           )}
-
-          {error && <div className={styles.errorBanner}>{error}</div>}
+          {error && <div className={styles.errorBanner} role="alert">{error}</div>}
 
           {student && (
             <div className={styles.resultCard}>
-              {isCheckedInForActiveSession ? (
-                <div className={`${styles.statusHeader} ${styles.checkedIn}`}>
-                  ⚠️ ALREADY CHECKED IN FOR {SESSION_LABELS[activeSession]}
-                </div>
-              ) : (
-                <div className={`${styles.statusHeader} ${styles.valid}`}>
-                  ✅ VALID TICKET — ENTRY ALLOWED FOR {SESSION_LABELS[activeSession]}
-                </div>
-              )}
-
+              <div className={styles.statusHeader + " " +
+                (isCheckedInForActiveSession ? styles.checkedIn : isTest ? styles.testTicket : styles.valid)}>
+                {isCheckedInForActiveSession
+                  ? (isTest ? "TEST CHECK-IN ALREADY RECORDED FOR " : "ALREADY CHECKED IN FOR ") + SESSION_LABELS[activeSession]
+                  : (isTest ? "TEST PASS VERIFIED FOR " : "PASS VERIFIED — CONFIRM ENTRY FOR ") + SESSION_LABELS[activeSession]}
+              </div>
               <div className={styles.studentDetails}>
                 <div className={styles.detailGrid}>
                   <div className={styles.detailItem}><div className={styles.label}>STUDENT NAME</div><div className={styles.value}>{student.name}</div></div>
                   <div className={styles.detailItem}><div className={styles.label}>TICKET ID</div><div className={styles.value}>{student.ticketId}</div></div>
                   <div className={styles.detailItem}><div className={styles.label}>COLLEGE</div><div className={styles.value}>{student.college}</div></div>
-                  <div className={styles.detailItem}><div className={styles.label}>PAYMENT STATUS</div><div className={styles.value} style={{ color: "#2ecc71" }}>💳 {student.paymentStatus}</div></div>
+                  <div className={styles.detailItem}><div className={styles.label}>PAYMENT STATUS</div><div className={styles.value}>💳 {student.paymentStatus}{isTest ? " (Test)" : ""}</div></div>
                 </div>
-
                 <div className={styles.sessionMatrix}>
-                  <div className={styles.matrixTitle}>4-SESSION CHECK-IN MATRIX</div>
+                  <div className={styles.matrixTitle}>4-SESSION CHECK-IN HISTORY · INDIA TIME</div>
                   <div className={styles.matrixGrid}>
-                    {Object.keys(SESSION_LABELS).map((s) => (
-                      <div key={s} className={`${styles.matrixCard} ${student.checkInSessions?.[s]?.checkedIn ? styles.matrixCheckedIn : ""}`}>
-                        <div className={styles.matrixSessionName}>{SESSION_LABELS[s]}</div>
-                        <div className={styles.matrixStatus}>{student.checkInSessions?.[s]?.checkedIn ? "🟢 Checked In" : "⚪ Pending"}</div>
-                      </div>
-                    ))}
+                    {SESSION_KEYS.map(session => {
+                      const info = student.checkInSessions?.[session];
+                      return (
+                        <div key={session} className={styles.matrixCard + (info?.checkedIn ? " " + styles.matrixCheckedIn : "")}>
+                          <div className={styles.matrixSessionName}>{SESSION_LABELS[session]}</div>
+                          <div className={styles.matrixStatus}>{info?.checkedIn ? "🟢 Checked In" : "⚪ Pending"}</div>
+                          {info?.checkedIn && (
+                            <>
+                              <div className={styles.matrixTimestamp}>{formatCheckInTime(info.timestamp)}</div>
+                              <div className={styles.matrixTimestamp}>Admin: {info.gatekeeper || "Not recorded"}</div>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
-
               <div className={styles.actionSection}>
                 {!isCheckedInForActiveSession ? (
-                  <button className={styles.checkinBtn} onClick={handleCheckin} disabled={loading}>
-                    {loading ? "Processing..." : `CONFIRM ENTRY FOR ${SESSION_LABELS[activeSession]}`}
+                  <button className={styles.checkinBtn} onClick={() => void handleCheckin()} disabled={controlsDisabled}>
+                    {loading ? "Saving..." : (isTest ? "RECORD TEST CHECK-IN FOR " : "CONFIRM ENTRY FOR ") + SESSION_LABELS[activeSession]}
                   </button>
                 ) : (
                   <div className={styles.timestampNotice}>
-                    Checked in at: {currentSessionInfo?.timestamp ? new Date(currentSessionInfo.timestamp).toLocaleTimeString() : "Earlier"}
+                    Recorded: {formatCheckInTime(currentSessionInfo?.timestamp)}
+                    {currentSessionInfo?.gatekeeper && <span> · Admin: {currentSessionInfo.gatekeeper}</span>}
                   </div>
                 )}
               </div>

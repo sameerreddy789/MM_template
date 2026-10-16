@@ -29,9 +29,8 @@ import useOverlayStore from "./utils/store";
 import Gatekeeper from "./pages/gatekeeper/Gatekeeper";
 
 const TRACKING_ID = "G-57YBBH7RXW";
-if (window.location.hostname.search("mohanamantra.com") !== -1) {
- ReactGA.initialize(TRACKING_ID);
-}
+const isAnalyticsHost = window.location.hostname === "mohanamantra.com"
+ || window.location.hostname.endsWith(".mohanamantra.com");
 
 export default function App() {
  useCanonicalUrl(
@@ -47,9 +46,20 @@ export default function App() {
  }
 
  useEffect(() => {
+ if (!isAnalyticsHost) return;
+ // Emailed gatekeeper routes contain signed passes. Keep those routes out
+ // of analytics, including the default pageview on first initialization.
+ const privateRoute = location.pathname.startsWith("/gatekeeper");
+ const analyticsWindow = window as unknown as Record<string, boolean>;
+ analyticsWindow["ga-disable-" + TRACKING_ID] = privateRoute;
+ if (privateRoute) return;
+ if (!ReactGA.isInitialized) {
+ ReactGA.initialize(TRACKING_ID, { gtagOptions: { send_page_view: false } });
+ }
  ReactGA.send({
  hitType: "pageview",
  page: location.pathname + location.search,
+ page_location: window.location.origin + location.pathname + location.search,
  });
  }, [location]);
 

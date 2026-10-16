@@ -1,442 +1,309 @@
 @use "/src/assets/global.scss" as *;
 
 .registerContainer {
+  position: relative;
+  z-index: 3;
   display: flex;
-  opacity: 1;
-  flex-direction: column;
+  flex: 1;
   align-items: center;
   justify-content: center;
-  width: 100vw;
-  height: 100%;
-  z-index: 3;
-  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 0;
+  padding: 1.5rem 1.5rem 5rem;
+  color: #fff6dd;
+  font-family: $regFont;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+
+  ::selection {
+    color: #160c08;
+    background: #e5c384;
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(100%, 44rem);
+  min-width: 0;
+}
+
+.heading {
+  margin: 0 0 0.75rem;
+  font-family: $primaryFont;
+  font-size: clamp(1.8rem, 3vw, 2.75rem);
+  font-weight: 400;
+  line-height: 1.25;
+  text-wrap: balance;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.description {
+  max-width: 65ch;
+  margin: 0;
+  color: #f4e9d2;
+  font-size: 1rem;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.registrationForm {
+  width: 100%;
+  min-width: 0;
+}
+
+.testNotice {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 1.25rem 0 0;
+  padding: 0.875rem 1rem;
+  border: 1px solid #e5c384;
+  border-radius: 0.25rem;
+  background: rgba(18, 12, 8, 0.94);
+  color: #fff6dd;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  text-wrap: pretty;
+
+  strong { color: #e5c384; }
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem 1.5rem;
+  min-width: 0;
+  margin: 1.75rem 0 0;
+  padding: 0;
+  border: 0;
+  text-align: start;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+
+  label {
+    color: #fff6dd;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
 
   input {
-    caret-color: #fff9e9;
-    font-family: $regFont;
-  }
-
-  input::placeholder {
-    color: rgba(226, 220, 203, 0.6);
-    font-family: $regFont;
-    font-weight: 300;
-    font-size: 1.1vw;
-  }
-
-  input:-webkit-autofill,
-  input:-webkit-autofill:hover,
-  input:-webkit-autofill:focus,
-  textarea:-webkit-autofill,
-  select:-webkit-autofill {
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
-    box-shadow: 0 0 0 1000px transparent inset !important;
-    -webkit-text-fill-color: #e2dccb !important;
-    color: #e2dccb !important;
-    font: 500 1.25vw $regFont !important;
-    background-color: transparent !important;
-    transition: background-color 5000s ease-in-out 0s !important;
-  }
-
-  .registrationForm {
-    position: absolute;
-    transform: translateY(50%);
-    bottom: 54svh;
-    left: 0;
-    color: white;
+    box-sizing: border-box;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    min-width: 0;
+    min-height: 3rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #c6a66f;
+    border-radius: 0.25rem;
+    background: rgba(18, 12, 8, 0.9);
+    color: #fff6dd;
+    caret-color: #e5c384;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.5;
+    transition: border-color 160ms ease;
 
-    .formColumns {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      --field-width: min(26vw, 42svh);
-
-      .fields {
-        display: grid;
-        grid-template-columns: repeat(2, var(--field-width));
-        justify-content: center;
-        align-items: start;
-        column-gap: 4vw;
-        row-gap: 2.2vw;
-
-        .clouds {
-          position: relative;
-          width: var(--field-width);
-          aspect-ratio: 5.8223;
-          overflow: visible;
-          align-items: center;
-          padding: 0;
-          margin: 0;
-          z-index: 0;
-          display: flex;
-
-          .rotateDropDown {
-            transform: translateY(-50%) rotate(90deg) !important;
-          }
-
-          .dropDown {
-            height: 3vw;
-            width: 3vw;
-            position: absolute;
-            right: 7%;
-            top: 50%;
-            transform: translateY(-50%);
-            transition: transform 0.6s ease;
-          }
-
-          input {
-            margin: 0 auto;
-            width: 90%;
-            height: 100%;
-            color: #fff9e9;
-            box-sizing: border-box;
-            background: transparent;
-            border: 0;
-            text-align: center;
-            font: 500 1.2vw $regFont;
-            letter-spacing: 0.5px;
-            &:focus {
-              outline: none;
-              box-shadow: none;
-            }
-          }
-
-          .fieldImg {
-            position: absolute;
-            overflow-x: visible;
-            overflow-y: hidden;
-            display: flex;
-            width: 100%;
-            object-fit: contain;
-            pointer-events: none;
-            z-index: -2;
-          }
-        }
-
-        .sameline {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-          top: 0.2vw;
-
-          label {
-            color: #fff9e9;
-            white-space: nowrap;
-            font-family: $primaryFont;
-            font-size: 2.1vw;
-            font-weight: bold;
-            letter-spacing: 1.2px;
-            text-shadow: 0 0 10px rgba(229, 195, 132, 0.7),
-              0 2px 5px rgba(0, 0, 0, 0.9);
-          }
-          img {
-            width: 4.5vw;
-          }
-        }
-
-        .email,
-        .rollNo,
-        .name,
-        .college {
-          width: 100%;
-          z-index: 5;
-          position: relative;
-          display: flex;
-          align-items: center;
-          flex-direction: column;
-        }
-
-        .mobile {
-          width: 100%;
-          z-index: 5;
-          position: relative;
-          display: flex;
-          align-items: center;
-          flex-direction: column;
-          grid-column: 1 / -1;
-          justify-self: center;
-        }
-
-        .error {
-          position: relative;
-          width: 100%;
-          margin-top: -0.3vw;
-          color: rgb(255, 100, 100);
-          font-family: $regFont;
-          font-size: 0.85vw;
-          font-weight: 500;
-          text-align: center;
-          text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
-          min-height: 1em;
-          letter-spacing: 0.3px;
-        }
-      }
+    &::placeholder {
+      color: #ddc8a4;
+      opacity: 1;
     }
+
+    &:hover {
+      border-color: #e5c384;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #e5c384;
+      outline-offset: 3px;
+    }
+
+    &:disabled {
+      color: #e6d5b5;
+      cursor: default;
+    }
+  }
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.fieldHint {
+  margin: 0;
+  color: #f4e9d2;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.fee {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 1.5rem 0 0;
+  color: #f4e9d2;
+  font-size: 1rem;
+
+  strong {
+    color: #e5c384;
+    font-size: 1.5rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.confirmButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: min(100%, 30rem);
+  min-height: 4.5rem;
+  margin: 1.25rem 0 0;
+  padding: 1rem 1.5rem;
+  border: 0;
+  background: center / 100% 100% no-repeat
+    url("https://d3hw0wgw9j5gvz.cloudfront.net/svgs/registration/button-banner.svg");
+  color: #fff6dd;
+  font-family: $primaryFont;
+  font-size: clamp(1rem, 1.65vw, 1.25rem);
+  line-height: 1.4;
+  cursor: pointer;
+  transition: filter 160ms ease;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.12);
+  }
+
+  &:focus-visible {
+    outline: 3px solid #e5c384;
+    outline-offset: 5px;
+  }
+
+  &:active:not(:disabled) {
+    filter: brightness(0.92);
+  }
+
+  &:disabled {
+    filter: saturate(0.4);
+    cursor: default;
+  }
+}
+
+.note {
+  max-width: 65ch;
+  margin: 0.875rem auto 0;
+  color: #f4e9d2;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.error {
+  max-width: 65ch;
+  margin: 1rem auto 0;
+  color: #ffdac7;
+  font-size: 1rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.retryButton {
+  min-height: 44px;
+  margin: 0.25rem 0 0;
+  padding: 0.5rem 1rem;
+  border: 0;
+  background: transparent;
+  color: #e5c384;
+  font-family: inherit;
+  font-size: 1rem;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  cursor: pointer;
+
+  &:hover {
+    color: #fff6dd;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #e5c384;
+    outline-offset: 2px;
+  }
+}
+
+.receipt {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem 1.5rem;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 2rem 0 0.5rem;
+  padding: 1.5rem;
+  border: 1px solid #c6a66f;
+  background: rgba(18, 12, 8, 0.9);
+  text-align: start;
+  font-variant-numeric: tabular-nums;
+
+  dt {
+    color: #e5c384;
+  }
+
+  dd {
+    min-width: 0;
+    margin: 0;
+    color: #fff6dd;
+    overflow-wrap: anywhere;
+  }
+}
+
+.screenReaderOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .registerContainer {
+    padding: 1.5rem 1.5rem 4rem;
+  }
+
+  .heading {
+    font-size: clamp(1.8rem, 7vw, 2.25rem);
+  }
+
+  .fields {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
   }
 
   .confirmButton {
-    position: absolute;
-    bottom: 2vw;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 3;
-    outline: none;
-    border: none;
-    text-align: center;
-    cursor: pointer;
-    margin: 1.5vw 0;
-    background: center / contain no-repeat
-      url("https://d3hw0wgw9j5gvz.cloudfront.net/svgs/registration/button-banner.svg");
-    padding: 1vw 2.5vw;
-    color: #fff6dd;
-    font-family: $primaryFont;
-    font-size: 1.6vw;
-    letter-spacing: 1.5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8vw;
-    width: 30vw;
-    min-width: 360px;
-    transition: filter 0.3s, transform 0.2s;
+    padding-inline: 1rem;
+  }
 
-    &:hover {
-      filter: brightness(1.2) drop-shadow(0 0 14px rgba(229, 195, 132, 0.9));
-      transform: translateX(-50%) scale(1.02);
-    }
-
-    &:active {
-      transform: translateX(-50%) scale(0.98);
-    }
-
-    span {
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    .confirmIcon {
-      &:last-child {
-        rotate: 180deg;
-      }
-    }
+  .receipt {
+    gap: 1rem;
+    padding: 1.25rem;
   }
 }
 
-@media (max-width: 1200px) and (max-aspect-ratio: 1.45) {
-  .registerContainer {
-    margin: 0 0 5vw 0;
-    width: 100%;
-    // Was `height: 100svh`. Stacked under the banner inside a viewport-height
-    // parent, a full-height container put its own bottom - and the pay button
-    // pinned to it - below the fold with nothing able to scroll there. It sizes to
-    // its content now and the page scrolls instead.
-    height: auto;
-    position: relative;
-
-    // Keyboard clearance, added only while a field is focused.
-    //
-    // A phone keyboard hides roughly the bottom 40% of the screen. Where it only
-    // shrinks the visual viewport and leaves the layout viewport alone - iOS
-    // Safari's behaviour, and the fallback anywhere the viewport meta's
-    // interactive-widget key is ignored - the page's scroll range is unchanged, and
-    // measured against the last field that range comes up about 70px short. The
-    // browser then scrolls as far as it can and the WhatsApp field still sits
-    // behind the keyboard.
-    //
-    // Tying the slack to :focus-within means the scroll range grows exactly when
-    // the keyboard is up and collapses again afterwards, so the page does not
-    // carry 40svh of dead space below the pay button the rest of the time.
-    &:focus-within {
-      padding-bottom: 42svh;
-    }
-
-    input::placeholder {
-      font-size: max(14px, 2.8vw);
-    }
-
-    input:-webkit-autofill,
-    input:-webkit-autofill:hover,
-    input:-webkit-autofill:focus,
-    textarea:-webkit-autofill,
-    select:-webkit-autofill {
-      font: 500 max(16px, 3.2vw) $regFont !important;
-    }
-
-    // In the page flow now, not an absolutely positioned scroll box. The old
-    // `position: absolute; max-height: 62svh; overflow-y: scroll` set up a nested
-    // scroller whose own window started below the banner and so ran past the
-    // bottom of the screen, and its edge mask plus hidden scrollbar gave no hint
-    // that it was scrollable at all. The mask is dropped with it - fading the top
-    // and bottom of a region that no longer has its own edges just dimmed fields.
-    .registrationForm {
-      position: static;
-      max-height: none;
-      overflow-y: visible;
-      transform: none;
-      padding: 4vw 0;
-      mask-image: none;
-      --webkit-mask-image: none;
-
-      .formColumns {
-        flex-direction: column;
-        gap: 2vw;
-        --field-width: 74vw;
-
-        .fields {
-          grid-template-columns: var(--field-width);
-          row-gap: 2vw;
-
-          .clouds {
-            .dropDown {
-              height: 6vw;
-              width: 6vw;
-            }
-            input {
-              font: 500 max(16px, 3.2vw) $regFont;
-            }
-          }
-          .error {
-            position: relative;
-            margin-top: -0.5vw;
-            font-family: $regFont;
-            font-size: max(13px, 2.6vw);
-            font-weight: 500;
-            color: #ff6b6b;
-            text-align: center;
-          }
-          .sameline {
-            label {
-              font-family: $primaryFont;
-              font-size: 4.6vw;
-              letter-spacing: 1px;
-            }
-            img {
-              width: 14vw;
-            }
-          }
-        }
-      }
-    }
-    // Follows the form down the page instead of being pinned to the bottom of a
-    // container taller than the screen, which is where it used to end up out of
-    // reach. `.registerContainer` centres its flex children, so dropping the
-    // `left: 50%` / `translateX(-50%)` pair keeps it centred; the hover and active
-    // states have to give up that same translate or they would shunt it sideways.
-    .confirmButton {
-      position: static;
-      transform: none;
-      margin: 6vw 0 2vw 0;
-      padding: 2vw 3vw;
-      font-family: $primaryFont;
-      font-size: max(16px, 3.6vw);
-      letter-spacing: 1px;
-      justify-content: center;
-      gap: 1.5vw;
-      width: 78vw;
-      min-width: unset;
-      min-height: 48px;
-      white-space: nowrap;
-
-      &:hover {
-        transform: scale(1.02);
-      }
-
-      &:active {
-        transform: scale(0.98);
-      }
-    }
-  }
-}
-
-@media (max-width: 1200px) and (max-aspect-ratio: 0.75) {
-  .registerContainer {
-    input::placeholder {
-      font-size: max(14px, 3.8vw);
-    }
-
-    input:-webkit-autofill,
-    input:-webkit-autofill:hover,
-    input:-webkit-autofill:focus,
-    textarea:-webkit-autofill,
-    select:-webkit-autofill {
-      font: 500 max(16px, 4.2vw) $regFont !important;
-    }
-    .registrationForm {
-      // `max-height: 75svh` would re-clip the form that the wider mobile block
-      // just freed.
-      //
-      // The deep bottom padding here (18vw, then raised to 32vw in 205e0d5 to buy
-      // the form more clearance) goes with it. That padding was propping up the
-      // nested scroll box this rule used to describe: the form was an absolutely
-      // positioned `overflow-y: scroll` island and the pay button floated over its
-      // lower edge, so the only way to keep the last field clear of the button was
-      // to pad the scroller from the inside. The page scrolls as a document now and
-      // the button sits in the flow with its own margin, so that clearance comes
-      // from the layout instead, and 32vw would just be ~125px of dead space in the
-      // middle of the form. Keyboard clearance is handled by the :focus-within rule
-      // on .registerContainer above.
-      //
-      // The 4vw top padding is kept from 205e0d5.
-      max-height: none;
-      padding: 4vw 0 2vw 0;
-
-      .formColumns {
-        gap: 6vw;
-        --field-width: 88vw;
-
-        .fields {
-          grid-template-columns: var(--field-width);
-          row-gap: 6vw;
-          .clouds {
-            .dropDown {
-              height: 6.5vw;
-              width: 6.5vw;
-            }
-            input {
-              font: 500 max(16px, 4vw) $regFont;
-            }
-          }
-          .error {
-            position: relative;
-            margin-top: -1vw;
-            font-family: $regFont;
-            font-size: max(13px, 3.2vw);
-            font-weight: 500;
-            color: #ff6b6b;
-            text-align: center;
-          }
-          .sameline {
-            label {
-              font-family: $primaryFont;
-              font-size: 5.6vw;
-              letter-spacing: 1px;
-            }
-            img {
-              width: 16vw;
-            }
-          }
-        }
-      }
-    }
-    .confirmButton {
-      width: 90vw;
-      gap: 1.5vw;
-      margin: 8vw 0 2vw 0;
-      padding: 2.8vw 3vw;
-      font-family: $primaryFont;
-      font-size: max(16px, 4.8vw);
-      letter-spacing: 1px;
-      min-width: unset;
-      min-height: 48px;
-      white-space: nowrap;
-    }
+@media (prefers-reduced-motion: reduce) {
+  .confirmButton,
+  .field input {
+    transition: none;
   }
 }

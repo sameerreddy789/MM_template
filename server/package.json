@@ -8,7 +8,9 @@
   },
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "setup:payment-test": "node setup-payment-test.js",
+    "dev:payment-test": "node --env-file=.env.payment-test --watch server.js"
   },
   "keywords": [],
   "author": "",

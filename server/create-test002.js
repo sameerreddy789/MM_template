@@ -2,6 +2,13 @@
 // MohanaMantra 2K26 — Registration & Mail Generation for "Test 002"
 // ==========================================
 
+// Keep manually fabricated paid fixtures out of cloud/live registration data.
+if (process.env.PAYMENT_MODE !== "test" || !/^rzp_test_/.test(process.env.RAZORPAY_KEY_ID || "") ||
+    !/^(127\.0\.0\.1|localhost|\[::1\]):\d+$/.test(process.env.FIRESTORE_EMULATOR_HOST || "")) {
+  console.error("This legacy fixture requires the test environment and a loopback Firestore emulator. Use localhost /register for a real Razorpay test payment.");
+  process.exit(1);
+}
+
 const { initializeApp, cert, getApps } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { generateIdCard } = require("./services/idcard");
@@ -30,7 +37,7 @@ console.log(`✅ Firebase Admin initialized (${serviceAccount.project_id})`);
 
 function generateTicketId() {
   const randomHex = crypto.randomBytes(3).toString("hex").toUpperCase();
-  return `MM26-T002-${randomHex}`;
+  return `MM26-TEST-${randomHex}`;
 }
 
 async function runTest002Registration() {
@@ -38,19 +45,22 @@ async function runTest002Registration() {
   console.log("🚀 MOHANA MANTRA 2K26 — TEST 002 REGISTRATION & MAIL GENERATION");
   console.log("==========================================\n");
 
+  if (!process.env.GMAIL_USER) throw new Error("Configure the private Gmail test recipient before running this fixture.");
   const ticketId = generateTicketId();
   const secureToken = crypto.randomBytes(16).toString("hex");
 
   const student = {
     ticketId,
     name: "Test 002",
-    email: process.env.GMAIL_USER || "mohanamantra2k26official@gmail.com",
+    email: process.env.GMAIL_USER,
     phone: "9988776655",
     college: "Mohan Babu University",
     rollNo: "22CS002",
     orderId: `order_test_${Date.now()}`,
     paymentId: `pay_test_${Date.now()}`,
     paymentStatus: "Paid",
+    paymentMode: "test",
+    amount: 1000, amountPaise: 100000, currency: "INR",
     checkInStatus: "Not Checked In",
     checkedInAt: null,
     secureToken,
@@ -60,8 +70,8 @@ async function runTest002Registration() {
   try {
     // STEP 1: Save to Firestore
     console.log(`📥 1. Saving registration record to Firestore (${ticketId})...`);
-    await db.collection("registrations").doc(ticketId).set(student);
-    console.log(`   ✅ Saved to Firestore document: registrations/${ticketId}`);
+    await db.collection("testRegistrations").doc(ticketId).set(student);
+    console.log(`   ✅ Saved to emulator document: testRegistrations/${ticketId}`);
 
     // STEP 2: Generate ID Card & QR Code
     console.log(`\n🎨 2. Generating ID Card PNG image...`);
@@ -92,10 +102,11 @@ async function runTest002Registration() {
       studentName: student.name,
       ticketId,
       college: student.college,
+      paymentMode: student.paymentMode,
       idCardBuffer,
       qrBuffer,
     });
-    console.log(`   ✅ Email delivered successfully to ${student.email}`);
+    console.log(`   ✅ Email accepted by Gmail successfully to ${student.email}`);
     console.log(`   Message ID: ${emailResult.messageId}`);
 
     console.log("\n==========================================");
