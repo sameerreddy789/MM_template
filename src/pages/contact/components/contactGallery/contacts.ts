@@ -39,7 +39,7 @@ const registrations: ContactSection = {
     section: "Registrations",
     people: [
         {
-            name: "P Jubella Khan",
+            name: "P JABEULLA KHAN",
             phone: "+91 86394 59052",
         },
     ],
