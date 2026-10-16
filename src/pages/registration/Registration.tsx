@@ -5,6 +5,7 @@ import BackButton from "../components/backButton/BackButton";
 import BreadCrumb from "../components/breadCrumb/BreadCrumb";
 import Countdown from "../components/countdown/Countdown";
 import Register from "./components/Register/Register";
+import { registrationFormEnabled } from "../../utils/registrationSettings";
 import styles from "./Registration.module.scss";
 
 const bgExtend = cdn("/images/registration/bg-extended.webp");
@@ -56,7 +57,9 @@ const Registration = ({ goToPage }: RegistrationProps) => {
     <div className={styles.instrback}>
       <SEO
         title="Registration | MohanaMantra 2K26 | MBU"
-        description="Register for MohanaMantra 2K26. Enter your student details, pay securely through Razorpay, and receive your entry pass after payment verification."
+        description={registrationFormEnabled
+          ? "Register for MohanaMantra 2K26. Enter your student details and receive your entry pass after payment verification."
+          : "MohanaMantra 2K26 registrations are temporarily closed while we update the registration system. Please check back for updates."}
         canonicalUrl="https://www.mohanamantra.com/register"
       />
       <BreadCrumb data={breadcrumbJsonLd} />

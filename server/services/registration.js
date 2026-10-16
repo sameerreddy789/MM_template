@@ -74,6 +74,8 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
       paymentEnvironment(config).mode === environment.mode &&
       isConfiguredSecret(config.RAZORPAY_KEY_SECRET);
     const status = {
+      registrationsOpen: config.REGISTRATIONS_OPEN === "true" ||
+        (config.REGISTRATIONS_OPEN === undefined && environment.mode === "test" && config.NODE_ENV !== "production"),
       payment,
       database: Boolean(db),
       webhook: isConfiguredSecret(config.RAZORPAY_WEBHOOK_SECRET),
@@ -91,6 +93,9 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
   }
 
   async function createOrder(input) {
+    if (!configurationStatus().registrationsOpen) {
+      throw new RegistrationError(503, "REGISTRATIONS_CLOSED", "Registrations are temporarily closed while we update the registration system.");
+    }
     const student = cleanStudentDetails(input);
     if (!configurationStatus().ready) {
       throw new RegistrationError(503, "PAYMENTS_UNAVAILABLE", "Payments are temporarily unavailable. Please try again shortly.");

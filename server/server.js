@@ -279,6 +279,7 @@ app.get("/api/registration-status", (_req, res) => {
   const status = registrationService.configurationStatus();
   res.json({
     ready: status.ready,
+    registrationsOpen: status.registrationsOpen,
     amount: REGISTRATION_AMOUNT,
     currency: REGISTRATION_CURRENCY,
     paymentMode: environment.mode,

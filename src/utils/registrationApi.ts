@@ -123,7 +123,7 @@ async function request(endpoint: string, body?: unknown, signal?: AbortSignal) {
     const data = object(await response.json().catch(() => null));
     if (!response.ok) {
       const knownError = typeof data.code === "string" && [
-        "INVALID_DETAILS", "INVALID_EMAIL", "INVALID_PHONE", "PAYMENTS_UNAVAILABLE",
+        "INVALID_DETAILS", "INVALID_EMAIL", "INVALID_PHONE", "PAYMENTS_UNAVAILABLE", "REGISTRATIONS_CLOSED",
         "ORDER_UNAVAILABLE", "REGISTRATION_UNAVAILABLE", "VERIFICATION_UNAVAILABLE",
         "PAYMENT_MISMATCH", "PAYMENT_INCOMPLETE", "INVALID_PROOF", "INVALID_SIGNATURE",
         "EMAIL_STATUS_UNAVAILABLE", "UNKNOWN_ORDER", "PAYMENT_CONFLICT",

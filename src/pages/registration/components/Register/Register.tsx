@@ -15,12 +15,30 @@ import {
   type RegistrationDetails,
 } from "../../../../utils/registrationApi";
 import styles from "./Register.module.scss";
+import { registrationFormEnabled } from "../../../../utils/registrationSettings";
 
 type Availability = "checking" | "ready" | "unavailable";
 type Phase = "idle" | "creating" | "checkout" | "verifying";
 const initialDetails: RegistrationDetails = { name: "", email: "", phone: "", college: "", roll_no: "" };
 
 function Register() {
+  if (!registrationFormEnabled) {
+    return (
+      <section className={styles.registerContainer} aria-labelledby="registration-heading">
+        <div className={styles.content}>
+          <h1 id="registration-heading" className={styles.heading}>Registrations temporarily closed</h1>
+          <p className={styles.description}>
+            We’re updating the registration system. Please check back for updates.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  return <RegistrationForm />;
+}
+
+function RegistrationForm() {
   const [details, setDetails] = useState(initialDetails);
   const [availability, setAvailability] = useState<Availability>("checking");
   const [phase, setPhase] = useState<Phase>("idle");

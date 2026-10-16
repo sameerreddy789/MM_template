@@ -190,6 +190,47 @@ async function run() {
     }
     assert.equal(state.orderRequests.length, 0);
   });
+  await check('Registration closure blocks new orders before any provider request or write', async () => {
+    for (const setting of [{ REGISTRATIONS_OPEN: 'false' }, { NODE_ENV: 'production' }]) {
+      Object.assign(fakeEnv, setting);
+      const status = await (await fetch(`${baseUrl}/api/registration-status`)).json();
+      assert.equal(status.registrationsOpen, false);
+      assert.equal(status.ready, false);
+      const response = await post('/api/register', validForm);
+      assert.equal(response.status, 503);
+      assert.equal(response.body.code, 'REGISTRATIONS_CLOSED');
+      assert.equal(state.orderRequests.length, 0);
+      assert.equal(registrations().size, 0);
+      delete fakeEnv.REGISTRATIONS_OPEN;
+      delete fakeEnv.NODE_ENV;
+    }
+    fakeEnv.NODE_ENV = 'production';
+    fakeEnv.REGISTRATIONS_OPEN = 'true';
+    assert.equal((await post('/api/register', validForm)).status, 200);
+  });
+  await check('Closing registrations preserves confirmation and webhook recovery for existing payments', async () => {
+    fakeEnv.REGISTRATIONS_OPEN = 'false';
+    const callback = await verify();
+    assert.equal(callback.status, 200);
+    assert.equal(callback.body.registration.paymentStatus, 'Paid');
+    assert.equal((await webhook()).status, 200);
+    assert.equal(registrations().size, 1);
+    assert.equal(state.emails.length, 1);
+    assert.equal(state.orderRequests.length, 0);
+  });
+  await check('Live registration requires an explicit opening setting', async () => {
+    const { createRegistrationService } = nativeRequire('./services/registration');
+    const config = { ...baseEnv, PAYMENT_MODE: 'live', RAZORPAY_KEY_ID: 'rzp_live_isolated' };
+    const live = createRegistrationService({ db: fakeDb, razorpay: new FakeRazorpay(), config,
+      serverTimestamp: () => 'isolated-server-timestamp', emailConfigured: () => true,
+      generateTicketId: () => 'MM26-C0FFEE', sendTicketEmail: async () => ({ messageId: 'isolated-message' }) });
+    assert.equal(live.configurationStatus().ready, false);
+    await assert.rejects(live.createOrder(validForm), error => error.code === 'REGISTRATIONS_CLOSED');
+    assert.equal(state.orderRequests.length, 0);
+    config.REGISTRATIONS_OPEN = 'true';
+    assert.equal(live.configurationStatus().ready, true);
+    assert.equal((await live.createOrder(validForm)).paymentMode, 'live');
+  });
   await check('A test/live key-mode mismatch disables orders and confirmation', async () => {
     fakeEnv.PAYMENT_MODE = 'live';
     const status = await (await fetch(`${baseUrl}/api/registration-status`)).json();
@@ -206,7 +247,7 @@ async function run() {
     assert.equal(state.tables.registrations.size, 0);
     const { createRegistrationService } = nativeRequire('./services/registration');
     const live = createRegistrationService({ db: fakeDb, razorpay: new FakeRazorpay(),
-      config: { ...baseEnv, PAYMENT_MODE: 'live', RAZORPAY_KEY_ID: 'rzp_live_isolated' },
+      config: { ...baseEnv, PAYMENT_MODE: 'live', RAZORPAY_KEY_ID: 'rzp_live_isolated', REGISTRATIONS_OPEN: 'true' },
       serverTimestamp: () => 'isolated-server-timestamp', emailConfigured: () => true,
       generateTicketId: () => 'MM26-C0FFEE', sendTicketEmail: async () => ({ messageId: 'isolated-message' }),
     });

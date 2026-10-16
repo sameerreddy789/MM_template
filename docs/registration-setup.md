@@ -1,6 +1,14 @@
 # Website registration, Razorpay, and Firestore
 
-Students register on `/register` using their name, email, mobile number, roll number, and college. The existing Express API creates a fixed **₹1,000 INR** Razorpay order and saves the student details in Firestore before offering checkout. A Razorpay-hosted Payment Page link is not required for this flow.
+Public `/register` currently shows **Registrations temporarily closed** while the live setup is being confirmed. It has no student form, fee or checkout control and makes no payment availability request. Local development retains the five-field form and separate Test Mode backend for further testing.
+
+When registration is opened, students enter their name, email, mobile number, roll number, and college. The Express API creates a fixed **₹1,000 INR** Razorpay order and saves the details in Firestore before offering checkout. A Razorpay-hosted Payment Page link is not required for this flow.
+
+## Opening and closing registration
+
+Production builds stay closed unless `VITE_REGISTRATIONS_OPEN=true` is deliberately set before rebuilding. The backend separately requires `REGISTRATIONS_OPEN=true` for new live orders; deployed test mode also stays closed by default when `NODE_ENV=production`. Local test mode permits new orders when `REGISTRATIONS_OPEN` is absent. An explicit `REGISTRATIONS_OPEN=false` closes new orders in every environment.
+
+Set both switches only after confirming the live merchant key pair, account activation/capture settings, genuine public webhook delivery and the production email sender. A frontend switch alone cannot open a closed backend. Closing registration blocks new orders before contacting Razorpay or writing student records, while signed confirmation requests and webhooks for existing paid orders continue to work.
 
 ## What each service does
 
@@ -24,6 +32,7 @@ Copy `server/.env.example` to `server/.env` only if a private environment file d
 | --- | --- |
 | `RAZORPAY_KEY_ID` | Key ID for the merchant account and selected test/live mode |
 | `PAYMENT_MODE` | Optional explicit `test`/`live` guard; the matching key prefix is used when omitted |
+| `REGISTRATIONS_OPEN` | Explicit opening switch for new public orders; set `false` to close while preserving existing-payment recovery |
 | `RAZORPAY_KEY_SECRET` | Matching private secret used for API authentication and checkout-proof verification |
 | `RAZORPAY_WEBHOOK_SECRET` | Independent signing secret configured for the payment webhook |
 | `JWT_SECRET` | Random secret of at least 32 characters used to sign QR passes |
@@ -79,6 +88,8 @@ https://mohanamantra-backend.onrender.com/api/payment-webhook
 
 Confirm automatic capture settings in Razorpay. An authorized payment stays pending until the gateway confirms capture. The API checks the server's stored order ID, the exact amount/currency, the captured payment, the paid order, and refund status before issuing a ticket. Order/ticket creation is transactional and repeated callbacks/webhooks reuse the same ticket.
 
+Standard Checkout payments appear under **Payments** and **Orders** in the matching merchant account and Test/Live dashboard mode. A custom website registration is stored in Firestore; Razorpay receives the student details in the order's Notes (`student_name`, `student_email`, `student_phone`, `college_name`, `roll_no`) and the order receipt. This flow does not create a Razorpay-hosted Payment Page registration. If a captured payment is missing from the dashboard, search the exact payment/order ID with date and status filters cleared and confirm that the displayed merchant account issued the configured keys. An email alone is insufficient evidence of a provider payment; reconcile using the provider API and the saved paid-order mapping.
+
 ## Official Google email and the local mail sender
 
 The official Google mailbox can be retained. The existing Node email service uses Gmail SMTP and can run locally with a valid app password. **Render Free blocks outbound ports 25, 465, and 587**, including the ports normally used by Gmail SMTP. A Python script using those ports on Render Free faces the same restriction. See [Render's free-service limitations](https://render.com/docs/free).
@@ -106,6 +117,8 @@ Gmail-accepted delivery records store `emailMessageId` and `emailSentAt`; failed
 ## Frontend configuration and local run
 
 The frontend's `.env.example` contains only the public `VITE_BACKEND_URL`. Vite forwards development `/api` requests to `http://127.0.0.1:4000`, so local testing uses the local API. Production builds use `VITE_BACKEND_URL`; rebuild after changing it. The frontend receives the Razorpay key ID together with each server order and does not need a hosted-page URL.
+
+Vite's development file denylist blocks the entire backend folder, credential exports, service-account files, `.secrets` folders and ignored `.local` artifacts. Git ignores alone do not stop a development server from serving a file by URL. The payment API proxy and normal website routes remain available; the trusted backend and local scripts still read their credentials from the filesystem.
 
 Run the backend in one terminal:
 
@@ -163,6 +176,8 @@ A new verification clears the previous student's result. Session, ticket, camera
 Both actual emailed PNG attachments were decoded in the browser and verified against the existing cloud test ticket. All four sessions and duplicate rejection were then confirmed by direct Firestore readback. Physical camera hardware was not exercised; camera permission failure and startup cancellation were tested separately with a local substitute.
 
 ## Safe local checks
+
+With both local servers running, `node testing/payment-gateway/test-private-dev-files.js` checks denied HTTP access to private files, including raw and absolute filesystem URL forms, while confirming the registration/admin pages and API proxy remain reachable. It uses only read-only HTTP requests and a temporary ignored synthetic probe. Missing credential files are skipped; their contents are never loaded or fabricated.
 
 The isolated route checks use the actual Express routes with substituted Razorpay, Firestore, QR/card generation, and email:
 
