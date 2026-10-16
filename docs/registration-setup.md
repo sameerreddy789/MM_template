@@ -26,6 +26,8 @@ The setup can use the existing free Render service and Firestore's no-cost allow
 
 ## Backend configuration
 
+The Render service uses root directory `server`, build command `npm ci`, and start command `npm start`. The backend requires Node.js `22.x`, matching the installed Firebase Admin and Firestore packages. Remove an existing Node 20 override or set `NODE_VERSION=22` in Render. Firestore is a required dependency, and the backend npm configuration includes optional native packages and rejects unsupported Node versions during installation. After changing these settings, deploy the latest `main` commit with a cleared build cache and check `/api/health` and `/api/registration-status` while `REGISTRATIONS_OPEN=false`.
+
 Copy `server/.env.example` to `server/.env` only if a private environment file does not already exist. Preserve existing settings and fill the missing values privately. Never put secret values in chat, source control, or frontend `VITE_` variables.
 
 | Setting | Purpose |
