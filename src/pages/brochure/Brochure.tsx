@@ -1,6 +1,10 @@
 import BackButton from '../components/backButton/BackButton';
 import styles from './Brochure.module.scss';
 import { Helmet } from 'react-helmet-async';
+import { FaDownload } from 'react-icons/fa6';
+
+const BROCHURE_PDF = '/MMBrochure.pdf';
+
 export default function Brochure() {
 
     return (
@@ -16,8 +20,21 @@ export default function Brochure() {
                 <BackButton />
                 <div className={styles.title}>Brochure</div>
                 <div className={styles.brochureWrapper}>
-                    <div className={styles.brochureContainer} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '2rem', fontFamily: 'var(--regFont)' }}>
-                        Brochure Coming Soon...
+                    <div className={styles.brochureContainer}>
+                        <object data={BROCHURE_PDF} type="application/pdf" className={styles.brochureIframe} aria-label="MohanaMantra 2K26 brochure PDF viewer">
+                            <iframe src={BROCHURE_PDF} className={styles.brochureIframe} title="MohanaMantra 2K26 brochure PDF viewer" />
+                        </object>
+                        <a
+                            href={BROCHURE_PDF}
+                            download
+                            target="_blank"
+                            rel="noreferrer"
+                            className={styles.downloadButton}
+                            aria-label="Download brochure PDF"
+                            title="Download brochure PDF"
+                        >
+                            <FaDownload />
+                        </a>
                     </div>
                 </div>
             </div>

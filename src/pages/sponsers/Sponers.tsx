@@ -8,16 +8,27 @@ import SEO from "../../components/SEO";
 
 
 const sponsorLogos = [
-  { name: "Beautiful Tirupati", img: encodeURI(cdn("/images/sponsors/Beautiful_Tirupati.webp")) },
+  { name: "Sahanah", img: encodeURI(cdn("/images/sponsors/Sahanah.webp")) },
+  // Bundled from public/ and served same-origin (not yet on the CDN bucket).
+  { name: "FC Overseas", img: encodeURI("/images/sponsors/FC-Overseas.webp") },
   { name: "CS Overseas", img: encodeURI(cdn("/images/sponsors/CS-Overseas.webp")) },
   { name: "ED-West", img: encodeURI(cdn("/images/sponsors/ED-West.webp")) },
   { name: "IMFS", img: encodeURI(cdn("/images/sponsors/IMFS.webp")) },
   { name: "Mango Tranquil", img: encodeURI(cdn("/images/sponsors/Mango_Tranquil.webp")) },
   { name: "MayaBazaar", img: encodeURI(cdn("/images/sponsors/MayaBazaar.webp")) },
-  { name: "Nellorians", img: encodeURI(cdn("/images/sponsors/Nellorians.webp")) },
-  { name: "Sahanah", img: encodeURI(cdn("/images/sponsors/Sahanah.webp")) },
   { name: "Sneha", img: encodeURI(cdn("/images/sponsors/Sneha.webp")) },
   { name: "Kalanjali", img: encodeURI(cdn("/images/sponsors/kalanjali.webp")) },
+  { name: "Dopamine Store", img: encodeURI("/images/sponsors/Dopamine-Store.webp") },
+  // New 2026 sponsor logos are bundled from public/ and served same-origin
+  // (not yet uploaded to the CDN bucket), so they are referenced locally.
+  { name: "Talentio", img: encodeURI("/images/sponsors/Talentio.webp") },
+  { name: "Sri Sai Ads", img: encodeURI("/images/sponsors/Sri-Sai-Ads.webp") },
+  { name: "Sparsh", img: encodeURI("/images/sponsors/Sparsh.webp") },
+  { name: "Prakash Arts", img: encodeURI("/images/sponsors/Prakash-Arts.webp") },
+  { name: "Apex Sport Surfaces", img: encodeURI("/images/sponsors/Apex-Sport-Surfaces.webp") },
+  { name: "GV Aqua Engineers", img: encodeURI("/images/sponsors/GV-Aqua-Engineers.webp") },
+  { name: "Kamalveer Systems", img: encodeURI("/images/sponsors/Kamalveer-Systems.webp") },
+  { name: "MVR Enterprises", img: encodeURI("/images/sponsors/MVR-Enterprises.webp") },
 ];
 
 const containerVariants: Variants = {
@@ -121,14 +132,10 @@ const Sponsors = () => {
               className={styles.sponsorCard}
               variants={cardVariants}
               whileHover={{
-                scale: 1.05,
-                y: -8,
-                rotateX: 4,
-                rotateY: -4,
+                scale: 1.08,
                 transition: { type: "spring", stiffness: 300, damping: 15 },
               }}
               whileTap={{ scale: 0.97 }}
-              style={{ transformStyle: "preserve-3d" }}
             >
               <div className={styles.logoWrapper}>
                 <img
