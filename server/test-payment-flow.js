@@ -520,6 +520,49 @@ async function run() {
       assert.equal(result.status, 200);
     }
   });
+  await check('Health monitors do not consume the public API request budget', async () => {
+    const before = await fetch(`${baseUrl}/api/registration-status`);
+    assert.equal(before.status, 200);
+    assert.ok(before.headers.has('ratelimit-remaining'));
+    const remaining = Number(before.headers.get('ratelimit-remaining'));
+    await before.json();
+    for (let i = 0; i < 201; i++) {
+      const response = await fetch(`${baseUrl}/api/health`);
+      assert.equal(response.status, 200);
+      assert.equal((await response.json()).status, 'healthy');
+    }
+    const head = await fetch(`${baseUrl}/api/health`, { method: 'HEAD' });
+    assert.equal(head.status, 200);
+    assert.equal(head.headers.has('ratelimit-limit'), false);
+    const after = await fetch(`${baseUrl}/api/registration-status`);
+    assert.equal(after.status, 200);
+    assert.equal(Number(after.headers.get('ratelimit-remaining')), remaining - 1);
+    await after.json();
+    assert.equal(state.orderRequests.length, 0);
+    assert.equal(state.emailAttempts.length, 0);
+  });
+  await check('Health stays available when the public API rate limit is exhausted', async () => {
+    const initial = await fetch(`${baseUrl}/api/registration-status`);
+    assert.equal(initial.status, 200);
+    const remaining = Number(initial.headers.get('ratelimit-remaining'));
+    await initial.json();
+    for (let i = 0; i < remaining; i++) {
+      const response = await fetch(`${baseUrl}/api/registration-status`);
+      assert.equal(response.status, 200);
+      await response.json();
+    }
+    const limited = await fetch(`${baseUrl}/api/registration-status`);
+    assert.equal(limited.status, 429);
+    await limited.json();
+    const health = await fetch(`${baseUrl}/api/health`);
+    assert.equal(health.status, 200);
+    assert.equal((await health.json()).status, 'healthy');
+    const unsupportedMethod = await fetch(`${baseUrl}/api/health`, { method: 'POST' });
+    assert.equal(unsupportedMethod.status, 429);
+    await unsupportedMethod.json();
+    assert.equal(state.orderRequests.length, 0);
+    assert.equal(state.emailAttempts.length, 0);
+  });
 }
 
 run().catch(error => { console.error('Payment route test could not run:', error.message); process.exitCode = 1; }).finally(async () => {

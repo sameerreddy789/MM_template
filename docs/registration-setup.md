@@ -48,6 +48,8 @@ Use `server/serviceAccountKey.json` locally, a Render secret file at `/etc/secre
 
 `GET /api/registration-status` returns configuration booleans, the fixed fee, and a `ready` flag. It does not expose credentials or test a real payment, database write, or SMTP login. Missing/placeholder payment, webhook, and QR-signing secrets keep checkout disabled.
 
+Use `GET /api/health` for Render health checks and external uptime monitoring. This small liveness response does not contact Razorpay, query Firestore, or send email. GET and HEAD health probes bypass the public API rate limit, so monitoring stays available after that request budget is exhausted; other methods and public API routes retain their limits. For intermittent monitor failures, inspect the failed execution's HTTP status and compare its timestamp with Render's deployment logs. A successful health response does not verify payment or email readiness.
+
 ### Razorpay setup
 
 For a real sandbox checkout, use a **matching test-mode key ID and secret**. A live key ID alone cannot create a valid server order. Do not replace an incomplete key pair with fabricated payment IDs or a browser-only success callback.

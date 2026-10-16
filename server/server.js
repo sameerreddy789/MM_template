@@ -115,7 +115,7 @@ app.use(
 // RATE LIMITING (DOS & BRUTE FORCE DEFENSE)
 // ==========================================
 
-// Global rate limiter across all endpoints
+// Rate limiter for public API traffic
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 200, // max 200 requests per IP per 15 min
@@ -124,8 +124,12 @@ const generalLimiter = rateLimit({
   message: { success: false, error: "Too many requests from this IP. Please try again later." },
 });
 const staffPaths = new Set(["/api/gatekeeper/verify", "/api/gatekeeper/checkin"]);
-app.use((req, res, next) => req.path === "/api/payment-webhook" || staffPaths.has(req.path)
-  ? next() : generalLimiter(req, res, next));
+app.use((req, res, next) => {
+  // Liveness probes must stay available when public traffic exhausts its budget.
+  const healthProbe = req.path === "/api/health" && (req.method === "GET" || req.method === "HEAD");
+  return healthProbe || req.path === "/api/payment-webhook" || staffPaths.has(req.path)
+    ? next() : generalLimiter(req, res, next);
+});
 
 // Strict brute-force limiter applies to staff login, not every entry scan.
 const authLimiter = rateLimit({
