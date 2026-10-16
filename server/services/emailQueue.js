@@ -1,9 +1,12 @@
 // Consume paid entry-pass records using the same transactional email lease as
 // payment callbacks. This helper never creates a registration or payment.
-async function sendPendingEntryPasses({ db, deliverQueuedEmail, batchSize = 25 }) {
+const { paymentEnvironment, recordMatchesMode } = require("./paymentEnvironment");
+
+async function sendPendingEntryPasses({ db, deliverQueuedEmail, batchSize = 25, config = process.env }) {
+  const environment = paymentEnvironment(config);
   const statuses = ["Pending", "Failed", "Sending"];
   const snapshots = await Promise.all(statuses.map(status =>
-    db.collection("registrations").where("emailStatus", "==", status).limit(batchSize).get()
+    db.collection(environment.registrationsCollection).where("emailStatus", "==", status).limit(batchSize).get()
   ));
   const result = { sent: 0, failed: 0, pending: 0, skipped: 0 };
   const seen = new Set();
@@ -12,7 +15,8 @@ async function sendPendingEntryPasses({ db, deliverQueuedEmail, batchSize = 25 }
       if (seen.has(document.id)) continue;
       seen.add(document.id);
       const record = document.data();
-      if (record.paymentStatus !== "Paid" || (record.emailStatus === "Sending" && record.emailLeaseUntil > Date.now())) {
+      if (!recordMatchesMode(record, environment.mode) || record.paymentStatus !== "Paid" ||
+          (record.emailStatus === "Sending" && record.emailLeaseUntil > Date.now())) {
         result.skipped++;
         continue;
       }

@@ -21,6 +21,7 @@ const baseEnv = {
   JWT_SECRET: 'isolated_ticket_signing_secret_more_than_32_chars',
   GMAIL_USER: 'sender@example.invalid', GMAIL_APP_PASSWORD: 'isolated_mail_secret',
   FIREBASE_SERVICE_ACCOUNT: JSON.stringify({ project_id: 'isolated-test' }),
+  ADMIN_KEY: 'isolated-staff', ADMIN_SECRET: 'isolated-staff-signing-secret',
 };
 const validForm = { name: 'Gateway Test', email: 'gateway.test@example.invalid', phone: '9999999999', college: 'Gateway Test College', roll_no: 'GW-TEST' };
 const state = {};
@@ -31,15 +32,15 @@ function resetState() {
   for (const key of Object.keys(fakeEnv)) delete fakeEnv[key];
   Object.assign(fakeEnv, baseEnv);
   Object.assign(state, {
-    tables: { registrations: new Map(), registrationOrders: new Map() },
+    tables: { registrations: new Map(), registrationOrders: new Map(), testRegistrations: new Map(), testRegistrationOrders: new Map() },
     orderRequests: [], orderFetches: [], paymentFetches: [], emailAttempts: [], emails: [],
-    failWrites: false, failReads: false, failEmail: false, failProvider: false,
+    failWrites: false, failReads: false, failEmail: false, failProvider: false, delayReads: false,
     transactionQueue: Promise.resolve(),
     order: { id: 'order_IsolatedTest', amount: 100000, currency: 'INR', status: 'paid', amount_paid: 100000, notes: {} },
     payment: { id: 'pay_IsolatedTest', order_id: 'order_IsolatedTest', amount: 100000, currency: 'INR', status: 'captured', captured: true, amount_refunded: 0 },
   });
-  state.tables.registrationOrders.set(state.order.id, {
-    orderId: state.order.id, amount: 100000, currency: 'INR', paymentStatus: 'Pending',
+  state.tables.testRegistrationOrders.set(state.order.id, {
+    orderId: state.order.id, paymentMode: 'test', amount: 100000, currency: 'INR', paymentStatus: 'Pending',
     student: { name: validForm.name, email: validForm.email, phone: validForm.phone, college: validForm.college, rollNo: validForm.roll_no },
     createdAt: 'isolated-server-timestamp',
   });
@@ -56,12 +57,17 @@ function write(tables, kind, reference, data) {
 }
 const fakeDb = {
   collection(collectionName) {
-    assert.ok(['registrations', 'registrationOrders'].includes(collectionName));
+    assert.ok(['registrations', 'registrationOrders', 'testRegistrations', 'testRegistrationOrders'].includes(collectionName));
     return { doc(id) {
       const reference = { collectionName, id };
       return {
         ...reference,
-        async get() { if (state.failReads) throw new Error('Simulated Firestore read outage'); return snapshot(state.tables[collectionName].get(id)); },
+        async get() {
+          if (state.failReads) throw new Error('Simulated Firestore read outage');
+          const result = snapshot(state.tables[collectionName].get(id));
+          if (state.delayReads) await new Promise(resolve => setTimeout(resolve, 15));
+          return result;
+        },
         async create(data) { if (state.failWrites) throw new Error('Simulated Firestore write outage'); write(state.tables, 'create', reference, data); },
         async update(data) { if (state.failWrites) throw new Error('Simulated Firestore write outage'); write(state.tables, 'update', reference, data); },
       };
@@ -165,7 +171,7 @@ async function run() {
       razorpay_signature: crypto.createHmac('sha256', keySecret).update(`${state.order.id}|${state.payment.id}`).digest('hex'), ...overrides };
     return post('/api/payment-verify', proof);
   }
-  const registrations = () => state.tables.registrations;
+  const registrations = () => state.tables.testRegistrations;
 
   await check('Readiness rejects placeholder payment, webhook, and ticket secrets', async () => {
     for (const key of ['RAZORPAY_KEY_SECRET', 'RAZORPAY_WEBHOOK_SECRET', 'JWT_SECRET']) {
@@ -184,6 +190,44 @@ async function run() {
     }
     assert.equal(state.orderRequests.length, 0);
   });
+  await check('A test/live key-mode mismatch disables orders and confirmation', async () => {
+    fakeEnv.PAYMENT_MODE = 'live';
+    const status = await (await fetch(`${baseUrl}/api/registration-status`)).json();
+    assert.equal(status.ready, false);
+    assert.equal((await post('/api/register', validForm)).status, 503);
+    assert.equal((await verify()).status, 503);
+    assert.equal(state.orderRequests.length, 0);
+    assert.equal(state.emails.length, 0);
+  });
+  await check('Test orders and passes stay separate from live registrations', async () => {
+    const test = await verify();
+    assert.equal(test.body.registration.paymentMode, 'test');
+    assert.match(test.body.registration.ticketId, /^MM26-TEST-[A-F0-9]{6}$/);
+    assert.equal(state.tables.registrations.size, 0);
+    const { createRegistrationService } = nativeRequire('./services/registration');
+    const live = createRegistrationService({ db: fakeDb, razorpay: new FakeRazorpay(),
+      config: { ...baseEnv, PAYMENT_MODE: 'live', RAZORPAY_KEY_ID: 'rzp_live_isolated' },
+      serverTimestamp: () => 'isolated-server-timestamp', emailConfigured: () => true,
+      generateTicketId: () => 'MM26-C0FFEE', sendTicketEmail: async () => ({ messageId: 'isolated-message' }),
+    });
+    const order = await live.createOrder(validForm);
+    assert.equal(order.paymentMode, 'live');
+    assert.equal(state.tables.registrationOrders.size, 1);
+    assert.equal(state.tables.testRegistrations.size, 1);
+    const testProof = { razorpay_order_id: 'order_IsolatedTest', razorpay_payment_id: 'pay_IsolatedTest',
+      razorpay_signature: crypto.createHmac('sha256', keySecret).update('order_IsolatedTest|pay_IsolatedTest').digest('hex') };
+    await assert.rejects(live.verifyCheckout(testProof), error => error.code === 'UNKNOWN_ORDER');
+    state.order.status = 'paid'; state.order.amount_paid = 100000;
+    state.payment.order_id = order.order_id;
+    const liveProof = { ...testProof, razorpay_order_id: order.order_id,
+      razorpay_signature: crypto.createHmac('sha256', keySecret).update(`${order.order_id}|pay_IsolatedTest`).digest('hex') };
+    const paid = await live.verifyCheckout(liveProof);
+    assert.equal(paid.registration.paymentMode, 'live');
+    assert.equal(paid.registration.ticketId, 'MM26-C0FFEE');
+    assert.equal(state.tables.registrations.size, 1);
+    assert.equal(state.tables.testRegistrations.size, 1);
+    assert.equal((await verify(liveProof)).body.code, 'UNKNOWN_ORDER');
+  });
   await check('The fixed INR 1000 order and cleaned details are saved as Pending', async () => {
     const response = await post('/api/register', { ...validForm, name: '  Gateway Test  ', email: 'Gateway.Test@EXAMPLE.INVALID', roll_no: 'gw-test', amount: 100, currency: 'USD' });
     assert.equal(response.status, 200);
@@ -193,7 +237,9 @@ async function run() {
     assert.equal(state.orderRequests[0].notes.student_email, validForm.email);
     assert.equal(state.orderRequests[0].notes.roll_no, validForm.roll_no);
     assert.ok(state.orderRequests[0].receipt.length <= 40);
-    assert.equal(state.tables.registrationOrders.get(response.body.order_id).paymentStatus, 'Pending');
+    assert.equal(state.tables.testRegistrationOrders.get(response.body.order_id).paymentStatus, 'Pending');
+    assert.equal(state.tables.testRegistrationOrders.get(response.body.order_id).paymentMode, 'test');
+    assert.equal(response.body.paymentMode, 'test');
     assert.equal(registrations().size, 0);
     assert.equal(state.emails.length, 0);
   });
@@ -219,7 +265,7 @@ async function run() {
     assert.equal(response.body.registration.secureToken, undefined);
     assert.equal(registrations().size, 1);
     const record = [...registrations().values()][0];
-    assert.match(record.ticketId, /^MM26-[A-F0-9]{6}$/);
+    assert.match(record.ticketId, /^MM26-TEST-[A-F0-9]{6}$/);
     assert.match(record.secureToken, /^[a-f0-9]{32}$/);
     assert.equal(record.email, validForm.email);
     assert.equal(record.amount, 1000);
@@ -232,7 +278,7 @@ async function run() {
     assert.equal(state.emails.length, 1);
   });
   await check('Payments without a server-created stored order are rejected', async () => {
-    state.tables.registrationOrders.clear();
+    state.tables.testRegistrationOrders.clear();
     assert.equal((await webhook()).status, 400);
     assert.equal((await verify()).status, 400);
     assert.equal(registrations().size, 0);
@@ -263,7 +309,7 @@ async function run() {
   await check('Stored order changes are revalidated inside the paid transaction', async () => {
     const originalTransaction = fakeDb.runTransaction;
     fakeDb.runTransaction = function (run) {
-      state.tables.registrationOrders.get(state.order.id).amount = 100;
+      state.tables.testRegistrationOrders.get(state.order.id).amount = 100;
       return originalTransaction.call(this, run);
     };
     try {
@@ -276,7 +322,7 @@ async function run() {
   });
   await check('An inconsistent paid ticket mapping cannot return confirmed success', async () => {
     const paid = await verify();
-    const ticket = state.tables.registrations.get(paid.body.registration.ticketId);
+    const ticket = state.tables.testRegistrations.get(paid.body.registration.ticketId);
     ticket.paymentId = 'pay_DifferentPayment';
     assert.equal((await verify()).status, 503);
     assert.equal(state.emails.length, 1);
@@ -347,13 +393,47 @@ async function run() {
     const record = [...registrations().values()][0];
     record.emailStatus = 'Sent';
     const ticketId = record.ticketId;
-    state.tables.registrations.set(ticketId, record);
+    state.tables.testRegistrations.set(ticketId, record);
     assert.equal((await verify()).body.registration.emailStatus, 'Sent');
     assert.equal(state.emailAttempts.length, 0);
   });
   await check('Malformed JSON is rejected before provider work', async () => {
     assert.equal((await post('/api/register', '{')).status, 400);
     assert.equal(state.orderRequests.length, 0);
+  });
+  const staff = (ticketId, sessionKey) => post('/api/gatekeeper/checkin', {
+    adminKey: baseEnv.ADMIN_KEY, adminSecret: baseEnv.ADMIN_SECRET, ticketId, sessionKey,
+  });
+  await check('Concurrent scans admit a paid ticket once in the same session', async () => {
+    const paid = await verify();
+    state.delayReads = true;
+    const checks = await Promise.all([staff(paid.body.registration.ticketId, 'day1_am'), staff(paid.body.registration.ticketId, 'day1_am')]);
+    assert.deepEqual(checks.map(result => result.status).sort(), [200, 400]);
+    assert.equal(registrations().get(paid.body.registration.ticketId).checkInSessions.day1_am.checkedIn, true);
+  });
+  await check('Concurrent different-session scans preserve both check-ins', async () => {
+    const paid = await verify();
+    state.delayReads = true;
+    const checks = await Promise.all([staff(paid.body.registration.ticketId, 'day1_am'), staff(paid.body.registration.ticketId, 'day1_pm')]);
+    assert.ok(checks.every(result => result.status === 200));
+    const sessions = registrations().get(paid.body.registration.ticketId).checkInSessions;
+    assert.equal(sessions.day1_am.checkedIn, true);
+    assert.equal(sessions.day1_pm.checkedIn, true);
+  });
+  await check('Unpaid passes and unknown session names cannot be checked in', async () => {
+    const paid = await verify();
+    const ticketId = paid.body.registration.ticketId;
+    assert.equal((await staff(ticketId, 'unknown-session')).status, 400);
+    registrations().get(ticketId).paymentStatus = 'Pending';
+    assert.equal((await staff(ticketId, 'day1_am')).status, 400);
+  });
+  await check('Legitimate staff verification is not limited to ten gate requests', async () => {
+    const paid = await verify();
+    for (let i = 0; i < 12; i++) {
+      const result = await post('/api/gatekeeper/verify', { adminKey: baseEnv.ADMIN_KEY,
+        adminSecret: baseEnv.ADMIN_SECRET, ticketId: paid.body.registration.ticketId });
+      assert.equal(result.status, 200);
+    }
   });
 }
 

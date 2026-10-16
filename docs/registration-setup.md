@@ -23,6 +23,7 @@ Copy `server/.env.example` to `server/.env` only if a private environment file d
 | Setting | Purpose |
 | --- | --- |
 | `RAZORPAY_KEY_ID` | Key ID for the merchant account and selected test/live mode |
+| `PAYMENT_MODE` | Optional explicit `test`/`live` guard; the matching key prefix is used when omitted |
 | `RAZORPAY_KEY_SECRET` | Matching private secret used for API authentication and checkout-proof verification |
 | `RAZORPAY_WEBHOOK_SECRET` | Independent signing secret configured for the payment webhook |
 | `JWT_SECRET` | Random secret of at least 32 characters used to sign QR passes |
@@ -39,6 +40,36 @@ Use `server/serviceAccountKey.json` locally, a Render secret file at `/etc/secre
 ### Razorpay setup
 
 For a real sandbox checkout, use a **matching test-mode key ID and secret**. A live key ID alone cannot create a valid server order. Do not replace an incomplete key pair with fabricated payment IDs or a browser-only success callback.
+
+### Private local test environment
+
+Export the test credentials from Razorpay as a CSV with `key_id` and `key_secret` columns and one credential row. Keep the export at the repository root as `rzp.csv` (ignored by Git) or inside the ignored `.secrets` directory. Never put it under `public/` or commit it.
+
+From the repository root, run:
+
+```powershell
+node server/setup-payment-test.js
+node server/check-payment-test.js
+```
+
+The setup command refuses live key pairs and creates the ignored `server/.env.payment-test`. It preserves the existing `server/.env`, copies the existing official Gmail settings, and generates separate test JWT, webhook, and staff secrets. It can also accept a CSV path as its first argument. Updating the export and running setup again preserves the test signing secrets so existing test passes remain verifiable.
+
+The configuration check authenticates with the Razorpay Test Mode API and the actual Gmail transporter, and creates/reads/transacts/deletes one diagnostic Firestore test document. It does not make a payment, create a paid registration, or send an email. Its output contains status flags and error codes, never credential values.
+
+Start the backend and frontend in separate terminals:
+
+```powershell
+npm --prefix server run dev:payment-test
+npm run dev -- --host 127.0.0.1
+```
+
+Open `http://localhost:5173/register`, enter an email inbox you can check, and use **TRY TEST PAYMENT — ₹0 CHARGED**. Razorpay Test Mode simulates the ₹1,000 registration fee; no real money is debited. Netbanking opens a mock bank page where **Success** completes the sandbox payment. See [Razorpay's integration testing instructions](https://razorpay.com/docs/payments/payment-gateway/web-integration/standard/integration-steps/#2-test-integration).
+
+Test orders use `testRegistrationOrders`; test tickets and their email queue use `testRegistrations`. Live mode retains `registrationOrders` and `registrations`. Test tickets use `MM26-TEST-XXXXXX`, and the form, receipt, email, and pass identify them as tests that are not valid for event entry. Browser recovery is separated by payment mode. Staff verification checks the record's mode, captured-payment status, signed QR mode, and private ticket token. A live gatekeeper does not look up test tickets.
+
+The generated local webhook secret does not configure a Razorpay Dashboard webhook. Direct checkout confirmation works on localhost; genuine gateway webhook delivery still requires a reachable public test endpoint and a matching Dashboard secret. Keep production secrets separate when moving to live payments.
+
+A real local sandbox checkout and Gmail delivery were completed on 16 October 2026; see [the verification report](../testing/payment-gateway/LOCAL-RAZORPAY-TEST-2026-10-16.md).
 
 Configure a webhook for the backend's `/api/payment-webhook` endpoint, with `payment.captured` and `order.paid` events and the same private webhook signing secret. For the current backend URL, the production endpoint is:
 
@@ -62,13 +93,15 @@ On a trusted local machine, configure the existing Google sender/app password an
 node server/send-pending-emails.js
 ```
 
-It checks the queue every 60 seconds and uses the existing ID-card, QR, and Gmail services. The computer and this process must stay running for automatic delivery. For one deliberate batch, use `node server/send-pending-emails.js --once`. Both commands send real emails; they are not harmless diagnostic checks. The implementation was verified with substituted email delivery, and the real sender was not started during this change.
+It checks the queue every 60 seconds and uses the existing ID-card, QR, and Gmail services. The computer and this process must stay running for automatic delivery. For one deliberate batch, use `node server/send-pending-emails.js --once`. Both commands send real emails. The separate queue consumer was verified with substituted delivery. The 16 October local checkout used the real inline Gmail sender, and the recipient confirmed receipt of both attachments.
 
-The mailer must use private Firebase Admin access to consume `registrations` documents with `paymentStatus: Paid` and `emailStatus: Pending` or `Failed`. Each record includes `ticketId`, student details, `secureToken`, payment details, and email status. Generate the pass/QR using the existing server helpers or a compatible implementation. The QR token uses HS256 and the private ticket-signing secret; its payload contains `tid`, `name`, and `stk`, and its URL is `/gatekeeper/verify/{token}` on the festival site.
+The mailer must use private Firebase Admin access to consume the selected mode's registration collection with `paymentStatus: Paid` and `emailStatus: Pending` or `Failed`. Each record includes `ticketId`, student details, `secureToken`, payment details, mode, and email status. Generate the pass/QR using the existing server helpers or a compatible implementation. The QR token uses HS256 and the private ticket-signing secret; its payload contains `tid`, `name`, `stk`, and `mode`, and its URL is `/gatekeeper/verify/{token}` on the festival site. Existing live passes without an explicit mode remain supported. Staff opening a QR link select that pass automatically after authentication.
 
 Claim each email transactionally before sending, using `emailStatus: Sending`, a unique `emailAttemptId`, and `emailLeaseUntil`. Record `Sent` only after the Google sender accepts the message; record `Failed` after a failed attempt. Never create a second ticket to retry email. A Gmail send followed by a process crash can still require reconciliation; SMTP delivery is not globally exactly-once.
 
 The queue sender reads only pending/failed email records and expired sending leases, skips unpaid records, and uses the same transactional lease as the payment callback. It can recover after a temporary database outage. No new email-provider account is needed.
+
+Gmail-accepted delivery records store `emailMessageId` and `emailSentAt`; failed attempts store a bounded failure code. Provider acceptance is separate from inbox receipt, which needs recipient confirmation. Check-in updates are Firestore transactions: simultaneous scans of one session admit the ticket once, and different-session scans preserve both updates. Only the four defined sessions are accepted. Staff login retains the strict brute-force limit; authenticated verification/check-in use a separate operational rate limit.
 
 ## Frontend configuration and local run
 
@@ -108,6 +141,10 @@ npx --yes firebase-tools emulators:exec --only firestore --project demo-mohana-m
 
 Browser QA can inject `testing/payment-gateway/browser-fixture.js` only into a separate local test browser. It substitutes checkout and all payment API calls on the localhost origin. It is never imported by the application.
 
+`testing/payment-gateway/gatekeeper-fixture.js` similarly tests QR-link selection in an isolated browser with synthetic staff/session data. Real QR signatures and check-in were also checked separately against the cloud test ticket. Neither fixture belongs in the browser used for the genuine Razorpay trial.
+
+The legacy `test-full-pipeline.js` and `create-test002.js` manually fabricate payment fixtures. They now refuse cloud execution and require both the test environment and a loopback Firestore emulator. They cannot validate a real Razorpay payment. The standalone email/order diagnostics also require the separate test environment and never log credential prefixes.
+
 `firestore.rules` denies browser reads/writes; only Firebase Admin can access the private collections. These rules were tested locally and **have not been deployed to Firebase**. Review current cloud rules and publish the intended rules as a separate deployment step before opening production registration.
 
-No real Razorpay transaction, production Firestore registration, confirmation email, GitHub push, or deployment is performed by these local checks.
+The isolated route/emulator checks and browser fixtures do not perform a real Razorpay transaction, create a production Firestore registration, send a confirmation email, push to GitHub, or deploy the website. The separately verified genuine sandbox checkout and Gmail delivery are documented in the linked report.

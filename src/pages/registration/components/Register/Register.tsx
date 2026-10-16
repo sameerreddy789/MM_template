@@ -11,6 +11,7 @@ import {
   type ConfirmedRegistration,
   type PaymentOrder,
   type PaymentProof,
+  type PaymentMode,
   type RegistrationDetails,
 } from "../../../../utils/registrationApi";
 import styles from "./Register.module.scss";
@@ -20,26 +21,37 @@ type Phase = "idle" | "creating" | "checkout" | "verifying";
 const initialDetails: RegistrationDetails = { name: "", email: "", phone: "", college: "", roll_no: "" };
 
 function Register() {
-  const [recovery] = useState(readPendingCheckout);
   const [details, setDetails] = useState(initialDetails);
   const [availability, setAvailability] = useState<Availability>("checking");
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState("");
-  const [proof, setProof] = useState<PaymentProof | null>(recovery?.proof || null);
-  const [uncertainOrderId, setUncertainOrderId] = useState(recovery && !recovery.proof ? recovery.orderId : "");
+  const [paymentMode, setPaymentMode] = useState<PaymentMode | null>(null);
+  const [proof, setProof] = useState<PaymentProof | null>(null);
+  const [uncertainOrderId, setUncertainOrderId] = useState("");
   const [registration, setRegistration] = useState<ConfirmedRegistration | null>(null);
   const mounted = useRef(true);
   const busy = useRef(false);
   const requestSignal = useRef<AbortSignal | undefined>(undefined);
   const previousOrder = useRef<{ details: string; order: PaymentOrder } | null>(null);
   const successHeading = useRef<HTMLHeadingElement>(null);
+  const loadedMode = useRef<PaymentMode | null>(null);
 
   const checkAvailability = useCallback(async () => {
     if (!mounted.current) return;
     setAvailability("checking");
     try {
-      const ready = await checkRegistrationAvailability(requestSignal.current);
-      if (mounted.current) setAvailability(ready ? "ready" : "unavailable");
+      const status = await checkRegistrationAvailability(requestSignal.current);
+      if (mounted.current) {
+        setPaymentMode(status.paymentMode);
+        if (loadedMode.current !== status.paymentMode) {
+          const recovery = readPendingCheckout(status.paymentMode);
+          setProof(recovery?.proof || null);
+          setUncertainOrderId(recovery && !recovery.proof ? recovery.orderId : "");
+          previousOrder.current = null;
+          loadedMode.current = status.paymentMode;
+        }
+        setAvailability(status.ready ? "ready" : "unavailable");
+      }
     } catch {
       if (mounted.current) setAvailability("unavailable");
     }
@@ -61,10 +73,11 @@ function Register() {
   }, [registration?.ticketId]);
 
   async function confirmPayment(paymentProof: PaymentProof, poll: boolean) {
+    if (!paymentMode) throw new Error("The payment environment could not be verified.");
     setPhase("verifying");
     const attempts = poll ? 6 : 1;
     for (let attempt = 0; attempt < attempts; attempt++) {
-      const result = await verifyRegistrationPayment(paymentProof, requestSignal.current);
+      const result = await verifyRegistrationPayment(paymentProof, paymentMode, requestSignal.current);
       if (!mounted.current) return;
       if (result.success) {
         setRegistration(result.registration);
@@ -76,7 +89,7 @@ function Register() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy.current || phase !== "idle" || availability !== "ready" || proof || uncertainOrderId) return;
+    if (busy.current || phase !== "idle" || availability !== "ready" || !paymentMode || proof || uncertainOrderId) return;
     const clean = Object.fromEntries(Object.entries(details).map(([key, value]) => [key, value.trim()])) as unknown as RegistrationDetails;
     if (Object.values(clean).some(value => !value)) {
       setError("Please complete all five student fields.");
@@ -99,24 +112,27 @@ function Register() {
         ? previousOrder.current.order
         : await createRegistrationOrder(clean, requestSignal.current);
       previousOrder.current = { details: key, order };
+      if (order.paymentMode !== paymentMode) {
+        throw new Error("The payment environment changed. Refresh the page before opening checkout.");
+      }
       if (!mounted.current) return;
       setPhase("checkout");
-      savePendingCheckout(order.order_id);
+      savePendingCheckout(paymentMode, order.order_id);
       const paymentProof = await openRegistrationCheckout(order, clean, requestSignal.current);
       if (!mounted.current) return;
       if (paymentProof) {
         receivedProof = true;
-        savePendingCheckout(order.order_id, paymentProof);
+        savePendingCheckout(paymentMode, order.order_id, paymentProof);
         setProof(paymentProof);
         await confirmPayment(paymentProof, true);
       } else {
-        clearPendingCheckout();
+        clearPendingCheckout(paymentMode);
         setError("Checkout was closed. Your payment has not been confirmed.");
       }
     } catch (failure) {
       if (mounted.current) {
         if (failure instanceof CheckoutConfirmationError) setUncertainOrderId(previousOrder.current?.order.order_id || "");
-        else if (!receivedProof) clearPendingCheckout();
+        else if (!receivedProof) clearPendingCheckout(paymentMode);
         setError(failure instanceof Error ? failure.message : "Payment could not be completed. Please try again.");
       }
     } finally {
@@ -144,7 +160,7 @@ function Register() {
   }
 
   function registerAnotherStudent() {
-    clearPendingCheckout();
+    if (paymentMode) clearPendingCheckout(paymentMode);
     previousOrder.current = null;
     setProof(null);
     setUncertainOrderId("");
@@ -159,7 +175,7 @@ function Register() {
     : phase === "checkout" ? "COMPLETE PAYMENT ON RAZORPAY"
       : availability === "checking" ? "CHECKING PAYMENTS…"
         : availability === "unavailable" ? "PAYMENTS UNAVAILABLE"
-          : "PAY ₹1,000 & REGISTER";
+          : paymentMode === "test" ? "TRY TEST PAYMENT — ₹0 CHARGED" : "PAY ₹1,000 & REGISTER";
 
   if (registration) {
     const emailSent = registration.emailStatus === "Sent";
@@ -167,15 +183,18 @@ function Register() {
       <section className={styles.registerContainer} aria-labelledby="registration-confirmed">
         <div className={styles.content}>
           <h1 className={styles.heading} id="registration-confirmed" ref={successHeading} tabIndex={-1}>
-            Registration confirmed
+            {registration.paymentMode === "test" ? "Test registration confirmed" : "Registration confirmed"}
           </h1>
-          <p className={styles.description}>Your payment is verified and your MohanaMantra registration is saved.</p>
+          <p className={styles.description}>{registration.paymentMode === "test"
+            ? "Your simulated payment is verified and your test registration is saved. No real money was charged."
+            : "Your payment is verified and your MohanaMantra registration is saved."}</p>
           <dl className={styles.receipt}>
             <dt>Ticket ID</dt><dd>{registration.ticketId}</dd>
             <dt>Name</dt><dd>{registration.name}</dd>
-            <dt>Paid</dt><dd>₹1,000</dd>
+            <dt>{registration.paymentMode === "test" ? "Test amount" : "Paid"}</dt><dd>₹1,000</dd>
             <dt>Payment ID</dt><dd>{registration.paymentId}</dd>
           </dl>
+          {registration.paymentMode === "test" && <p className={styles.testNotice}>Test pass only — not valid for event entry.</p>}
           <p className={styles.note} role="status">
             {emailSent
               ? <>Your entry pass and QR code have been emailed to <strong>{registration.email}</strong>. Check your inbox and spam folder.</>
@@ -200,6 +219,10 @@ function Register() {
         <p className={styles.description}>
           Fill in your student details and pay securely through Razorpay.
         </p>
+        {paymentMode === "test" && <p className={styles.testNotice} role="status">
+          <strong>Razorpay Test Mode</strong> — checkout simulates ₹1,000. No real money is charged.
+          Enter an email you can check to test delivery. The test pass is not valid for event entry.
+        </p>}
         <form className={styles.registrationForm} onSubmit={event => void submit(event)}>
           <fieldset className={styles.fields} disabled={isBusy || Boolean(proof) || Boolean(uncertainOrderId)}>
             <legend className={styles.screenReaderOnly}>Student details — all fields required</legend>
@@ -230,7 +253,7 @@ function Register() {
                 placeholder="Your college or university" value={details.college} onChange={event => change("college", event.target.value)} />
             </div>
           </fieldset>
-          <p className={styles.fee}>Registration fee <strong>₹1,000</strong></p>
+          <p className={styles.fee}>{paymentMode === "test" ? "Simulated registration fee" : "Registration fee"} <strong>₹1,000</strong></p>
           {proof ? (
             <>
               <p className={styles.note} role="status">

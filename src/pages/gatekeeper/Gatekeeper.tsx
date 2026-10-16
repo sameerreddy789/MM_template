@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import styles from "./Gatekeeper.module.scss";
 import { Html5Qrcode } from "html5-qrcode";
 import { Helmet } from "react-helmet-async";
@@ -17,21 +18,41 @@ interface StudentData {
   email: string;
   phone: string;
   paymentStatus: string;
+  paymentMode?: "test" | "live";
   checkInStatus: string;
   checkedInAt?: string | null;
   checkInSessions?: Record<string, CheckInSessionInfo>;
 }
 
-const SESSION_LABELS: Record<string, string> = {
+const SESSION_KEYS = ["day1_am", "day1_pm", "day2_am", "day2_pm"] as const;
+type SessionKey = typeof SESSION_KEYS[number];
+const SESSION_LABELS: Record<SessionKey, string> = {
   day1_am: "DAY 1 MORNING",
   day1_pm: "DAY 1 EVENING",
   day2_am: "DAY 2 MORNING",
   day2_pm: "DAY 2 EVENING",
 };
 
+// Local staff tests use the same Vite proxy as registration. A failed local
+// request must not send staff credentials or test tokens to the live backend.
+const backendUrl = import.meta.env.DEV
+  ? ""
+  : (import.meta.env.VITE_BACKEND_URL || "https://mohanamantra-backend.onrender.com").replace(/\/$/, "");
+
+async function fetchBackend(endpoint: string, options: RequestInit) {
+  const response = await fetch(`${backendUrl}${endpoint}`, {
+    ...options, credentials: "omit", cache: "no-store",
+    signal: options.signal || AbortSignal.timeout(90000),
+  });
+  return response.json();
+}
+
 const Gatekeeper: React.FC = () => {
+  const location = useLocation();
+  const linkedToken = location.pathname.startsWith("/gatekeeper/verify/")
+    ? location.pathname.slice("/gatekeeper/verify/".length) : "";
   // Active Gate Session State (day1_am, day1_pm, day2_am, day2_pm)
-  const [activeSession, setActiveSession] = useState<"day1_am" | "day1_pm" | "day2_am" | "day2_pm">("day1_am");
+  const [activeSession, setActiveSession] = useState<SessionKey>("day1_am");
 
   // Key-Value Pair Admin Credentials
   const [adminKey, setAdminKey] = useState<string>(() => sessionStorage.getItem("mm26_admin_key") || "");
@@ -52,33 +73,6 @@ const Gatekeeper: React.FC = () => {
   // QR Scanner State
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
-
-  // Smart Backend API fetcher
-  const fetchBackend = async (endpoint: string, options: RequestInit) => {
-    const urls: string[] = [];
-    
-    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-      urls.push("http://localhost:4000");
-    }
-    if (import.meta.env.VITE_BACKEND_URL) {
-      urls.push(import.meta.env.VITE_BACKEND_URL);
-    }
-    urls.push("https://mohanamantra-backend.onrender.com");
-
-    const uniqueUrls = Array.from(new Set(urls));
-    let lastErr: any = null;
-
-    for (const baseUrl of uniqueUrls) {
-      try {
-        const res = await fetch(`${baseUrl}${endpoint}`, options);
-        const data = await res.json();
-        return data;
-      } catch (err) {
-        lastErr = err;
-      }
-    }
-    throw lastErr || new Error("Failed to connect to backend server.");
-  };
 
   // Perform Admin Login
   const handleLogin = async (e: React.FormEvent) => {
@@ -102,7 +96,7 @@ const Gatekeeper: React.FC = () => {
       } else {
         setError(data?.error || "Invalid Key-Value credentials.");
       }
-    } catch (err: any) {
+    } catch {
       setError("Failed to connect to backend for authentication.");
     } finally {
       setLoading(false);
@@ -119,14 +113,14 @@ const Gatekeeper: React.FC = () => {
   };
 
   // Verify Token or Ticket ID
-  const verifyTokenOrId = async (tokenOrId: string, isToken: boolean = false) => {
+  const verifyTokenOrId = useCallback(async (tokenOrId: string, isToken: boolean = false) => {
     if (!tokenOrId.trim()) return;
     setLoading(true);
     setError(null);
     setCheckinSuccess(false);
 
     try {
-      const payload: any = { adminKey, adminSecret };
+      const payload: { adminKey: string; adminSecret: string; token?: string; ticketId?: string } = { adminKey, adminSecret };
       if (isToken) payload.token = tokenOrId;
       else payload.ticketId = tokenOrId;
 
@@ -142,12 +136,17 @@ const Gatekeeper: React.FC = () => {
         setError(data?.error || "Invalid ticket or QR code.");
         setStudent(null);
       }
-    } catch (err: any) {
+    } catch {
       setError("Network error while verifying ticket.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [adminKey, adminSecret]);
+
+  // Opening an emailed QR link selects its pass after staff authentication.
+  useEffect(() => {
+    if (isAuthenticated && linkedToken) void verifyTokenOrId(linkedToken, true);
+  }, [isAuthenticated, linkedToken, verifyTokenOrId]);
 
   // Perform Session Check-in
   const handleCheckin = async () => {
@@ -200,7 +199,7 @@ const Gatekeeper: React.FC = () => {
       } else {
         setError(data?.error || "Check-in failed.");
       }
-    } catch (err: any) {
+    } catch {
       setError("Failed to perform check-in.");
     } finally {
       setLoading(false);
@@ -262,7 +261,7 @@ const Gatekeeper: React.FC = () => {
   const [dragActive, setDragActive] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const processQRImageFile = async (file: File) => {
+  const processQRImageFile = useCallback(async (file: File) => {
     setLoading(true);
     try {
       const html5QrCode = new Html5Qrcode("reader-hidden");
@@ -273,12 +272,12 @@ const Gatekeeper: React.FC = () => {
       } else {
         verifyTokenOrId(decodedText, false);
       }
-    } catch (err: any) {
+    } catch {
       setError("Could not read QR code from image.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [verifyTokenOrId]);
 
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
@@ -295,7 +294,7 @@ const Gatekeeper: React.FC = () => {
     };
     window.addEventListener("paste", handlePaste);
     return () => window.removeEventListener("paste", handlePaste);
-  }, [isAuthenticated]);
+  }, [isAuthenticated, processQRImageFile]);
 
   const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setDragActive(true); };
   const handleDragLeave = (e: React.DragEvent) => { e.preventDefault(); setDragActive(false); };
@@ -356,11 +355,11 @@ const Gatekeeper: React.FC = () => {
           <div className={styles.sessionBar}>
             <div className={styles.sessionLabel}>ACTIVE GATE CHECK-IN SESSION:</div>
             <div className={styles.sessionPills}>
-              {["day1_am", "day1_pm", "day2_am", "day2_pm"].map((s) => (
+              {SESSION_KEYS.map((s) => (
                 <button
                   key={s}
                   className={`${styles.sessionPill} ${activeSession === s ? styles.activePill : ""}`}
-                  onClick={() => { setActiveSession(s as any); setCheckinSuccess(false); }}
+                  onClick={() => { setActiveSession(s); setCheckinSuccess(false); }}
                 >
                   {s.includes("am") ? "🌅" : "🌙"} {SESSION_LABELS[s]}
                 </button>
@@ -435,7 +434,7 @@ const Gatekeeper: React.FC = () => {
                 <div className={styles.sessionMatrix}>
                   <div className={styles.matrixTitle}>4-SESSION CHECK-IN MATRIX</div>
                   <div className={styles.matrixGrid}>
-                    {Object.keys(SESSION_LABELS).map((s) => (
+                    {SESSION_KEYS.map((s) => (
                       <div key={s} className={`${styles.matrixCard} ${student.checkInSessions?.[s]?.checkedIn ? styles.matrixCheckedIn : ""}`}>
                         <div className={styles.matrixSessionName}>{SESSION_LABELS[s]}</div>
                         <div className={styles.matrixStatus}>{student.checkInSessions?.[s]?.checkedIn ? "🟢 Checked In" : "⚪ Pending"}</div>

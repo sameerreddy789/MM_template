@@ -17,7 +17,7 @@
 
 const nodemailer = require("nodemailer");
 const { isConfiguredSecret } = require("./registration");
-require("dotenv").config();
+require("dotenv").config({ path: require("node:path").join(__dirname, "..", ".env"), quiet: true });
 
 function isEmailConfigured(config = process.env) {
   return typeof config.GMAIL_USER === "string" &&
@@ -49,7 +49,7 @@ const transporter = nodemailer.createTransport({
  * @param {Buffer} [params.qrBuffer]   - Optional PNG buffer of the standalone QR code
  * @returns {Promise<Object>} Nodemailer send result
  */
-async function sendIdCardEmail({ toEmail, studentName, ticketId, college, idCardBuffer, qrBuffer }) {
+async function sendIdCardEmail({ toEmail, studentName, ticketId, college, idCardBuffer, qrBuffer, paymentMode = "live" }) {
   const attachments = [
     {
       filename: `MohanaMantra_EntryPass_${ticketId}.png`,
@@ -70,8 +70,8 @@ async function sendIdCardEmail({ toEmail, studentName, ticketId, college, idCard
   const mailOptions = {
     from: `"MohanaMantra 2K26" <${process.env.GMAIL_USER}>`,
     to: toEmail,
-    subject: `🎉 MohanaMantra 2K26 — Your Entry Pass & QR Code (${ticketId})`,
-    html: buildEmailHtml(studentName, ticketId, college),
+    subject: `${paymentMode === "test" ? "[TEST — NO CHARGE] " : "🎉 "}MohanaMantra 2K26 — Your Entry Pass & QR Code (${ticketId})`,
+    html: buildEmailHtml(studentName, ticketId, college, paymentMode),
     attachments,
   };
 
@@ -103,7 +103,8 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
-function buildEmailHtml(studentName, ticketId, college) {
+function buildEmailHtml(studentName, ticketId, college, paymentMode) {
+  const test = paymentMode === "test";
   const safeName = escapeHtml(studentName);
   const safeTicketId = escapeHtml(ticketId);
   const safeCollege = escapeHtml(college);
@@ -127,7 +128,7 @@ function buildEmailHtml(studentName, ticketId, college) {
                 MOHANA MANTRA 2K26
               </h1>
               <p style="color: #c4a265; font-size: 14px; margin: 8px 0 0; letter-spacing: 4px;">
-                ENTRY PASS CONFIRMATION
+                ${test ? "TEST PAYMENT CONFIRMATION" : "ENTRY PASS CONFIRMATION"}
               </p>
             </td>
           </tr>
@@ -146,12 +147,13 @@ function buildEmailHtml(studentName, ticketId, college) {
                 Dear <strong style="color: #d4a843;">${safeName}</strong>,
               </p>
               <p style="color: #e2dccb; font-size: 15px; line-height: 1.7; margin: 0 0 15px;">
-                Welcome to MohanaMantra 2K26! Your registration is confirmed and payment of 
-                <strong style="color: #d4a843;">₹1,000</strong> has been received successfully.
+                ${test
+                  ? "Your Razorpay test payment of <strong style=\"color: #d4a843;\">₹1,000</strong> was verified. No real money was charged. This registration and its attachments are for testing and are not valid for event entry."
+                  : "Welcome to MohanaMantra 2K26! Your registration is confirmed and payment of <strong style=\"color: #d4a843;\">₹1,000</strong> has been received successfully."}
               </p>
               <p style="color: #e2dccb; font-size: 15px; line-height: 1.7; margin: 0;">
                 Your <strong style="color: #d4a843;">Entry Pass</strong> is attached to this email. 
-                Please save it on your phone or print it — you will need to show the QR code at the gate.
+                ${test ? "Use it to check the test card and local QR verification." : "Please save it on your phone or print it — you will need to show the QR code at the gate."}
               </p>
             </td>
           </tr>
@@ -183,13 +185,13 @@ function buildEmailHtml(studentName, ticketId, college) {
                 <tr>
                   <td style="padding: 15px 20px;">
                     <p style="color: #d4a843; font-size: 14px; font-weight: bold; margin: 0 0 8px;">
-                      ⚠️ Important — Read Before Event Day
+                      ${test ? "TEST PASS — NOT VALID FOR ENTRY" : "⚠️ Important — Read Before Event Day"}
                     </p>
                     <ul style="color: #e2dccb; font-size: 13px; line-height: 1.8; margin: 0; padding-left: 18px;">
-                      <li>Show the QR code on your <strong>Entry Pass</strong> at the college gate</li>
+                      <li>${test ? "This QR code belongs to the local test environment only" : "Show the QR code on your <strong>Entry Pass</strong> at the college gate"}</li>
                       <li>You can show it on your phone screen or bring a printed copy</li>
                       <li><strong style="color:#ff9999;">If your email app uses Dark Mode</strong>, the QR code colors may invert and fail to scan. Please turn off dark mode before showing it, or take a screenshot in light mode</li>
-                      <li>Each QR code can only be scanned <strong>once</strong> — do not share your pass</li>
+                      <li>${test ? "No real payment or event admission is confirmed by this test email" : "Check-in is recorded once per event session — do not share your pass"}</li>
                     </ul>
                   </td>
                 </tr>
@@ -217,4 +219,9 @@ function buildEmailHtml(studentName, ticketId, college) {
 </html>`;
 }
 
-module.exports = { sendIdCardEmail, isEmailConfigured };
+async function verifyEmailTransport() {
+  if (!isEmailConfigured()) throw new Error("The Gmail sender and app password are not configured.");
+  return transporter.verify();
+}
+
+module.exports = { sendIdCardEmail, isEmailConfigured, verifyEmailTransport };

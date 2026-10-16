@@ -6,7 +6,7 @@
 // ==========================================
 
 const Razorpay = require("razorpay");
-require("dotenv").config();
+require("dotenv").config({ path: require("node:path").join(__dirname, ".env.payment-test"), quiet: true });
 
 async function runRazorpayTest() {
   console.log("💳 Testing Razorpay API Order Creation...\n");
@@ -14,12 +14,12 @@ async function runRazorpayTest() {
   const keyId = process.env.RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
-  console.log(`   Key ID     : ${keyId || "NOT SET"}`);
-  console.log(`   Key Secret : ${keySecret ? keySecret.substring(0, 5) + "*****" : "NOT SET"}\n`);
+  console.log(`   Mode: ${/^rzp_test_/.test(keyId || "") ? "test" : "unconfigured"}`);
 
-  if (!keyId || !keySecret || keySecret.includes("YOUR_RAZORPAY_KEY_SECRET")) {
-    console.error("❌ Error: RAZORPAY_KEY_SECRET is not configured in server/.env!");
-    console.log("   Please set your real Razorpay Key Secret in server/.env or Render environment variables.\n");
+  if (process.env.PAYMENT_MODE !== "test" || !/^rzp_test_[A-Za-z0-9]+$/.test(keyId || "") ||
+      !require("./services/registration").isConfiguredSecret(keySecret)) {
+    console.error("Configure the separate test environment with node server/setup-payment-test.js. Live key pairs are refused.");
+    process.exitCode = 1;
     return;
   }
 
@@ -45,7 +45,7 @@ async function runRazorpayTest() {
     console.log(`   Status   : ${order.status}`);
   } catch (error) {
     console.error("\n❌ Razorpay Order Creation Failed!");
-    console.error(`   Error Message: ${error.message}`);
+    console.error(`   Error code: ${error.statusCode || error.code || error.name || "UNKNOWN"}`);
     if (error.statusCode === 401) {
       console.log("\n💡 Solution: Your RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET is invalid or mismatched. Please check your Razorpay Dashboard.");
     }

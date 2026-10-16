@@ -46,7 +46,7 @@ async function run() {
     },
     serverTimestamp: () => FieldValue.serverTimestamp(),
     emailConfigured: () => true,
-    generateTicketId: () => `MM26-${crypto.randomBytes(3).toString('hex').toUpperCase()}`,
+    generateTicketId: () => `MM26-TEST-${crypto.randomBytes(3).toString('hex').toUpperCase()}`,
     sendTicketEmail: async record => {
       mailAttempts.set(record.orderId, (mailAttempts.get(record.orderId) || 0) + 1);
       if (failedMail.has(record.orderId)) throw new Error('Simulated mail failure');
@@ -80,13 +80,13 @@ async function run() {
     const signature = crypto.createHmac('sha256', config.RAZORPAY_WEBHOOK_SECRET).update(raw).digest('hex');
     return service.processWebhook(raw, signature, JSON.parse(raw.toString()));
   }
-  const ticketsFor = orderId => db.collection('registrations').where('orderId', '==', orderId).get();
+  const ticketsFor = orderId => db.collection('testRegistrations').where('orderId', '==', orderId).get();
 
   try {
     let initialOrder;
     await check('Firebase Admin persists pending student details and server timestamps', async () => {
       initialOrder = await service.createOrder(student);
-      const record = (await db.collection('registrationOrders').doc(initialOrder.order_id).get()).data();
+      const record = (await db.collection('testRegistrationOrders').doc(initialOrder.order_id).get()).data();
       assert.equal(record.student.email, student.email);
       assert.equal(record.student.rollNo, student.roll_no);
       assert.equal(record.amount, 100000);
@@ -96,14 +96,14 @@ async function run() {
     });
     await check('Firestore rules deny browser reads of student details and forged writes', async () => {
       const base = `http://${emulatorHost}/v1/projects/${projectId}/databases/(default)/documents`;
-      const read = await fetch(`${base}/registrationOrders/${initialOrder.order_id}`);
+      const read = await fetch(`${base}/testRegistrationOrders/${initialOrder.order_id}`);
       assert.equal(read.status, 403);
-      const write = await fetch(`${base}/registrations?documentId=MM26-CLIENT`, {
+      const write = await fetch(`${base}/testRegistrations?documentId=MM26-CLIENT`, {
         method: 'POST', headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ fields: { paymentStatus: { stringValue: 'Paid' } } }),
       });
       assert.equal(write.status, 403);
-      assert.equal((await db.collection('registrations').doc('MM26-CLIENT').get()).exists, false);
+      assert.equal((await db.collection('testRegistrations').doc('MM26-CLIENT').get()).exists, false);
     });
     await check('A captured payment creates a paid ticket in a real Firestore transaction', async () => {
       const { order, proof } = await preparePaidOrder();
@@ -114,7 +114,7 @@ async function run() {
       const tickets = await ticketsFor(order.order_id);
       assert.equal(tickets.size, 1);
       assert.match(tickets.docs[0].data().secureToken, /^[a-f0-9]{32}$/);
-      const storedOrder = (await db.collection('registrationOrders').doc(order.order_id).get()).data();
+      const storedOrder = (await db.collection('testRegistrationOrders').doc(order.order_id).get()).data();
       assert.equal(storedOrder.ticketId, result.registration.ticketId);
       assert.equal(storedOrder.paymentStatus, 'Paid');
     });
@@ -155,7 +155,7 @@ async function run() {
       payment.amount = 100;
       await assert.rejects(service.verifyCheckout(proof), error => error.code === 'PAYMENT_MISMATCH');
       assert.equal((await ticketsFor(order.order_id)).size, 0);
-      assert.equal((await db.collection('registrationOrders').doc(order.order_id).get()).data().paymentStatus, 'Pending');
+      assert.equal((await db.collection('testRegistrationOrders').doc(order.order_id).get()).data().paymentStatus, 'Pending');
       assert.equal(mailAttempts.has(order.order_id), false);
     });
     await check('The local mail sender consumes the paid queue and skips an unpaid record', async () => {
@@ -163,10 +163,10 @@ async function run() {
       const { order, proof } = await preparePaidOrder();
       assert.equal((await service.verifyCheckout(proof)).registration.emailStatus, 'Pending');
       assert.equal(mailAttempts.has(order.order_id), false);
-      const unpaidRef = db.collection('registrations').doc('unpaid-email-queue-test');
+      const unpaidRef = db.collection('testRegistrations').doc('unpaid-email-queue-test');
       await unpaidRef.create({ paymentStatus: 'Pending', emailStatus: 'Pending' });
       const localSender = createRegistrationService({ ...dependencies, config: { ...config, TICKET_EMAIL_MODE: 'inline' } });
-      const batch = await sendPendingEntryPasses({ db, deliverQueuedEmail: localSender.deliverQueuedEmail });
+      const batch = await sendPendingEntryPasses({ db, config, deliverQueuedEmail: localSender.deliverQueuedEmail });
       assert.equal(batch.sent, 1);
       assert.equal(batch.skipped, 1);
       assert.equal((await service.verifyCheckout(proof)).registration.emailStatus, 'Sent');

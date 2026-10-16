@@ -43,8 +43,8 @@ async function run() {
     sendTicketEmail: async record => {
       const idCardBuffer = await generateIdCard(record);
       const qrBuffer = await generateQRCode(record.ticketId, record.name, record.secureToken);
-      await sendIdCardEmail({ toEmail: record.email, studentName: record.name, ticketId: record.ticketId,
-        college: record.college, idCardBuffer, qrBuffer });
+      return sendIdCardEmail({ toEmail: record.email, studentName: record.name, ticketId: record.ticketId,
+        college: record.college, idCardBuffer, qrBuffer, paymentMode: record.paymentMode });
     },
   });
   try {

@@ -14,7 +14,8 @@
 const jwt = require("jsonwebtoken");
 const QRCode = require("qrcode");
 const { isConfiguredSecret } = require("./registration");
-require("dotenv").config();
+const { paymentEnvironment } = require("./paymentEnvironment");
+require("dotenv").config({ path: require("node:path").join(__dirname, "..", ".env"), quiet: true });
 
 /**
  * Generate a signed JWT token for a student's ticket
@@ -28,6 +29,7 @@ function generateVerificationToken(ticketId, studentName, secureToken) {
     tid: ticketId,
     name: studentName,
     stk: secureToken,
+    mode: paymentEnvironment().mode,
   };
 
   // Sign with our secret. Token never expires (we check status in DB instead)
@@ -59,7 +61,7 @@ async function generateQRCode(ticketId, studentName, secureToken) {
   const token = generateVerificationToken(ticketId, studentName, secureToken);
   const verificationUrl = buildVerificationUrl(token);
 
-  console.log(`🔐 QR Verification URL: ${verificationUrl.substring(0, 60)}...`);
+  console.log(`🔐 QR generated for ${ticketId}`);
 
   // Generate QR code as PNG buffer
   const qrBuffer = await QRCode.toBuffer(verificationUrl, {

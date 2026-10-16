@@ -1,4 +1,5 @@
 const crypto = require("node:crypto");
+const { paymentEnvironment, recordMatchesMode } = require("./paymentEnvironment");
 
 const REGISTRATION_AMOUNT = 100000;
 const REGISTRATION_CURRENCY = "INR";
@@ -52,9 +53,10 @@ function cleanStudentDetails(input) {
   return student;
 }
 
-function validateStoredOrder(order, orderId) {
+function validateStoredOrder(order, orderId, mode) {
   if (!order || order.orderId !== orderId || order.amount !== REGISTRATION_AMOUNT ||
-    order.currency !== REGISTRATION_CURRENCY || !["Pending", "Paid"].includes(order.paymentStatus)) {
+    order.currency !== REGISTRATION_CURRENCY || !["Pending", "Paid"].includes(order.paymentStatus) ||
+    !recordMatchesMode(order, mode)) {
     throw new RegistrationError(400, "INVALID_ORDER", "This registration order could not be validated.");
   }
   try {
@@ -65,8 +67,10 @@ function validateStoredOrder(order, orderId) {
 }
 
 function createRegistrationService({ db, razorpay, config, serverTimestamp, sendTicketEmail, emailConfigured, generateTicketId }) {
+  const environment = paymentEnvironment(config);
   function configurationStatus() {
-    const payment = Boolean(razorpay) && /^rzp_(test|live)_[A-Za-z0-9]+$/.test(config.RAZORPAY_KEY_ID || "") &&
+    const payment = Boolean(razorpay) && paymentEnvironment(config).keyMatchesMode &&
+      paymentEnvironment(config).mode === environment.mode &&
       isConfiguredSecret(config.RAZORPAY_KEY_SECRET);
     const status = {
       payment,
@@ -103,6 +107,7 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
           college_name: student.college,
           roll_no: student.rollNo,
           fest: "MohanaMantra 2K26",
+          payment_mode: environment.mode,
         },
       });
     } catch {
@@ -113,8 +118,9 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
     }
     try {
       // Checkout is offered only after the order and student details are durable.
-      await db.collection("registrationOrders").doc(order.id).create({
+      await db.collection(environment.ordersCollection).doc(order.id).create({
         orderId: order.id,
+        paymentMode: environment.mode,
         student,
         amount: REGISTRATION_AMOUNT,
         currency: REGISTRATION_CURRENCY,
@@ -124,11 +130,12 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
     } catch {
       throw new RegistrationError(503, "REGISTRATION_UNAVAILABLE", "We couldn't save your registration details. Please try again before paying.");
     }
-    return { success: true, order_id: order.id, amount: order.amount, currency: order.currency, key_id: config.RAZORPAY_KEY_ID };
+    return { success: true, order_id: order.id, amount: order.amount, currency: order.currency,
+      key_id: config.RAZORPAY_KEY_ID, paymentMode: environment.mode };
   }
 
   async function readStoredOrder(orderId) {
-    const reference = db.collection("registrationOrders").doc(orderId);
+    const reference = db.collection(environment.ordersCollection).doc(orderId);
     let snapshot;
     try {
       snapshot = await reference.get();
@@ -139,7 +146,7 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
       throw new RegistrationError(400, "UNKNOWN_ORDER", "This payment order was not created for an MM registration.");
     }
     const order = snapshot.data();
-    validateStoredOrder(order, orderId);
+    validateStoredOrder(order, orderId, environment.mode);
     return { reference, order };
   }
 
@@ -167,24 +174,25 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
 
   async function savePaidRegistration(orderReference, payment) {
     for (let attempt = 0; attempt < 5; attempt++) {
-      const ticketId = generateTicketId();
-      const ticketReference = db.collection("registrations").doc(ticketId);
+      const ticketId = generateTicketId(environment.mode);
+      const ticketReference = db.collection(environment.registrationsCollection).doc(ticketId);
       try {
         return await db.runTransaction(async transaction => {
           const orderSnapshot = await transaction.get(orderReference);
           if (!orderSnapshot.exists) throw new RegistrationError(400, "UNKNOWN_ORDER", "This registration order could not be found.");
           const order = orderSnapshot.data();
-          const student = validateStoredOrder(order, orderReference.id);
+          const student = validateStoredOrder(order, orderReference.id, environment.mode);
           if (order.paymentId && order.paymentId !== payment.id) {
             throw new RegistrationError(409, "PAYMENT_CONFLICT", "This order already has a confirmed registration.");
           }
           if (order.ticketId) {
-            const existingReference = db.collection("registrations").doc(order.ticketId);
+            const existingReference = db.collection(environment.registrationsCollection).doc(order.ticketId);
             const existingSnapshot = await transaction.get(existingReference);
             if (!existingSnapshot.exists) throw new Error("Registration mapping is incomplete");
             const record = existingSnapshot.data();
             if (record.ticketId !== order.ticketId || record.orderId !== order.orderId || record.paymentId !== payment.id ||
-              record.paymentStatus !== "Paid" || record.amountPaise !== REGISTRATION_AMOUNT || record.currency !== REGISTRATION_CURRENCY) {
+              record.paymentStatus !== "Paid" || record.amountPaise !== REGISTRATION_AMOUNT || record.currency !== REGISTRATION_CURRENCY ||
+              !recordMatchesMode(record, environment.mode)) {
               throw new Error("Registration mapping does not match its payment");
             }
             return { reference: existingReference, record };
@@ -194,6 +202,7 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
           if (ticketSnapshot.exists) throw new RegistrationError(409, "TICKET_COLLISION", "Please retry payment confirmation.");
           const record = {
             ticketId,
+            paymentMode: environment.mode,
             ...student,
             orderId: order.orderId,
             paymentId: payment.id,
@@ -234,7 +243,8 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
         const snapshot = await transaction.get(reference);
         const record = snapshot.data();
         if (!record || record.paymentStatus !== "Paid" || record.amountPaise !== REGISTRATION_AMOUNT ||
-          record.currency !== REGISTRATION_CURRENCY || !validId(record.paymentId, "pay")) {
+          record.currency !== REGISTRATION_CURRENCY || !validId(record.paymentId, "pay") ||
+          !recordMatchesMode(record, environment.mode)) {
           throw new Error("Only confirmed paid registrations can receive an entry-pass email");
         }
         if (record.emailStatus === "Sent") return { status: "Sent" };
@@ -257,10 +267,13 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
     }
     if (claim.status) return claim.status;
     let status = "Sent";
+    let delivery;
+    let failureCode;
     try {
-      await sendTicketEmail(claim.record);
-    } catch {
+      delivery = await sendTicketEmail(claim.record);
+    } catch (error) {
       status = "Failed";
+      failureCode = /^[A-Z0-9_]{1,50}$/.test(String(error.code || "")) ? error.code : "DELIVERY_FAILED";
     }
     try {
       return await db.runTransaction(async transaction => {
@@ -270,7 +283,9 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
         transaction.update(reference, {
           emailStatus: status,
           emailLeaseUntil: 0,
-          ...(status === "Sent" ? { emailSentAt: serverTimestamp() } : {}),
+          emailFailureCode: failureCode || null,
+          ...(status === "Sent" ? { emailSentAt: serverTimestamp(),
+            ...(typeof delivery?.messageId === "string" ? { emailMessageId: delivery.messageId } : {}) } : {}),
         });
         return status;
       });
@@ -294,6 +309,7 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
         paymentId: record.paymentId,
         amount: record.amount,
         paymentStatus: record.paymentStatus,
+        paymentMode: environment.mode,
         emailStatus,
       },
     };

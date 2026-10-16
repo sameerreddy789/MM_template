@@ -6,11 +6,14 @@ export interface RegistrationDetails {
   roll_no: string;
 }
 
+export type PaymentMode = "test" | "live";
+
 export interface PaymentOrder {
   order_id: string;
   key_id: string;
   amount: number;
   currency: "INR";
+  paymentMode: PaymentMode;
 }
 
 export interface PaymentProof {
@@ -24,9 +27,9 @@ export class CheckoutConfirmationError extends Error {}
 const pendingCheckoutKey = "mm26:pending-checkout";
 
 // Keep a payment recoverable in this tab without storing student details or server secrets.
-export function readPendingCheckout(): { orderId: string; proof: PaymentProof | null } | null {
+export function readPendingCheckout(mode: PaymentMode): { orderId: string; proof: PaymentProof | null } | null {
   try {
-    const pending = object(JSON.parse(window.sessionStorage.getItem(pendingCheckoutKey) || "null"));
+    const pending = object(JSON.parse(window.sessionStorage.getItem(`${pendingCheckoutKey}:${mode}`) || "null"));
     if (typeof pending.orderId !== "string" || !/^order_[A-Za-z0-9_]{1,64}$/.test(pending.orderId)) return null;
     const proof = object(pending.proof);
     return {
@@ -41,17 +44,17 @@ export function readPendingCheckout(): { orderId: string; proof: PaymentProof | 
   }
 }
 
-export function savePendingCheckout(orderId: string, proof: PaymentProof | null = null) {
+export function savePendingCheckout(mode: PaymentMode, orderId: string, proof: PaymentProof | null = null) {
   try {
-    window.sessionStorage.setItem(pendingCheckoutKey, JSON.stringify({ orderId, proof }));
+    window.sessionStorage.setItem(`${pendingCheckoutKey}:${mode}`, JSON.stringify({ orderId, proof }));
   } catch {
     // Checkout and verification still work if this browser blocks session storage.
   }
 }
 
-export function clearPendingCheckout() {
+export function clearPendingCheckout(mode: PaymentMode) {
   try {
-    window.sessionStorage.removeItem(pendingCheckoutKey);
+    window.sessionStorage.removeItem(`${pendingCheckoutKey}:${mode}`);
   } catch {
     // No persisted checkout exists when storage is unavailable.
   }
@@ -64,6 +67,7 @@ export interface ConfirmedRegistration {
   paymentId: string;
   amount: number;
   paymentStatus: "Paid";
+  paymentMode: PaymentMode;
   emailStatus: "Pending" | "Sending" | "Sent" | "Failed";
 }
 
@@ -137,29 +141,34 @@ async function request(endpoint: string, body?: unknown, signal?: AbortSignal) {
   }
 }
 
-export async function checkRegistrationAvailability(signal?: AbortSignal): Promise<boolean> {
+export async function checkRegistrationAvailability(signal?: AbortSignal): Promise<{ ready: boolean; paymentMode: PaymentMode }> {
   const status = await request("/api/registration-status", undefined, signal);
-  return status.ready === true && status.amount === feeInPaise && status.currency === "INR";
+  if (status.paymentMode !== "test" && status.paymentMode !== "live") {
+    throw new Error("The payment environment could not be verified. Please try again before paying.");
+  }
+  return { ready: status.ready === true && status.amount === feeInPaise && status.currency === "INR", paymentMode: status.paymentMode };
 }
 
 export async function createRegistrationOrder(details: RegistrationDetails, signal?: AbortSignal): Promise<PaymentOrder> {
   const data = await request("/api/register", details, signal);
   if (data.success !== true || typeof data.order_id !== "string" || !/^order_[A-Za-z0-9_]{1,64}$/.test(data.order_id) ||
     typeof data.key_id !== "string" || !/^rzp_(test|live)_[A-Za-z0-9]+$/.test(data.key_id) ||
+    (data.paymentMode !== "test" && data.paymentMode !== "live") || !data.key_id.startsWith(`rzp_${data.paymentMode}_`) ||
     data.amount !== feeInPaise || data.currency !== "INR") {
     throw new Error("Your payment order could not be validated. Please try again before paying.");
   }
-  return { order_id: data.order_id, key_id: data.key_id, amount: feeInPaise, currency: "INR" };
+  return { order_id: data.order_id, key_id: data.key_id, amount: feeInPaise, currency: "INR", paymentMode: data.paymentMode };
 }
 
-export async function verifyRegistrationPayment(proof: PaymentProof, signal?: AbortSignal): Promise<PaymentConfirmation> {
+export async function verifyRegistrationPayment(proof: PaymentProof, mode: PaymentMode, signal?: AbortSignal): Promise<PaymentConfirmation> {
   const data = await request("/api/payment-verify", proof, signal);
   if (data.success === false && data.paymentStatus === "Pending") {
     return { success: false, paymentStatus: "Pending" };
   }
   const registration = object(data.registration);
   if (data.success !== true || registration.paymentStatus !== "Paid" || registration.amount !== feeInPaise / 100 ||
-    typeof registration.ticketId !== "string" || !/^MM26-[A-F0-9]{6}$/.test(registration.ticketId) ||
+    registration.paymentMode !== mode || typeof registration.ticketId !== "string" ||
+    !(mode === "test" ? /^MM26-TEST-[A-F0-9]{6}$/ : /^MM26-[A-F0-9]{6}$/).test(registration.ticketId) ||
     typeof registration.name !== "string" || typeof registration.email !== "string" ||
     registration.paymentId !== proof.razorpay_payment_id ||
     !["Pending", "Sending", "Sent", "Failed"].includes(String(registration.emailStatus))) {
@@ -215,7 +224,7 @@ export async function openRegistrationCheckout(order: PaymentOrder, details: Reg
       amount: order.amount,
       currency: order.currency,
       name: "MohanaMantra 2K26",
-      description: "Festival registration",
+      description: order.paymentMode === "test" ? "TEST festival registration — no real charge" : "Festival registration",
       prefill: { name: details.name, email: details.email, contact: details.phone },
       theme: { color: "#861b24" },
       handler: response => {
