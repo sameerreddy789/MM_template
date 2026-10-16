@@ -105,7 +105,7 @@ async function run() {
       assert.equal(write.status, 403);
       assert.equal((await db.collection('testRegistrations').doc('MM26-CLIENT').get()).exists, false);
     });
-    await check('A captured payment creates a paid ticket in a real Firestore transaction', async () => {
+    await check('A captured payment persists a paid ticket and four pending sessions in a real transaction', async () => {
       const { order, proof } = await preparePaidOrder();
       const result = await service.verifyCheckout(proof);
       assert.equal(result.registration.paymentStatus, 'Paid');
@@ -114,6 +114,12 @@ async function run() {
       const tickets = await ticketsFor(order.order_id);
       assert.equal(tickets.size, 1);
       assert.match(tickets.docs[0].data().secureToken, /^[a-f0-9]{32}$/);
+      const sessions = tickets.docs[0].data().checkInSessions;
+      const sessionKeys = ['day1_am', 'day1_pm', 'day2_am', 'day2_pm'];
+      assert.deepEqual(Object.keys(sessions).sort(), [...sessionKeys].sort());
+      for (const session of sessionKeys) {
+        assert.deepEqual(sessions[session], { checkedIn: false, timestamp: null, gatekeeper: null });
+      }
       const storedOrder = (await db.collection('testRegistrationOrders').doc(order.order_id).get()).data();
       assert.equal(storedOrder.ticketId, result.registration.ticketId);
       assert.equal(storedOrder.paymentStatus, 'Paid');

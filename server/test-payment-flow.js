@@ -404,6 +404,50 @@ async function run() {
   const staff = (ticketId, sessionKey) => post('/api/gatekeeper/checkin', {
     adminKey: baseEnv.ADMIN_KEY, adminSecret: baseEnv.ADMIN_SECRET, ticketId, sessionKey,
   });
+  const staffVerify = input => post('/api/gatekeeper/verify', {
+    adminKey: baseEnv.ADMIN_KEY, adminSecret: baseEnv.ADMIN_SECRET, ...input,
+  });
+  const sessionKeys = ['day1_am', 'day1_pm', 'day2_am', 'day2_pm'];
+  await check('Fresh paid tickets persist all four unchecked sessions', async () => {
+    const paid = await verify();
+    const record = registrations().get(paid.body.registration.ticketId);
+    assert.deepEqual(Object.keys(record.checkInSessions || {}), sessionKeys);
+    for (const key of sessionKeys) {
+      assert.equal(record.checkInSessions[key].checkedIn, false);
+      assert.equal(record.checkInSessions[key].timestamp, null);
+      assert.equal(record.checkInSessions[key].gatekeeper, null);
+    }
+  });
+  await check('Admin login identifies the active payment mode and rejects bad credentials', async () => {
+    const login = await post('/api/gatekeeper/login', { adminKey: baseEnv.ADMIN_KEY, adminSecret: baseEnv.ADMIN_SECRET });
+    assert.equal(login.status, 200);
+    assert.equal(login.body.paymentMode, 'test');
+    assert.equal((await post('/api/gatekeeper/login', { adminKey: baseEnv.ADMIN_KEY, adminSecret: 'wrong-secret' })).status, 401);
+    assert.equal((await post('/api/gatekeeper/verify', { ticketId: 'MM26-TEST-C0FFEE' })).status, 401);
+    assert.equal((await post('/api/gatekeeper/checkin', { ticketId: 'MM26-TEST-C0FFEE', sessionKey: 'day1_am' })).status, 401);
+  });
+  await check('Malformed ticket identifiers are rejected before a database lookup', async () => {
+    for (const ticketId of ['wrong/id', 'MM26-C0FFEE', 'MM26-TEST-C0FFEE/other/doc', {}, 7]) {
+      assert.equal((await staffVerify({ ticketId })).status, 400);
+    }
+  });
+  await check('All four sessions record staff and time once while preserving earlier sessions', async () => {
+    const paid = await verify();
+    const ticketId = paid.body.registration.ticketId;
+    for (const key of sessionKeys) {
+      const entered = await staff(ticketId, key);
+      assert.equal(entered.status, 200);
+      assert.equal(entered.body.sessionKey, key);
+      assert.equal(entered.body.checkInSessions[key].gatekeeper, baseEnv.ADMIN_KEY);
+      assert.ok(!Number.isNaN(Date.parse(entered.body.checkInSessions[key].timestamp)));
+      const before = structuredClone(registrations().get(ticketId).checkInSessions);
+      const repeated = await staff(ticketId, key);
+      assert.equal(repeated.status, 400);
+      assert.equal(repeated.body.code, 'ALREADY_CHECKED_IN');
+      assert.deepEqual(registrations().get(ticketId).checkInSessions, before);
+    }
+    assert.ok(sessionKeys.every(key => registrations().get(ticketId).checkInSessions[key].checkedIn));
+  });
   await check('Concurrent scans admit a paid ticket once in the same session', async () => {
     const paid = await verify();
     state.delayReads = true;

@@ -1,5 +1,6 @@
 const crypto = require("node:crypto");
 const { paymentEnvironment, recordMatchesMode } = require("./paymentEnvironment");
+const { createCheckInSessions } = require("./checkInSessions");
 
 const REGISTRATION_AMOUNT = 100000;
 const REGISTRATION_CURRENCY = "INR";
@@ -211,6 +212,7 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
             currency: REGISTRATION_CURRENCY,
             paymentStatus: "Paid",
             checkInStatus: "Not Checked In",
+            checkInSessions: createCheckInSessions(),
             checkedInAt: null,
             secureToken: crypto.randomBytes(16).toString("hex"),
             emailStatus: "Pending",

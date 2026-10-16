@@ -125,6 +125,43 @@ Open `http://localhost:5173/register`. The five-field form remains visible when 
 
 After checkout returns valid proof, the browser asks the API to verify it. Pending confirmation offers **Check payment status** and blocks another payment. Confirmation data is kept in this browser tab's session storage to support refresh/recovery without saving student details or server secrets. An incomplete checkout confirmation blocks another payment and directs the student to the registration team with the order ID.
 
+## Staff verification and four-session check-in
+
+The local staff portal is [http://localhost:5173/gatekeeper](http://localhost:5173/gatekeeper). With the private payment-test backend running, sign in using `ADMIN_KEY` and `ADMIN_SECRET` from ignored `server/.env.payment-test`. Keep the password private. Production uses the separately configured credentials on the deployed backend; the public route is [https://mohanamantra.com/gatekeeper](https://mohanamantra.com/gatekeeper).
+
+The portal uses two deliberate steps:
+
+1. Select Day 1 Morning, Day 1 Evening, Day 2 Morning, or Day 2 Evening, then scan the QR with the camera, upload/drop/paste a pass image, or enter its ticket ID or QR link.
+2. Check the verified student details and select **Confirm entry** to save that session. Test Mode uses **Record test check-in** and displays that the pass is not valid for event entry.
+
+A scan alone does not admit the student or write a check-in. Successful confirmation records `checkedIn: true`, an ISO timestamp, and the configured staff ID in the selected session. The history shows each session's time in India time and its admin ID. An already checked-in session disables its confirmation action; the server also rejects repeated or concurrent entry attempts atomically.
+
+| Collection in Test Mode | What it stores |
+| --- | --- |
+| `testRegistrationOrders` | Form details, the server-created Razorpay order, pending/paid state, and the issued-ticket mapping |
+| `testRegistrations` | The paid entry pass, email state, private QR token, and all four check-in sessions |
+
+Live mode uses `registrationOrders` and `registrations`. Pending order records do not have a usable entry pass. Two collections preserve the payment record and the issued ticket separately; scanning reads the paid-ticket collection.
+
+Every newly paid ticket saves all four entries immediately:
+
+```json
+{
+  "checkInSessions": {
+    "day1_am": { "checkedIn": false, "timestamp": null, "gatekeeper": null },
+    "day1_pm": { "checkedIn": false, "timestamp": null, "gatekeeper": null },
+    "day2_am": { "checkedIn": false, "timestamp": null, "gatekeeper": null },
+    "day2_pm": { "checkedIn": false, "timestamp": null, "gatekeeper": null }
+  }
+}
+```
+
+Older partial records receive defaults when verified; the next successful check-in persists the complete matrix while preserving existing session history. A general `checkInStatus: Checked In` means at least one session was recorded. Each later session remains independently eligible until its own flag is set.
+
+A new verification clears the previous student's result. Session, ticket, camera and image controls remain locked through verification/check-in, including image decoding. Logout cancels pending requests and camera startup; expired credentials return to sign-in. Ticket IDs and signed-token links use the same parser across input methods. Private QR routes are excluded from the application's analytics calls and use a canonical URL without the token.
+
+Both actual emailed PNG attachments were decoded in the browser and verified against the existing cloud test ticket. All four sessions and duplicate rejection were then confirmed by direct Firestore readback. Physical camera hardware was not exercised; camera permission failure and startup cancellation were tested separately with a local substitute.
+
 ## Safe local checks
 
 The isolated route checks use the actual Express routes with substituted Razorpay, Firestore, QR/card generation, and email:
@@ -141,7 +178,7 @@ npx --yes firebase-tools emulators:exec --only firestore --project demo-mohana-m
 
 Browser QA can inject `testing/payment-gateway/browser-fixture.js` only into a separate local test browser. It substitutes checkout and all payment API calls on the localhost origin. It is never imported by the application.
 
-`testing/payment-gateway/gatekeeper-fixture.js` similarly tests QR-link selection in an isolated browser with synthetic staff/session data. Real QR signatures and check-in were also checked separately against the cloud test ticket. Neither fixture belongs in the browser used for the genuine Razorpay trial.
+`testing/payment-gateway/gatekeeper-fixture.js` tests staff login, QR/input parsing, held or failed requests, duplicate check-ins, and session state in an isolated browser with synthetic staff/session data. Both emailed PNG attachments and all four real check-ins were checked separately against the cloud test ticket. Neither fixture belongs in the browser used for the genuine Razorpay trial.
 
 The legacy `test-full-pipeline.js` and `create-test002.js` manually fabricate payment fixtures. They now refuse cloud execution and require both the test environment and a loopback Firestore emulator. They cannot validate a real Razorpay payment. The standalone email/order diagnostics also require the separate test environment and never log credential prefixes.
 

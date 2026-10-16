@@ -4,9 +4,10 @@ import { useLocation } from "react-router-dom";
 
 const useCanonicalUrl = (baseUrl: string) => {
   const location = useLocation();
-  const BaseUrl = baseUrl;
   useEffect(() => {
-    const canonicalUrl = BaseUrl + location.pathname;
+    const canonicalPath = location.pathname.startsWith("/gatekeeper")
+      ? "/gatekeeper" : location.pathname;
+    const canonicalUrl = baseUrl + canonicalPath;
 
     let canonicalLink: HTMLLinkElement | null = document.querySelector(
       "link[rel='canonical']"

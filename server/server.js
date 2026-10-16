@@ -27,6 +27,7 @@ const { generateQRCode } = require("./services/qr");
 const { sendIdCardEmail, isEmailConfigured } = require("./services/email");
 const { createRegistrationService, RegistrationError, isConfiguredSecret, REGISTRATION_AMOUNT, REGISTRATION_CURRENCY } = require("./services/registration");
 const { paymentEnvironment, recordMatchesMode } = require("./services/paymentEnvironment");
+const { SESSION_NAMES, normalizeCheckInSessions } = require("./services/checkInSessions");
 const environment = paymentEnvironment(process.env);
 
 // ==========================================
@@ -365,7 +366,7 @@ function isValidAdmin(adminKey, adminSecret) {
 
 // ROUTE: POST /api/gatekeeper/login
 app.post("/api/gatekeeper/login", authLimiter, (req, res) => {
-  const { adminKey, adminSecret } = req.body;
+  const { adminKey, adminSecret } = req.body || {};
   if (!adminKey || !adminSecret || !isValidAdmin(adminKey, adminSecret)) {
     return res.status(401).json({
       success: false,
@@ -377,13 +378,14 @@ app.post("/api/gatekeeper/login", authLimiter, (req, res) => {
     success: true,
     message: "Admin authentication successful",
     adminKey,
+    paymentMode: environment.mode,
   });
 });
 
 // ROUTE: POST /api/gatekeeper/verify
 app.post("/api/gatekeeper/verify", staffLimiter, async (req, res) => {
   try {
-    const { token, ticketId, adminKey, adminSecret } = req.body;
+    const { token, ticketId, adminKey, adminSecret } = req.body || {};
 
     if (!isValidAdmin(adminKey, adminSecret)) {
       return res.status(401).json({ success: false, error: "Unauthorized admin credentials." });
@@ -412,12 +414,12 @@ app.post("/api/gatekeeper/verify", staffLimiter, async (req, res) => {
     }
     }
 
-    if (!targetTicketId) {
-      return res.status(400).json({ success: false, error: "Ticket ID or token required." });
+    if (typeof targetTicketId !== "string" || !new RegExp(`^${environment.ticketPrefix}[A-F0-9]{6}$`).test(targetTicketId)) {
+      return res.status(400).json({ success: false, error: "Enter a valid ticket ID for this payment environment." });
     }
 
     if (!db) {
-      return res.status(500).json({ success: false, error: "Firestore database not connected." });
+      return res.status(503).json({ success: false, error: "Firestore database not connected." });
     }
 
     const docRef = db.collection(environment.registrationsCollection).doc(targetTicketId);
@@ -428,21 +430,14 @@ app.post("/api/gatekeeper/verify", staffLimiter, async (req, res) => {
     }
 
     const student = docSnap.data();
-    if (!recordMatchesMode(student, environment.mode) || student.paymentStatus !== "Paid") {
+    if (student.ticketId !== targetTicketId || !recordMatchesMode(student, environment.mode) || student.paymentStatus !== "Paid") {
       return res.status(400).json({ success: false, error: "This pass does not have a confirmed payment in this environment." });
     }
     if (decodedTicket && !timingSafeCompare(decodedTicket.stk, student.secureToken)) {
       return res.status(400).json({ success: false, error: "This QR code does not match the issued pass." });
     }
 
-    const defaultSessions = {
-      day1_am: { checkedIn: false, timestamp: null },
-      day1_pm: { checkedIn: false, timestamp: null },
-      day2_am: { checkedIn: false, timestamp: null },
-      day2_pm: { checkedIn: false, timestamp: null },
-    };
-
-    const checkInSessions = student.checkInSessions || defaultSessions;
+    const checkInSessions = normalizeCheckInSessions(student.checkInSessions);
 
     return res.status(200).json({
       success: true,
@@ -461,22 +456,15 @@ app.post("/api/gatekeeper/verify", staffLimiter, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("❌ Gatekeeper verify error:", error);
-    return res.status(500).json({ success: false, error: "Failed to verify ticket." });
+    console.error("❌ Gatekeeper verify error:", error.code || error.name);
+    return res.status(503).json({ success: false, error: "Ticket verification is temporarily unavailable. Please try again." });
   }
 });
-
-const SESSION_NAMES = {
-  day1_am: "Day 1 Morning",
-  day1_pm: "Day 1 Evening",
-  day2_am: "Day 2 Morning",
-  day2_pm: "Day 2 Evening",
-};
 
 // ROUTE: POST /api/gatekeeper/checkin
 app.post("/api/gatekeeper/checkin", staffLimiter, async (req, res) => {
   try {
-    const { ticketId, sessionKey = "day1_am", adminKey, adminSecret } = req.body;
+    const { ticketId, sessionKey = "day1_am", adminKey, adminSecret } = req.body || {};
 
     if (!isValidAdmin(adminKey, adminSecret)) {
       return res.status(401).json({ success: false, error: "Unauthorized admin credentials." });
@@ -496,18 +484,16 @@ app.post("/api/gatekeeper/checkin", staffLimiter, async (req, res) => {
       const snapshot = await transaction.get(docRef);
       if (!snapshot.exists) throw new RegistrationError(404, "TICKET_NOT_FOUND", "Ticket not found.");
       const student = snapshot.data();
-      if (!recordMatchesMode(student, environment.mode) || student.paymentStatus !== "Paid") {
+      if (student.ticketId !== ticketId || !recordMatchesMode(student, environment.mode) || student.paymentStatus !== "Paid") {
         throw new RegistrationError(400, "PAYMENT_INCOMPLETE", "This pass does not have a confirmed payment in this environment.");
       }
-      const sessions = student.checkInSessions || {
-        day1_am: { checkedIn: false, timestamp: null }, day1_pm: { checkedIn: false, timestamp: null },
-        day2_am: { checkedIn: false, timestamp: null }, day2_pm: { checkedIn: false, timestamp: null },
-      };
+      const sessions = normalizeCheckInSessions(student.checkInSessions);
       const currentSession = sessions[sessionKey] || { checkedIn: false, timestamp: null };
       if (currentSession.checkedIn) {
         const error = new RegistrationError(400, "ALREADY_CHECKED_IN", `Student is already checked in for ${sessionName}!`);
         error.checkedInAt = currentSession.timestamp;
         error.checkInSessions = sessions;
+        error.sessionKey = sessionKey;
         throw error;
       }
       const nowIso = new Date().toISOString();
@@ -529,7 +515,7 @@ app.post("/api/gatekeeper/checkin", staffLimiter, async (req, res) => {
   } catch (error) {
     if (error instanceof RegistrationError) {
       return res.status(error.status).json({ success: false, code: error.code, error: error.message,
-        ...(error.code === "ALREADY_CHECKED_IN" ? { checkedInAt: error.checkedInAt, checkInSessions: error.checkInSessions } : {}) });
+        ...(error.code === "ALREADY_CHECKED_IN" ? { checkedInAt: error.checkedInAt, checkInSessions: error.checkInSessions, sessionKey: error.sessionKey } : {}) });
     }
     console.error("❌ Gatekeeper check-in error:", error.code || error.name);
     return res.status(503).json({ success: false, error: "Check-in is temporarily unavailable. Please try again." });
