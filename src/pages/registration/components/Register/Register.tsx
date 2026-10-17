@@ -15,26 +15,19 @@ import {
   type RegistrationDetails,
 } from "../../../../utils/registrationApi";
 import styles from "./Register.module.scss";
-import { registrationFormEnabled } from "../../../../utils/registrationSettings";
 
-type Availability = "checking" | "ready" | "unavailable";
+type Availability = "checking" | "ready" | "unavailable" | "closed";
 type Phase = "idle" | "creating" | "checkout" | "verifying";
 const initialDetails: RegistrationDetails = { name: "", email: "", phone: "", college: "", roll_no: "" };
 
-function Register() {
-  if (!registrationFormEnabled) {
-    return (
-      <section className={styles.registerContainer} aria-labelledby="registration-heading">
-        <div className={styles.content}>
-          <h1 id="registration-heading" className={styles.heading}>Registrations temporarily closed</h1>
-          <p className={styles.description}>
-            We’re updating the registration system. Please check back for updates.
-          </p>
-        </div>
-      </section>
-    );
-  }
+function formatRupees(amountPaise: number) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency", currency: "INR",
+    minimumFractionDigits: amountPaise % 100 === 0 ? 0 : 2, maximumFractionDigits: 2,
+  }).format(amountPaise / 100);
+}
 
+function Register() {
   return <RegistrationForm />;
 }
 
@@ -68,7 +61,7 @@ function RegistrationForm() {
           previousOrder.current = null;
           loadedMode.current = status.paymentMode;
         }
-        setAvailability(status.ready ? "ready" : "unavailable");
+        setAvailability(status.ready ? "ready" : status.registrationsOpen ? "unavailable" : "closed");
       }
     } catch {
       if (mounted.current) setAvailability("unavailable");
@@ -209,7 +202,11 @@ function RegistrationForm() {
           <dl className={styles.receipt}>
             <dt>Ticket ID</dt><dd>{registration.ticketId}</dd>
             <dt>Name</dt><dd>{registration.name}</dd>
-            <dt>{registration.paymentMode === "test" ? "Test amount" : "Paid"}</dt><dd>₹1,000</dd>
+            <dt>{registration.paymentMode === "test" ? "Test registration fee" : "Registration fee"}</dt><dd>₹1,000</dd>
+            {registration.checkoutFeePaise > 0 && <>
+              <dt>Razorpay checkout fee</dt><dd>{formatRupees(registration.checkoutFeePaise)}</dd>
+              <dt>{registration.paymentMode === "test" ? "Test total" : "Total paid"}</dt><dd>{formatRupees(registration.paymentAmountPaise)}</dd>
+            </>}
             <dt>Payment ID</dt><dd>{registration.paymentId}</dd>
           </dl>
           {registration.paymentMode === "test" && <p className={styles.testNotice}>Test pass only — not valid for event entry.</p>}
@@ -223,6 +220,25 @@ function RegistrationForm() {
           </button>}
           {emailSent && <button className={styles.retryButton} type="button" onClick={registerAnotherStudent}>Register another student</button>}
           {error && <p className={styles.error} role="alert">{error}</p>}
+        </div>
+      </section>
+    );
+  }
+
+  if (!proof && !uncertainOrderId && availability !== "ready") {
+    return (
+      <section className={styles.registerContainer} aria-labelledby="registration-heading">
+        <div className={styles.content}>
+          <h1 id="registration-heading" className={styles.heading}>
+            {availability === "checking" ? "Checking registration availability"
+              : availability === "closed" ? "Registrations temporarily closed" : "Registration temporarily unavailable"}
+          </h1>
+          <p className={styles.description} role="status">
+            {availability === "checking" ? "Connecting to registration. This may take a moment."
+              : availability === "closed" ? "We’re updating the registration system. Please check back for updates."
+                : "We couldn’t confirm registration availability. Please try again shortly."}
+          </p>
+          {availability !== "checking" && <button className={styles.retryButton} type="button" onClick={() => void checkAvailability()}>Check again</button>}
         </div>
       </section>
     );
@@ -272,6 +288,7 @@ function RegistrationForm() {
             </div>
           </fieldset>
           <p className={styles.fee}>{paymentMode === "test" ? "Simulated registration fee" : "Registration fee"} <strong>₹1,000</strong></p>
+          <p className={styles.note}>Razorpay shows any additional checkout fee before you pay.</p>
           {proof ? (
             <>
               <p className={styles.note} role="status">

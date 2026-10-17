@@ -39,6 +39,7 @@ interface GatekeeperResponse {
   error?: string;
   code?: string;
   paymentMode?: PaymentMode;
+  availableModes?: PaymentMode[];
   student?: StudentData;
   ticketId?: string;
   sessionKey?: SessionKey;
@@ -122,6 +123,12 @@ const Gatekeeper: React.FC = () => {
   const [paymentMode, setPaymentMode] = useState<PaymentMode | null>(() => {
     const mode = sessionStorage.getItem("mm26_admin_mode");
     return mode === "test" || mode === "live" ? mode : null;
+  });
+  const [availableModes, setAvailableModes] = useState<PaymentMode[]>(() => {
+    try {
+      const modes: unknown = JSON.parse(sessionStorage.getItem("mm26_admin_modes") || "[]");
+      return Array.isArray(modes) ? modes.filter((mode): mode is PaymentMode => mode === "live" || mode === "test") : [];
+    } catch { return []; }
   });
   const [inputKey, setInputKey] = useState("");
   const [inputSecret, setInputSecret] = useState("");
@@ -212,10 +219,12 @@ const Gatekeeper: React.FC = () => {
     sessionStorage.removeItem("mm26_admin_key");
     sessionStorage.removeItem("mm26_admin_secret");
     sessionStorage.removeItem("mm26_admin_mode");
+    sessionStorage.removeItem("mm26_admin_modes");
     setAdminKey("");
     setAdminSecret("");
     setInputSecret("");
     setPaymentMode(null);
+    setAvailableModes([]);
     setIsAuthenticated(false);
     setTicketInput("");
     setStudent(null);
@@ -234,20 +243,25 @@ const Gatekeeper: React.FC = () => {
     if (!operation) return;
     const key = inputKey.trim();
     const secret = inputSecret;
+    const requestedMode = new URLSearchParams(location.search).get("mode");
     try {
       const { data } = await fetchBackend("/api/gatekeeper/login", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ adminKey: key, adminSecret: secret }),
+        body: JSON.stringify({ adminKey: key, adminSecret: secret,
+          ...((requestedMode === "live" || requestedMode === "test") ? { paymentMode: requestedMode } : {}) }),
         signal: operation.controller.signal,
       });
       if (!isCurrent(operation)) return;
       if (data.success && (data.paymentMode === "test" || data.paymentMode === "live")) {
+        const modes = data.availableModes?.filter(mode => mode === "live" || mode === "test") || [data.paymentMode];
         sessionStorage.setItem("mm26_admin_key", key);
         sessionStorage.setItem("mm26_admin_secret", secret);
         sessionStorage.setItem("mm26_admin_mode", data.paymentMode);
+        sessionStorage.setItem("mm26_admin_modes", JSON.stringify(modes));
         setAdminKey(key);
         setAdminSecret(secret);
         setPaymentMode(data.paymentMode);
+        setAvailableModes(modes);
         setInputSecret("");
         setIsAuthenticated(true);
       } else {
@@ -268,13 +282,13 @@ const Gatekeeper: React.FC = () => {
     try {
       const { status, data } = await fetchBackend("/api/gatekeeper/verify", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ adminKey, adminSecret, ...pass }),
+        body: JSON.stringify({ adminKey, adminSecret, paymentMode, ...pass }),
         signal: operation.controller.signal,
       });
       if (!isCurrent(operation)) return;
       if (status === 401) { expireLogin(); return; }
       const verified = data.student;
-      const correctMode = verified && (verified.paymentMode === "test" || verified.paymentMode === "live")
+      const correctMode = verified && verified.paymentMode === paymentMode
         && (verified.paymentMode === "test" ? /^MM26-TEST-[A-F0-9]{6}$/ : /^MM26-[A-F0-9]{6}$/).test(verified.ticketId);
       if (data.success && verified && correctMode && verified.paymentStatus === "Paid"
         && (!("ticketId" in pass) || pass.ticketId === verified.ticketId)) {
@@ -288,7 +302,7 @@ const Gatekeeper: React.FC = () => {
       if (isCurrent(operation)) setError(operation.controller.signal.aborted
         ? "Ticket verification timed out. Try again." : "Network error while verifying ticket. Try again.");
     }
-  }, [adminKey, adminSecret, expireLogin, isCurrent]);
+  }, [adminKey, adminSecret, paymentMode, expireLogin, isCurrent]);
 
   const verifyTokenOrId = useCallback(async (value: string) => {
     if (!isAuthenticated || cameraWantedRef.current) return;
@@ -314,15 +328,16 @@ const Gatekeeper: React.FC = () => {
     if (!operation) return;
     const ticketId = student.ticketId;
     const sessionKey = activeSession;
+    const passMode = student.paymentMode;
     try {
       const { status, data } = await fetchBackend("/api/gatekeeper/checkin", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ticketId, sessionKey, adminKey, adminSecret }),
+        body: JSON.stringify({ ticketId, sessionKey, adminKey, adminSecret, paymentMode: passMode }),
         signal: operation.controller.signal,
       });
       if (!isCurrent(operation)) return;
       if (status === 401) { expireLogin(); return; }
-      if (data.success && data.ticketId === ticketId && data.sessionKey === sessionKey
+      if (data.success && data.paymentMode === passMode && data.ticketId === ticketId && data.sessionKey === sessionKey
         && data.checkInSessions?.[sessionKey]?.checkedIn) {
         setStudent(previous => previous?.ticketId === ticketId ? {
           ...previous, checkInStatus: "Checked In", checkedInAt: data.checkedInAt,
@@ -426,6 +441,17 @@ const Gatekeeper: React.FC = () => {
   const currentSessionInfo = student?.checkInSessions?.[activeSession];
   const isCheckedInForActiveSession = !!currentSessionInfo?.checkedIn;
   const isTest = paymentMode === "test" || student?.paymentMode === "test";
+  const modeOptions = availableModes.length ? availableModes : paymentMode ? [paymentMode] : [];
+
+  const changePassMode = (mode: PaymentMode) => {
+    if (operationRef.current || cameraWantedRef.current || !availableModes.includes(mode)) return;
+    setPaymentMode(mode);
+    sessionStorage.setItem("mm26_admin_mode", mode);
+    setTicketInput("");
+    setStudent(null);
+    setSuccessSession(null);
+    setError(null);
+  };
 
   const changeTicketInput = (value: string) => {
     if (operationRef.current || cameraWantedRef.current) return;
@@ -484,9 +510,19 @@ const Gatekeeper: React.FC = () => {
 
       {isAuthenticated && (
         <div className={styles.dashboard} aria-busy={loading}>
+          {modeOptions.length > 1 && <div className={styles.sessionBar}>
+            <div className={styles.sessionLabel}>PASS TYPE</div>
+            <div className={styles.sessionPills}>
+              {modeOptions.map(mode => <button key={mode} disabled={controlsDisabled} aria-pressed={paymentMode === mode}
+                className={styles.sessionPill + (paymentMode === mode ? " " + styles.activePill : "")}
+                onClick={() => changePassMode(mode)}>
+                {mode === "test" ? "Test passes (demo)" : "Live passes"}
+              </button>)}
+            </div>
+          </div>}
           {isTest && (
             <div className={styles.modeBanner} role="status">
-              <strong>RAZORPAY TEST MODE — NOT VALID FOR EVENT ENTRY</strong>
+              <strong>TEST PASSES — NOT VALID FOR EVENT ENTRY</strong>
               <span>These checks update test registrations only. No real admission is granted.</span>
             </div>
           )}

@@ -204,7 +204,7 @@ async function run() {
       delete fakeEnv.REGISTRATIONS_OPEN;
       delete fakeEnv.NODE_ENV;
     }
-    fakeEnv.NODE_ENV = 'production';
+    fakeEnv.NODE_ENV = 'development';
     fakeEnv.REGISTRATIONS_OPEN = 'true';
     assert.equal((await post('/api/register', validForm)).status, 200);
   });
@@ -311,6 +311,83 @@ async function run() {
     assert.equal(record.email, validForm.email);
     assert.equal(record.amount, 1000);
     assert.equal(state.emails.length, 1);
+  });
+  await check('Customer-paid Razorpay fees confirm the fixed-price order with the actual payment total', async () => {
+    Object.assign(state.payment, { amount: 101180, fee: 1180, tax: 180 });
+    const response = await verify();
+    assert.equal(response.status, 200);
+    assert.equal(response.body.registration.amount, 1000);
+    assert.equal(response.body.registration.paymentAmountPaise, 101180);
+    assert.equal(response.body.registration.checkoutFeePaise, 1180);
+    const record = [...registrations().values()][0];
+    assert.equal(record.amountPaise, 100000);
+    assert.equal(record.paymentAmountPaise, 101180);
+    assert.equal(record.checkoutFeePaise, 1180);
+    assert.equal(state.tables.testRegistrationOrders.get(state.order.id).paymentAmountPaise, 101180);
+    assert.equal((await webhook('payment.captured')).status, 200);
+    assert.equal((await webhook('order.paid')).status, 200);
+    assert.equal(registrations().size, 1);
+    assert.equal(state.emails.length, 1);
+  });
+  await check('A fee-bearing webhook can issue the ticket before the checkout callback', async () => {
+    Object.assign(state.payment, { amount: 101180, fee: 1180, tax: 180 });
+    const response = await webhook();
+    assert.equal(response.status, 200);
+    const record = [...registrations().values()][0];
+    assert.equal(record.paymentAmountPaise, 101180);
+    assert.equal((await verify()).body.registration.ticketId, record.ticketId);
+    assert.equal(registrations().size, 1);
+    assert.equal(state.emails.length, 1);
+  });
+  await check('Merchant-paid fees do not increase the customer receipt', async () => {
+    Object.assign(state.payment, { fee: 2360, tax: 360 });
+    const response = await verify();
+    assert.equal(response.status, 200);
+    assert.equal(response.body.registration.paymentAmountPaise, 100000);
+    assert.equal(response.body.registration.checkoutFeePaise, 0);
+  });
+  await check('Unexplained fees and underpaid registration amounts cannot issue a ticket', async () => {
+    for (const payment of [
+      { amount: 101180, fee: 500, tax: 76 },
+      { amount: 100500, fee: 1180, tax: 180 },
+      { amount: 101180, fee: -1180, tax: 0 },
+      { amount: 101180, fee: 1180.5, tax: 180 },
+      { amount: 101180, fee: 1180, tax: 1181 },
+    ]) {
+      Object.assign(state.payment, payment);
+      const response = await verify();
+      assert.equal(response.status, 400);
+      assert.equal(response.body.code, 'PAYMENT_MISMATCH');
+      assert.equal((await webhook()).status, 400);
+    }
+    assert.equal(registrations().size, 0);
+    assert.equal(state.emails.length, 0);
+  });
+  await check('A signed fee-bearing webhook still verifies the fee against Razorpay', async () => {
+    Object.assign(state.payment, { amount: 101180, fee: 500, tax: 76 });
+    const response = await webhook('payment.captured', { fee: 1180, tax: 180 });
+    assert.equal(response.status, 400);
+    assert.equal(response.body.code, 'PAYMENT_MISMATCH');
+    assert.equal(state.paymentFetches.length, 1);
+    assert.equal(registrations().size, 0);
+    assert.equal(state.emails.length, 0);
+  });
+  await check('A fee-bearing payment needs the full registration amount credited to its order', async () => {
+    Object.assign(state.payment, { amount: 101180, fee: 1180, tax: 180 });
+    state.order.amount_paid = 99999;
+    const response = await verify();
+    assert.equal(response.status, 202);
+    assert.equal((await webhook()).status, 503);
+    assert.equal(registrations().size, 0);
+    assert.equal(state.emails.length, 0);
+  });
+  await check('An authorized checkout with fees waits for capture without issuing a ticket', async () => {
+    Object.assign(state.payment, { amount: 101180, fee: null, tax: null, status: 'authorized', captured: false });
+    state.order.status = 'attempted';
+    state.order.amount_paid = 0;
+    assert.equal((await verify()).status, 202);
+    assert.equal(registrations().size, 0);
+    assert.equal(state.emails.length, 0);
   });
   await check('Both webhooks and the checkout callback issue one ticket and email', async () => {
     await Promise.all([webhook('payment.captured'), webhook('order.paid'), verify()]);
@@ -442,8 +519,9 @@ async function run() {
     assert.equal((await post('/api/register', '{')).status, 400);
     assert.equal(state.orderRequests.length, 0);
   });
-  const staff = (ticketId, sessionKey) => post('/api/gatekeeper/checkin', {
+  const staff = (ticketId, sessionKey, paymentMode) => post('/api/gatekeeper/checkin', {
     adminKey: baseEnv.ADMIN_KEY, adminSecret: baseEnv.ADMIN_SECRET, ticketId, sessionKey,
+    ...(paymentMode === undefined ? {} : { paymentMode }),
   });
   const staffVerify = input => post('/api/gatekeeper/verify', {
     adminKey: baseEnv.ADMIN_KEY, adminSecret: baseEnv.ADMIN_SECRET, ...input,
@@ -519,6 +597,115 @@ async function run() {
         adminSecret: baseEnv.ADMIN_SECRET, ticketId: paid.body.registration.ticketId });
       assert.equal(result.status, 200);
     }
+  });
+  await check('Production never opens public test checkout, even with an explicit opening switch', async () => {
+    fakeEnv.NODE_ENV = 'production';
+    fakeEnv.REGISTRATIONS_OPEN = 'true';
+    const status = await (await fetch(`${baseUrl}/api/registration-status`)).json();
+    assert.equal(status.registrationsOpen, false);
+    assert.equal(status.ready, false);
+    assert.equal((await post('/api/register', validForm)).body.code, 'REGISTRATIONS_CLOSED');
+    assert.equal(state.orderRequests.length, 0);
+    assert.equal(registrations().size, 0);
+  });
+  async function mixedGatekeeper() {
+    const paid = await verify();
+    const testId = paid.body.registration.ticketId;
+    const liveId = 'MM26-C0FFEE';
+    state.tables.registrations.set(liveId, {
+      ...structuredClone(registrations().get(testId)), ticketId: liveId,
+      paymentMode: 'live', orderId: 'order_LiveFixture', paymentId: 'pay_LiveFixture',
+      secureToken: 'isolated-live-record-private-token',
+    });
+    Object.assign(fakeEnv, {
+      PAYMENT_MODE: 'live', RAZORPAY_KEY_ID: 'rzp_live_isolated', NODE_ENV: 'production',
+      JWT_SECRET: 'isolated_live_ticket_signing_secret_more_than_32_chars',
+      GATEKEEPER_TEST_ENABLED: 'true', TEST_JWT_SECRET: baseEnv.JWT_SECRET,
+    });
+    return { testId, liveId };
+  }
+  await check('Authenticated staff can select demo passes while live passes remain the default', async () => {
+    await mixedGatekeeper();
+    const credentials = { adminKey: baseEnv.ADMIN_KEY, adminSecret: baseEnv.ADMIN_SECRET };
+    const login = await post('/api/gatekeeper/login', credentials);
+    assert.equal(login.status, 200);
+    assert.equal(login.body.paymentMode, 'live');
+    assert.deepEqual(login.body.availableModes, ['live', 'test']);
+    const testLogin = await post('/api/gatekeeper/login', { ...credentials, paymentMode: 'test' });
+    assert.equal(testLogin.status, 200);
+    assert.equal(testLogin.body.paymentMode, 'test');
+    assert.equal(JSON.stringify(testLogin.body).includes(fakeEnv.TEST_JWT_SECRET), false);
+  });
+  await check('Demo mode verifies test records with the separate test QR secret and rejects crossed scopes', async () => {
+    const { testId, liveId } = await mixedGatekeeper();
+    const jwt = nativeRequire('jsonwebtoken');
+    const record = registrations().get(testId);
+    const payload = { tid: testId, mode: 'test', stk: record.secureToken };
+    const token = jwt.sign(payload, fakeEnv.TEST_JWT_SECRET, { algorithm: 'HS256' });
+    assert.equal((await staffVerify({ token, paymentMode: 'test' })).status, 200);
+    assert.equal((await staffVerify({ token, paymentMode: 'live' })).status, 400);
+    assert.equal((await staffVerify({ ticketId: testId })).status, 400);
+    assert.equal((await staffVerify({ ticketId: liveId, paymentMode: 'test' })).status, 400);
+    assert.equal((await staffVerify({ ticketId: liveId, paymentMode: 'live' })).status, 200);
+    const wrongSecret = jwt.sign(payload, fakeEnv.JWT_SECRET, { algorithm: 'HS256' });
+    assert.equal((await staffVerify({ token: wrongSecret, paymentMode: 'test' })).status, 400);
+    const wrongPass = jwt.sign({ ...payload, stk: 'another-ticket-token' }, fakeEnv.TEST_JWT_SECRET, { algorithm: 'HS256' });
+    assert.equal((await staffVerify({ token: wrongPass, paymentMode: 'test' })).status, 400);
+  });
+  await check('Demo check-in saves all four sessions only in test records and rejects duplicates', async () => {
+    const { testId, liveId } = await mixedGatekeeper();
+    const liveBefore = structuredClone(state.tables.registrations.get(liveId));
+    for (const sessionKey of sessionKeys) {
+      const checkin = await staff(testId, sessionKey, 'test');
+      assert.equal(checkin.status, 200);
+      assert.equal(checkin.body.paymentMode, 'test');
+      assert.equal(checkin.body.checkInSessions[sessionKey].checkedIn, true);
+      const before = structuredClone(registrations().get(testId));
+      assert.equal((await staff(testId, sessionKey, 'test')).body.code, 'ALREADY_CHECKED_IN');
+      assert.deepEqual(registrations().get(testId), before);
+      assert.deepEqual(state.tables.registrations.get(liveId), liveBefore);
+    }
+    assert.equal((await staff(testId, 'day1_am', 'live')).status, 400);
+  });
+  await check('Disabled or unconfigured demo mode cannot read or check in test passes', async () => {
+    const { testId } = await mixedGatekeeper();
+    for (const settings of [
+      { GATEKEEPER_TEST_ENABLED: 'false', TEST_JWT_SECRET: baseEnv.JWT_SECRET },
+      { GATEKEEPER_TEST_ENABLED: 'true', TEST_JWT_SECRET: 'placeholder' },
+    ]) {
+      Object.assign(fakeEnv, settings);
+      assert.equal((await staffVerify({ ticketId: testId, paymentMode: 'test' })).body.code, 'GATEKEEPER_MODE_UNAVAILABLE');
+      assert.equal((await staff(testId, 'day1_am', 'test')).body.code, 'GATEKEEPER_MODE_UNAVAILABLE');
+      const login = await post('/api/gatekeeper/login', { adminKey: baseEnv.ADMIN_KEY, adminSecret: baseEnv.ADMIN_SECRET });
+      assert.deepEqual(login.body.availableModes, ['live']);
+      assert.ok(sessionKeys.every(key => !registrations().get(testId).checkInSessions[key].checkedIn));
+    }
+  });
+  await check('Test scope still requires staff credentials and rejects invalid mode values', async () => {
+    const { testId } = await mixedGatekeeper();
+    state.failReads = true;
+    assert.equal((await post('/api/gatekeeper/verify', { ticketId: testId, paymentMode: 'test' })).status, 401);
+    assert.equal((await post('/api/gatekeeper/checkin', { ticketId: testId, paymentMode: 'test', sessionKey: 'day1_am' })).status, 401);
+    for (const paymentMode of ['__proto__', null, {}, 'TEST']) {
+      assert.equal((await staffVerify({ ticketId: testId, paymentMode })).body.code, 'GATEKEEPER_MODE_UNAVAILABLE');
+    }
+  });
+  await check('Enabling staff demo checks does not switch public live order creation into Test Mode', async () => {
+    await mixedGatekeeper();
+    fakeEnv.REGISTRATIONS_OPEN = 'true';
+    const { createRegistrationService } = nativeRequire('./services/registration');
+    const liveService = createRegistrationService({
+      db: fakeDb, razorpay: new FakeRazorpay(), config: fakeEnv,
+      serverTimestamp: () => 'isolated-server-timestamp',
+      emailConfigured: () => true, sendTicketEmail: async () => {},
+      generateTicketId: () => 'MM26-C0FFEE',
+    });
+    const testOrdersBefore = structuredClone(state.tables.testRegistrationOrders);
+    const order = await liveService.createOrder({ ...validForm, paymentMode: 'test' });
+    assert.equal(order.paymentMode, 'live');
+    assert.equal(order.key_id, 'rzp_live_isolated');
+    assert.equal(state.tables.registrationOrders.size, 1);
+    assert.deepEqual(state.tables.testRegistrationOrders, testOrdersBefore);
   });
   await check('Health monitors do not consume the public API request budget', async () => {
     const before = await fetch(`${baseUrl}/api/registration-status`);

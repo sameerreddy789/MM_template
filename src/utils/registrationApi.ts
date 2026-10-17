@@ -1,3 +1,5 @@
+import { allowTestPayments } from "./registrationSettings";
+
 export interface RegistrationDetails {
   name: string;
   email: string;
@@ -67,6 +69,8 @@ export interface ConfirmedRegistration {
   paymentId: string;
   amount: number;
   paymentStatus: "Paid";
+  paymentAmountPaise: number;
+  checkoutFeePaise: number;
   paymentMode: PaymentMode;
   emailStatus: "Pending" | "Sending" | "Sent" | "Failed";
 }
@@ -97,7 +101,7 @@ declare global {
 const feeInPaise = 100000;
 const apiBase = import.meta.env.DEV
   ? ""
-  : (import.meta.env.VITE_BACKEND_URL || "").replace(/\/$/, "");
+  : (import.meta.env.VITE_BACKEND_URL || "https://mohanamantra-backend.onrender.com").replace(/\/$/, "");
 
 function object(value: unknown): Record<string, unknown> {
   return value !== null && typeof value === "object" ? value as Record<string, unknown> : {};
@@ -141,12 +145,17 @@ async function request(endpoint: string, body?: unknown, signal?: AbortSignal) {
   }
 }
 
-export async function checkRegistrationAvailability(signal?: AbortSignal): Promise<{ ready: boolean; paymentMode: PaymentMode }> {
+export async function checkRegistrationAvailability(signal?: AbortSignal): Promise<{ ready: boolean; registrationsOpen: boolean; paymentMode: PaymentMode }> {
   const status = await request("/api/registration-status", undefined, signal);
-  if (status.paymentMode !== "test" && status.paymentMode !== "live") {
+  if ((status.paymentMode !== "test" && status.paymentMode !== "live") ||
+    (!allowTestPayments && status.paymentMode !== "live")) {
     throw new Error("The payment environment could not be verified. Please try again before paying.");
   }
-  return { ready: status.ready === true && status.amount === feeInPaise && status.currency === "INR", paymentMode: status.paymentMode };
+  return {
+    ready: status.ready === true && status.registrationsOpen === true && status.amount === feeInPaise && status.currency === "INR",
+    registrationsOpen: status.registrationsOpen === true,
+    paymentMode: status.paymentMode,
+  };
 }
 
 export async function createRegistrationOrder(details: RegistrationDetails, signal?: AbortSignal): Promise<PaymentOrder> {
@@ -154,6 +163,7 @@ export async function createRegistrationOrder(details: RegistrationDetails, sign
   if (data.success !== true || typeof data.order_id !== "string" || !/^order_[A-Za-z0-9_]{1,64}$/.test(data.order_id) ||
     typeof data.key_id !== "string" || !/^rzp_(test|live)_[A-Za-z0-9]+$/.test(data.key_id) ||
     (data.paymentMode !== "test" && data.paymentMode !== "live") || !data.key_id.startsWith(`rzp_${data.paymentMode}_`) ||
+    (!allowTestPayments && data.paymentMode !== "live") ||
     data.amount !== feeInPaise || data.currency !== "INR") {
     throw new Error("Your payment order could not be validated. Please try again before paying.");
   }
@@ -161,12 +171,18 @@ export async function createRegistrationOrder(details: RegistrationDetails, sign
 }
 
 export async function verifyRegistrationPayment(proof: PaymentProof, mode: PaymentMode, signal?: AbortSignal): Promise<PaymentConfirmation> {
+  if (!allowTestPayments && mode !== "live") throw new Error("Test payments are not available on the public registration page.");
   const data = await request("/api/payment-verify", proof, signal);
   if (data.success === false && data.paymentStatus === "Pending") {
     return { success: false, paymentStatus: "Pending" };
   }
   const registration = object(data.registration);
+  const paymentAmountPaise = registration.paymentAmountPaise === undefined ? feeInPaise : registration.paymentAmountPaise;
+  const checkoutFeePaise = registration.checkoutFeePaise === undefined ? 0 : registration.checkoutFeePaise;
   if (data.success !== true || registration.paymentStatus !== "Paid" || registration.amount !== feeInPaise / 100 ||
+    typeof paymentAmountPaise !== "number" || !Number.isSafeInteger(paymentAmountPaise) ||
+    typeof checkoutFeePaise !== "number" || !Number.isSafeInteger(checkoutFeePaise) || checkoutFeePaise < 0 ||
+    paymentAmountPaise !== feeInPaise + checkoutFeePaise ||
     registration.paymentMode !== mode || typeof registration.ticketId !== "string" ||
     !(mode === "test" ? /^MM26-TEST-[A-F0-9]{6}$/ : /^MM26-[A-F0-9]{6}$/).test(registration.ticketId) ||
     typeof registration.name !== "string" || typeof registration.email !== "string" ||
@@ -174,7 +190,7 @@ export async function verifyRegistrationPayment(proof: PaymentProof, mode: Payme
     !["Pending", "Sending", "Sent", "Failed"].includes(String(registration.emailStatus))) {
     throw new Error("Your registration could not be confirmed yet. Keep your receipt and check payment status here; do not pay again.");
   }
-  return { success: true, registration: registration as unknown as ConfirmedRegistration };
+  return { success: true, registration: { ...registration as unknown as ConfirmedRegistration, paymentAmountPaise, checkoutFeePaise } };
 }
 
 let sdkLoading: Promise<void> | null = null;
@@ -206,6 +222,7 @@ async function loadCheckout() {
 }
 
 export async function openRegistrationCheckout(order: PaymentOrder, details: RegistrationDetails, signal?: AbortSignal): Promise<PaymentProof | null> {
+  if (!allowTestPayments && order.paymentMode !== "live") throw new Error("Test payments are not available on the public registration page.");
   await loadCheckout();
   if (signal?.aborted) throw new DOMException("Checkout was interrupted.", "AbortError");
   return new Promise((resolve, reject) => {

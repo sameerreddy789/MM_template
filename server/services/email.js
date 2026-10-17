@@ -148,8 +148,8 @@ function buildEmailHtml(studentName, ticketId, college, paymentMode) {
               </p>
               <p style="color: #e2dccb; font-size: 15px; line-height: 1.7; margin: 0 0 15px;">
                 ${test
-                  ? "Your Razorpay test payment of <strong style=\"color: #d4a843;\">₹1,000</strong> was verified. No real money was charged. This registration and its attachments are for testing and are not valid for event entry."
-                  : "Welcome to MohanaMantra 2K26! Your registration is confirmed and payment of <strong style=\"color: #d4a843;\">₹1,000</strong> has been received successfully."}
+                  ? "Your test registration fee of <strong style=\"color: #d4a843;\">₹1,000</strong> was verified. No real money was charged. This registration and its attachments are for testing and are not valid for event entry."
+                  : "Welcome to MohanaMantra 2K26! Your registration is confirmed and the registration fee of <strong style=\"color: #d4a843;\">₹1,000</strong> has been received successfully. Your Razorpay receipt shows any additional checkout fee."}
               </p>
               <p style="color: #e2dccb; font-size: 15px; line-height: 1.7; margin: 0;">
                 Your <strong style="color: #d4a843;">Entry Pass</strong> is attached to this email. 

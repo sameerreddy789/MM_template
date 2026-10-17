@@ -59,7 +59,7 @@
     if (url.pathname.endsWith("/login")) {
       state.logins++;
       return respond("login", validAdmin
-        ? { success: true, paymentMode: "test", adminKey: key }
+        ? { success: true, paymentMode: "test", availableModes: ["test"], adminKey: key }
         : { success: false, error: "Isolated invalid credentials" }, validAdmin ? 200 : 401, options.signal);
     }
     if (url.pathname.endsWith("/verify")) {
@@ -93,7 +93,7 @@
       checkedIn: true, timestamp: "2026-10-16T10:30:00.000Z", gatekeeper: key,
     };
     return respond("checkin", {
-      success: true, ticketId: body.ticketId, sessionKey: body.sessionKey,
+      success: true, ticketId: body.ticketId, paymentMode: "test", sessionKey: body.sessionKey,
       checkedInAt: state.sessions[body.sessionKey].timestamp,
       checkInSessions: structuredClone(state.sessions),
     }, 200, options.signal);

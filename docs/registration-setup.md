@@ -1,14 +1,14 @@
 # Website registration, Razorpay, and Firestore
 
-Public `/register` currently shows **Registrations temporarily closed** while the live setup is being confirmed. It has no student form, fee or checkout control and makes no payment availability request. Local development retains the five-field form and separate Test Mode backend for further testing.
+Public `/register` checks the backend's registration availability. It shows **Registrations temporarily closed** while `REGISTRATIONS_OPEN=false` and offers a retry when the backend is unavailable. The student form and checkout appear only when the backend is ready. Public builds reject Test Mode payments. Local development retains the five-field form and separate Test Mode backend for further testing.
 
 When registration is opened, students enter their name, email, mobile number, roll number, and college. The Express API creates a fixed **₹1,000 INR** Razorpay order and saves the details in Firestore before offering checkout. A Razorpay-hosted Payment Page link is not required for this flow.
 
 ## Opening and closing registration
 
-Production builds stay closed unless `VITE_REGISTRATIONS_OPEN=true` is deliberately set before rebuilding. The backend separately requires `REGISTRATIONS_OPEN=true` for new live orders; deployed test mode also stays closed by default when `NODE_ENV=production`. Local test mode permits new orders when `REGISTRATIONS_OPEN` is absent. An explicit `REGISTRATIONS_OPEN=false` closes new orders in every environment.
+The backend requires `REGISTRATIONS_OPEN=true` for new live orders. The website reads that switch without requiring another frontend build. Production (`NODE_ENV=production`) always rejects new Test Mode orders, including when its opening switch is true. Local test mode permits new orders when `REGISTRATIONS_OPEN` is absent. An explicit `REGISTRATIONS_OPEN=false` closes new orders in every environment.
 
-Set both switches only after confirming the live merchant key pair, account activation/capture settings, genuine public webhook delivery and the production email sender. A frontend switch alone cannot open a closed backend. Closing registration blocks new orders before contacting Razorpay or writing student records, while signed confirmation requests and webhooks for existing paid orders continue to work.
+Open registration only after confirming the live merchant key pair, account activation/capture settings, genuine public webhook delivery and the production email sender. Closing registration blocks new orders before contacting Razorpay or writing student records, while signed confirmation requests and webhooks for existing paid orders continue to work. The browser preserves existing payment recovery even when new registration is closed.
 
 ## What each service does
 
@@ -43,6 +43,7 @@ Copy `server/.env.example` to `server/.env` only if a private environment file d
 | `GMAIL_USER`, `GMAIL_APP_PASSWORD` | Official Google sender and app password, needed by this server only in inline mode |
 | Firebase service account | Private Firebase Admin credentials for Firestore |
 | `ADMIN_KEY`, `ADMIN_SECRET` | Staff-only gatekeeper access |
+| `GATEKEEPER_TEST_ENABLED`, `TEST_JWT_SECRET` | Optional authenticated check-in of existing test passes using their original signing secret |
 
 Use `server/serviceAccountKey.json` locally, a Render secret file at `/etc/secrets/serviceAccountKey.json`, or the private `FIREBASE_SERVICE_ACCOUNT` environment variable. These credentials are ignored by Git and must stay on trusted servers or the machine running the mailer.
 
@@ -78,7 +79,15 @@ npm run dev -- --host 127.0.0.1
 
 Open `http://localhost:5173/register`, enter an email inbox you can check, and use **TRY TEST PAYMENT — ₹0 CHARGED**. Razorpay Test Mode simulates the ₹1,000 registration fee; no real money is debited. Netbanking opens a mock bank page where **Success** completes the sandbox payment. See [Razorpay's integration testing instructions](https://razorpay.com/docs/payments/payment-gateway/web-integration/standard/integration-steps/#2-test-integration).
 
-Test orders use `testRegistrationOrders`; test tickets and their email queue use `testRegistrations`. Live mode retains `registrationOrders` and `registrations`. Test tickets use `MM26-TEST-XXXXXX`, and the form, receipt, email, and pass identify them as tests that are not valid for event entry. Browser recovery is separated by payment mode. Staff verification checks the record's mode, captured-payment status, signed QR mode, and private ticket token. A live gatekeeper does not look up test tickets.
+Test orders use `testRegistrationOrders`; test tickets and their email queue use `testRegistrations`. Live mode retains `registrationOrders` and `registrations`. Test tickets use `MM26-TEST-XXXXXX`, and the form, receipt, email, and pass identify them as tests that are not valid for event entry. Browser recovery is separated by payment mode. Staff verification checks the record's mode, captured-payment status, signed QR mode, and private ticket token. A live gatekeeper does not look up test tickets unless authenticated staff explicitly select the configured demo mode.
+
+### Demonstrating test check-in on the public domain
+
+Keep the Render backend in `PAYMENT_MODE=live` with `NODE_ENV=production`. To let staff demonstrate existing test passes, set `GATEKEEPER_TEST_ENABLED=true` and configure `TEST_JWT_SECRET` privately with the original `JWT_SECRET` from the payment-test environment. No Razorpay test credentials are needed on the live backend.
+
+Open `https://www.mohanamantra.com/gatekeeper?mode=test` on a phone and sign in with the existing staff credentials. The Test Pass selector also appears after a fresh login at `/gatekeeper`. Select a morning/evening session, scan or upload the emailed test QR image (or enter its `MM26-TEST-XXXXXX` ticket ID), then record its test check-in. Each confirmed session updates `testRegistrations` with the staff ID and time. A repeat check-in for the same session is rejected. The test banner stays visible, and live registrations are unchanged.
+
+Set `GATEKEEPER_TEST_ENABLED=false` to withdraw demo access. Public registration never uses this selector and cannot create a Test Mode order.
 
 The generated local webhook secret does not configure a Razorpay Dashboard webhook. Direct checkout confirmation works on localhost; genuine gateway webhook delivery still requires a reachable public test endpoint and a matching Dashboard secret. Keep production secrets separate when moving to live payments.
 

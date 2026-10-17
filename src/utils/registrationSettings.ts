@@ -1,5 +1,3 @@
-// Public registration stays closed until the live setup is confirmed and both
-// the frontend and backend are explicitly opened. Local development keeps the
-// existing form available for the separate payment-test environment.
-export const registrationFormEnabled = import.meta.env.DEV ||
-  import.meta.env.VITE_REGISTRATIONS_OPEN === "true";
+// Test checkout is available only in the local development build. Staff demo
+// check-in is a separate authenticated backend operation.
+export const allowTestPayments = import.meta.env.DEV;

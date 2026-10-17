@@ -30,6 +30,18 @@ function verifySignature(signature, payload, secret) {
   return crypto.timingSafeEqual(expected, Buffer.from(signature, "hex"));
 }
 
+function hasValidRegistrationPaymentAmount(payment) {
+  const amount = payment?.amount;
+  const fee = payment?.fee ?? 0;
+  const tax = payment?.tax ?? 0;
+  if (!Number.isSafeInteger(amount) || !Number.isSafeInteger(fee) || !Number.isSafeInteger(tax) ||
+    amount < REGISTRATION_AMOUNT || fee < 0 || fee > amount || tax < 0 || tax > fee) return false;
+  // Razorpay keeps the order at the registration price when the customer pays
+  // its checkout fee. The payment total then includes fee (which includes GST).
+  // Merchant-paid fees leave the customer's payment at the registration price.
+  return amount === REGISTRATION_AMOUNT || amount - REGISTRATION_AMOUNT === fee;
+}
+
 function cleanStudentDetails(input) {
   const text = (key) => typeof input?.[key] === "string" ? input[key].trim() : "";
   const student = {
@@ -74,8 +86,9 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
       paymentEnvironment(config).mode === environment.mode &&
       isConfiguredSecret(config.RAZORPAY_KEY_SECRET);
     const status = {
-      registrationsOpen: config.REGISTRATIONS_OPEN === "true" ||
-        (config.REGISTRATIONS_OPEN === undefined && environment.mode === "test" && config.NODE_ENV !== "production"),
+      registrationsOpen: (environment.mode !== "test" || config.NODE_ENV !== "production") &&
+        (config.REGISTRATIONS_OPEN === "true" ||
+          (config.REGISTRATIONS_OPEN === undefined && environment.mode === "test" && config.NODE_ENV !== "production")),
       payment,
       database: Boolean(db),
       webhook: isConfiguredSecret(config.RAZORPAY_WEBHOOK_SECRET),
@@ -164,7 +177,8 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
       throw new RegistrationError(503, "VERIFICATION_UNAVAILABLE", "Payment confirmation is temporarily unavailable. Keep your receipt and try again.");
     }
     if (order.id !== orderId || payment.id !== paymentId || payment.order_id !== orderId ||
-      order.amount !== REGISTRATION_AMOUNT || payment.amount !== REGISTRATION_AMOUNT ||
+      order.amount !== REGISTRATION_AMOUNT || !Number.isSafeInteger(payment.amount) || payment.amount < REGISTRATION_AMOUNT ||
+      (payment.status === "captured" && !hasValidRegistrationPaymentAmount(payment)) ||
       order.currency !== REGISTRATION_CURRENCY || payment.currency !== REGISTRATION_CURRENCY ||
       Number(payment.amount_refunded || 0) !== 0) {
       throw new RegistrationError(400, "PAYMENT_MISMATCH", "The payment does not match this registration and its required fee.");
@@ -198,6 +212,8 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
             const record = existingSnapshot.data();
             if (record.ticketId !== order.ticketId || record.orderId !== order.orderId || record.paymentId !== payment.id ||
               record.paymentStatus !== "Paid" || record.amountPaise !== REGISTRATION_AMOUNT || record.currency !== REGISTRATION_CURRENCY ||
+              (record.paymentAmountPaise !== undefined && record.paymentAmountPaise !== payment.amount) ||
+              (record.checkoutFeePaise !== undefined && record.checkoutFeePaise !== payment.amount - REGISTRATION_AMOUNT) ||
               !recordMatchesMode(record, environment.mode)) {
               throw new Error("Registration mapping does not match its payment");
             }
@@ -214,6 +230,8 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
             paymentId: payment.id,
             amount: REGISTRATION_AMOUNT / 100,
             amountPaise: REGISTRATION_AMOUNT,
+            paymentAmountPaise: payment.amount,
+            checkoutFeePaise: payment.amount - REGISTRATION_AMOUNT,
             currency: REGISTRATION_CURRENCY,
             paymentStatus: "Paid",
             checkInStatus: "Not Checked In",
@@ -229,6 +247,8 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
             ticketId,
             paymentId: payment.id,
             paymentStatus: "Paid",
+            paymentAmountPaise: payment.amount,
+            checkoutFeePaise: payment.amount - REGISTRATION_AMOUNT,
             paidAt: serverTimestamp(),
           });
           return { reference: ticketReference, record };
@@ -315,6 +335,8 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
         email: record.email,
         paymentId: record.paymentId,
         amount: record.amount,
+        paymentAmountPaise: record.paymentAmountPaise ?? payment.amount,
+        checkoutFeePaise: record.checkoutFeePaise ?? payment.amount - REGISTRATION_AMOUNT,
         paymentStatus: record.paymentStatus,
         paymentMode: environment.mode,
         emailStatus,
@@ -346,7 +368,7 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
     requirePaymentBackend();
     const payment = body?.payload?.payment?.entity;
     if (!payment || !validId(payment.id, "pay") || !validId(payment.order_id, "order") ||
-      payment.status !== "captured" || payment.amount !== REGISTRATION_AMOUNT || payment.currency !== REGISTRATION_CURRENCY) {
+      payment.status !== "captured" || !hasValidRegistrationPaymentAmount(payment) || payment.currency !== REGISTRATION_CURRENCY) {
       throw new RegistrationError(400, "INVALID_PAYMENT", "The webhook payment does not match a captured registration payment.");
     }
     const result = await confirmPayment(payment.order_id, payment.id);
