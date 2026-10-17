@@ -323,7 +323,9 @@ app.post("/api/payment-verify", verificationLimiter, async (req, res) => {
 // Razorpay can redeliver notifications; the transaction issues one ticket per order.
 app.post("/api/payment-webhook", async (req, res) => {
   try {
-    await registrationService.processWebhook(req.rawBody, req.headers["x-razorpay-signature"], req.body);
+    await registrationService.processWebhook(
+      req.rawBody, req.headers["x-razorpay-signature"], req.body, req.headers["x-razorpay-event-id"],
+    );
     res.status(200).json({ status: "ok" });
   } catch (error) {
     registrationFailure(error, res);

@@ -34,7 +34,7 @@ function resetState() {
   Object.assign(state, {
     tables: { registrations: new Map(), registrationOrders: new Map(), testRegistrations: new Map(), testRegistrationOrders: new Map() },
     orderRequests: [], orderFetches: [], paymentFetches: [], emailAttempts: [], emails: [],
-    failWrites: false, failReads: false, failEmail: false, failProvider: false, delayReads: false,
+    failWrites: false, failWebhookWrites: false, failReads: false, failEmail: false, failProvider: false, delayReads: false,
     transactionQueue: Promise.resolve(),
     order: { id: 'order_IsolatedTest', amount: 100000, currency: 'INR', status: 'paid', amount_paid: 100000, notes: {} },
     payment: { id: 'pay_IsolatedTest', order_id: 'order_IsolatedTest', amount: 100000, currency: 'INR', status: 'captured', captured: true, amount_refunded: 0 },
@@ -69,7 +69,10 @@ const fakeDb = {
           return result;
         },
         async create(data) { if (state.failWrites) throw new Error('Simulated Firestore write outage'); write(state.tables, 'create', reference, data); },
-        async update(data) { if (state.failWrites) throw new Error('Simulated Firestore write outage'); write(state.tables, 'update', reference, data); },
+        async update(data) {
+          if (state.failWrites || (data.webhookReceipt && state.failWebhookWrites)) throw new Error('Simulated Firestore write outage');
+          write(state.tables, 'update', reference, data);
+        },
       };
     } };
   },
@@ -161,10 +164,13 @@ async function run() {
     const response = await fetch(`${baseUrl}${endpoint}`, { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: typeof body === 'string' ? body : JSON.stringify(body), signal: AbortSignal.timeout(5000) });
     return { status: response.status, body: await response.json() };
   }
-  async function webhook(event = 'payment.captured', overrides = {}, badSignature = false) {
+  async function webhook(event = 'payment.captured', overrides = {}, badSignature = false, eventId) {
     const body = JSON.stringify({ event, payload: { payment: { entity: { ...state.payment, ...overrides } } } });
     const signature = badSignature ? 'invalid-signature' : crypto.createHmac('sha256', webhookSecret).update(body).digest('hex');
-    return post('/api/payment-webhook', body, { 'x-razorpay-signature': signature });
+    return post('/api/payment-webhook', body, {
+      'x-razorpay-signature': signature,
+      ...(eventId === undefined ? {} : { 'x-razorpay-event-id': eventId }),
+    });
   }
   async function verify(overrides = {}) {
     const proof = { razorpay_order_id: state.order.id, razorpay_payment_id: state.payment.id,
@@ -172,6 +178,7 @@ async function run() {
     return post('/api/payment-verify', proof);
   }
   const registrations = () => state.tables.testRegistrations;
+  const webhookReceipt = () => state.tables.testRegistrationOrders.get(state.order.id)?.webhookReceipt;
 
   await check('Readiness rejects placeholder payment, webhook, and ticket secrets', async () => {
     for (const key of ['RAZORPAY_KEY_SECRET', 'RAZORPAY_WEBHOOK_SECRET', 'JWT_SECRET']) {
@@ -297,6 +304,7 @@ async function run() {
     assert.equal(state.paymentFetches.length, 0);
     assert.equal(registrations().size, 0);
     assert.equal(state.emails.length, 0);
+    assert.equal(webhookReceipt(), undefined);
   });
   await check('A verified captured payment saves a ticket and confirms its email', async () => {
     const response = await verify();
@@ -311,6 +319,56 @@ async function run() {
     assert.equal(record.email, validForm.email);
     assert.equal(record.amount, 1000);
     assert.equal(state.emails.length, 1);
+    assert.equal(webhookReceipt(), undefined);
+  });
+  await check('Only a verified webhook records its event and bounded event ID on the matching order', async () => {
+    assert.equal((await webhook('payment.captured', {}, false, 'evt_IsolatedCaptured')).status, 200);
+    assert.deepEqual(webhookReceipt(), {
+      event: 'payment.captured', paymentId: state.payment.id,
+      receivedAt: 'isolated-server-timestamp', eventId: 'evt_IsolatedCaptured',
+    });
+    const ticketId = state.tables.testRegistrationOrders.get(state.order.id).ticketId;
+    // The unsigned header is not used to suppress a valid event or prove payment.
+    assert.equal((await webhook('order.paid', {}, false, 'evt_IsolatedCaptured')).status, 200);
+    assert.equal(webhookReceipt().event, 'order.paid');
+    assert.equal((await verify()).body.registration.ticketId, ticketId);
+    assert.equal(webhookReceipt().event, 'order.paid');
+    assert.equal(state.tables.registrationOrders.size, 0);
+    assert.equal(registrations().size, 1);
+    assert.equal(state.emails.length, 1);
+  });
+  await check('Absent, malformed, and oversized telemetry headers do not prevent verified payment confirmation', async () => {
+    for (const eventId of [undefined, 'evt_invalid<value>', 'e'.repeat(129)]) {
+      assert.equal((await webhook('payment.captured', {}, false, eventId)).status, 200);
+      assert.deepEqual(webhookReceipt(), {
+        event: 'payment.captured', paymentId: state.payment.id, receivedAt: 'isolated-server-timestamp',
+      });
+    }
+    assert.equal(registrations().size, 1);
+    assert.equal(state.emails.length, 1);
+  });
+  await check('Webhook receipt write failure requests retry without duplicating the paid ticket or email', async () => {
+    state.failWebhookWrites = true;
+    const response = await webhook();
+    assert.equal(response.status, 503);
+    assert.equal(response.body.code, 'WEBHOOK_RECEIPT_UNAVAILABLE');
+    assert.equal(webhookReceipt(), undefined);
+    assert.equal(state.tables.testRegistrationOrders.get(state.order.id).paymentStatus, 'Paid');
+    const ticketId = state.tables.testRegistrationOrders.get(state.order.id).ticketId;
+    state.failWebhookWrites = false;
+    assert.equal((await webhook()).status, 200);
+    assert.equal(webhookReceipt().paymentId, state.payment.id);
+    assert.equal(state.tables.testRegistrationOrders.get(state.order.id).ticketId, ticketId);
+    assert.equal(registrations().size, 1);
+    assert.equal(state.emails.length, 1);
+  });
+  await check('A signed captured event with provider capture still pending cannot create a successful receipt', async () => {
+    Object.assign(state.payment, { status: 'authorized', captured: false });
+    Object.assign(state.order, { status: 'attempted', amount_paid: 0 });
+    assert.equal((await webhook('payment.captured', { status: 'captured', captured: true })).status, 503);
+    assert.equal(webhookReceipt(), undefined);
+    assert.equal(registrations().size, 0);
+    assert.equal(state.emails.length, 0);
   });
   await check('Customer-paid Razorpay fees confirm the fixed-price order with the actual payment total', async () => {
     Object.assign(state.payment, { amount: 101180, fee: 1180, tax: 180 });
@@ -371,6 +429,7 @@ async function run() {
     assert.equal(state.paymentFetches.length, 1);
     assert.equal(registrations().size, 0);
     assert.equal(state.emails.length, 0);
+    assert.equal(webhookReceipt(), undefined);
   });
   await check('A fee-bearing payment needs the full registration amount credited to its order', async () => {
     Object.assign(state.payment, { amount: 101180, fee: 1180, tax: 180 });
@@ -408,6 +467,7 @@ async function run() {
     const signature = crypto.createHmac('sha256', webhookSecret).update(raw).digest('hex');
     assert.equal((await post('/api/payment-webhook', raw, { 'x-razorpay-signature': signature })).status, 400);
     assert.equal(registrations().size, 0);
+    assert.equal(webhookReceipt(), undefined);
   });
   await check('Underpayments and wrong currencies never create Paid tickets', async () => {
     assert.equal((await webhook('payment.captured', { amount: 100 })).status, 400);
@@ -482,6 +542,7 @@ async function run() {
     assert.equal((await webhook()).status, 503);
     assert.equal(registrations().size, 1);
     assert.equal([...registrations().values()][0].emailStatus, 'Failed');
+    assert.equal(webhookReceipt().paymentId, state.payment.id);
     state.failEmail = false;
     assert.equal((await webhook()).status, 200);
     assert.equal((await verify()).body.registration.emailStatus, 'Sent');
@@ -506,6 +567,7 @@ async function run() {
     assert.equal(result.body.registration.paymentStatus, 'Paid');
     assert.equal(result.body.registration.emailStatus, 'Pending');
     assert.equal((await webhook()).status, 200);
+    assert.equal(webhookReceipt().event, 'payment.captured');
     assert.equal(registrations().size, 1);
     assert.equal(state.emailAttempts.length, 0);
     const record = [...registrations().values()][0];

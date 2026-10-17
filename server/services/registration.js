@@ -357,7 +357,7 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
     return confirmPayment(orderId, paymentId);
   }
 
-  async function processWebhook(rawBody, signature, body) {
+  async function processWebhook(rawBody, signature, body, eventId) {
     if (!isConfiguredSecret(config.RAZORPAY_WEBHOOK_SECRET)) {
       throw new RegistrationError(503, "WEBHOOK_UNAVAILABLE", "Payment notifications are temporarily unavailable.");
     }
@@ -372,6 +372,23 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
       throw new RegistrationError(400, "INVALID_PAYMENT", "The webhook payment does not match a captured registration payment.");
     }
     const result = await confirmPayment(payment.order_id, payment.id);
+    if (result.success) {
+      const receipt = {
+        event: body.event,
+        paymentId: payment.id,
+        receivedAt: serverTimestamp(),
+      };
+      // The event ID is unsigned telemetry; payment authority comes from the
+      // verified payload and Razorpay fetches, never this optional header.
+      if (typeof eventId === "string" && /^[A-Za-z0-9_-]{1,128}$/.test(eventId)) {
+        receipt.eventId = eventId;
+      }
+      try {
+        await db.collection(environment.ordersCollection).doc(payment.order_id).update({ webhookReceipt: receipt });
+      } catch {
+        throw new RegistrationError(503, "WEBHOOK_RECEIPT_UNAVAILABLE", "The payment is recorded, but its notification receipt could not be saved. Retry this notification.");
+      }
+    }
     if (!result.success || (config.TICKET_EMAIL_MODE !== "external" && result.registration.emailStatus !== "Sent")) {
       // Keep the durable ticket and ask Razorpay to retry delivery/confirmation.
       throw new RegistrationError(503, "CONFIRMATION_PENDING", "Payment confirmation or entry pass email is pending. Retry this notification.");
