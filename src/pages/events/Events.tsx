@@ -112,7 +112,7 @@ const Events: React.FC = () => {
  const [showEventPage, setShowEventPage] = useState(false);
  const [foldFan, setFoldFan] = useState(false);
  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
- const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+ const timeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
 
  const EventRef = useRef<HTMLDivElement>(null);
  const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -155,7 +155,7 @@ const Events: React.FC = () => {
  useEffect(() => {
  return () => {
  if (timeoutRef.current) {
- clearTimeout(timeoutRef.current);
+ window.clearTimeout(timeoutRef.current);
  }
  imageRefs.current.forEach((img) => {
  if (img) {
@@ -182,9 +182,9 @@ const Events: React.FC = () => {
  });
 
  if (timeoutRef.current) {
- clearTimeout(timeoutRef.current);
+ window.clearTimeout(timeoutRef.current);
  }
- timeoutRef.current = setTimeout(() => {
+ timeoutRef.current = window.setTimeout(() => {
  setShowImages(false);
  }, 1800);
 
@@ -264,7 +264,7 @@ const Events: React.FC = () => {
 
  const handleBackFromCategory = () => {
  if (timeoutRef.current) {
- clearTimeout(timeoutRef.current);
+ window.clearTimeout(timeoutRef.current);
  timeoutRef.current = null;
  }
  imageRefs.current.forEach((img) => {

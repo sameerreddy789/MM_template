@@ -26,6 +26,7 @@ The login, verification, and check-in routes now share a budget of ten failed au
 - The website adds a Content Security Policy with explicit script origins and without script `unsafe-inline` or `unsafe-eval`. It also adds MIME-type protection, frame denial, a referrer policy, and a camera-only Permissions Policy. Gatekeeper responses are private/no-store, no-referrer, and noindex. Inline styles remain allowed for existing styling and provider compatibility.
 - Unused browser Firebase and Google OAuth dependencies/code were removed. Firestore remains in the trusted backend. The QR library and gatekeeper page load on demand; the scanner loads only when camera or image scanning is requested. Direct registration/staff visits skip the general asset warmup, and staff routes skip public background music and door transitions.
 - The GitHub security workflow uses read-only repository permissions, pinned action revisions, Node 22, locked installations, dependency audits, the production build, targeted frontend lint, all 69 tests, and checksum-verified Gitleaks scans of history and the build output. It does not need production credentials.
+- Vercel exposed an events-page timer type that depended on an ambient Node.js namespace after the unused browser dependencies were removed. The events page now uses the browser timer API/type, the frontend compiler explicitly loads browser globals, and Vercel uses `npm ci` to match the locked CI installation. A forced TypeScript rebuild checks the corrected configuration.
 
 No additional hosting subscription, Firebase Cloud Functions, or email-provider account was introduced. Existing live/test database collections and ticket-signing keys remain separate. Public builds continue to reject Test Mode checkout; authenticated staff can verify existing demo passes.
 
@@ -44,7 +45,7 @@ No additional hosting subscription, Firebase Cloud Functions, or email-provider 
 | Gitleaks, production bundle | Approximately 22.74 MB scanned, zero findings |
 | Actual private-value comparison | 249 tracked/build files checked against configured private secrets and the Firebase private key; zero matches. Values were not printed |
 | Anonymous Firestore REST reads | Existing test registration and unpaid live-order reads returned HTTP 403 `PERMISSION_DENIED` |
-| Production-header localhost preview | Real updated backend staff login, manual ticket lookup, QR image decoding, session retention after refresh, and logout succeeded; no CSP warnings/errors observed during those operations |
+| Production-header localhost preview | Real updated backend staff login, manual ticket lookup, QR image decoding, session retention after refresh, and logout succeeded; no CSP warnings/errors observed during those operations. Staff verification was also checked at a 390 px mobile viewport with no horizontal page overflow |
 | Demo ticket preservation | QR verification showed the existing four-session history and left both unused Day 2 sessions unchanged |
 | Genuine live Razorpay API | Authenticated fetch of the existing unpaid ₹1,000 order succeeded; amount paid remained ₹0 |
 | Razorpay browser checkout | The existing unpaid live order opened at ₹1,000 plus the displayed fee under the new CSP; no payment was submitted |
@@ -60,7 +61,7 @@ Measured with the same production build command before and after the dependency/
 
 | Asset | Before | After |
 | --- | ---: | ---: |
-| Main JavaScript | 1,001.96 kB | 646.07 kB |
+| Main JavaScript | 1,001.96 kB | 646.10 kB |
 | Main JavaScript, gzip | 321.65 kB | 214.85 kB |
 | Initially loaded public CSS | 164.12 kB | 153.85 kB |
 | Deferred QR library | Included in main | 375.14 kB / 110.56 kB gzip |
