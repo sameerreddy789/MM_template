@@ -12,9 +12,7 @@
   "dependencies": {
     "@gsap/react": "^2.1.2",
     "@hookform/resolvers": "^5.2.1",
-    "@react-oauth/google": "^0.12.2",
     "axios": "^1.11.0",
-    "firebase": "^12.18.0",
     "framer-motion": "^12.23.12",
     "gsap": "^3.13.0",
     "html5-qrcode": "^2.3.8",

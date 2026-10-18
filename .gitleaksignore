@@ -1,0 +1,3 @@
+# Historical synthetic secureToken in test-idcard.js; it creates no database
+# record and is not an API credential. Keep this exception tied to that commit.
+3e9a15f410a93c60a57f1543328cdaa4d6189e82:server/test-idcard.js:generic-api-key:21

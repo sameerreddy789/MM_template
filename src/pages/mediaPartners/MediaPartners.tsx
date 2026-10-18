@@ -5,7 +5,7 @@ const heading = cdn("/svgs/mediaPartners/mediaHead.svg");
 const dummy = cdn("/images/logo.webp");
 const Back = cdn("/svgs/registration/back.svg");
 import { useContext, useEffect } from "react";
-import { navContext } from "../../App";
+import { navContext } from "../../utils/navigationContext";
 import { motion, type Variants } from "framer-motion";
 import SEO from "../../components/SEO";
 

@@ -2,7 +2,7 @@ import { cdn } from "../../../utils/cdn";
 import styles from "./Navbar.module.scss";
 import { useEffect, useContext, useRef } from "react";
 import { useNavVisibilityStore, useMainHamStore } from "../../../utils/store";
-import { navContext } from "../../../App";
+import { navContext } from "../../../utils/navigationContext";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion } from "framer-motion";

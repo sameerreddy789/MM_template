@@ -29,6 +29,7 @@ const { createRegistrationService, RegistrationError, isConfiguredSecret, REGIST
 const { paymentEnvironment, recordMatchesMode } = require("./services/paymentEnvironment");
 const { SESSION_NAMES, normalizeCheckInSessions } = require("./services/checkInSessions");
 const { availableGatekeeperModes, gatekeeperEnvironment } = require("./services/gatekeeperEnvironment");
+const { authenticateStaffRequest, isValidAdmin, issueStaffSession, timingSafeCompare } = require("./services/gatekeeperAuth");
 const environment = paymentEnvironment(process.env);
 
 // ==========================================
@@ -77,14 +78,24 @@ if (serviceAccount) {
 // 2. EXPRESS APP SETUP
 // ==========================================
 const app = express();
+// Render terminates TLS and forwards the client address through one trusted
+// application proxy. Direct local servers must ignore spoofed forwarding headers.
+app.set("trust proxy", process.env.RENDER === "true" ? 1 : false);
+app.disable("x-powered-by");
 
 // Security headers
-app.use(helmet());
+app.use(helmet({
+  frameguard: { action: "deny" },
+  contentSecurityPolicy: { directives: { frameAncestors: ["'none'"] } },
+}));
+app.use("/api", (_req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
 
 // CORS — allow only verified frontend origins (localhost, project Vercel domains, and festival domain)
 const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:3000",
+  ...(process.env.NODE_ENV === "production" ? [] : ["http://localhost:5173", "http://localhost:3000"]),
   "https://mm-template.vercel.app",
   "https://mohanamantra.com",
   "https://www.mohanamantra.com",
@@ -97,18 +108,18 @@ app.use(
       // Allow requests with no origin (mobile apps, server-to-server, curl, webhooks)
       if (!origin) return callback(null, true);
 
-      // Verify origin against allowlist or legitimate project preview deployments
-      const isAllowed =
-        allowedOrigins.includes(origin) ||
-        /^https:\/\/mm-template(-[a-z0-9-]+)?\.vercel\.app$/.test(origin);
+      const isAllowed = allowedOrigins.includes(origin);
 
       if (isAllowed) {
         callback(null, true);
       } else {
-        callback(new Error(`Origin ${origin} not allowed by CORS policy.`), false);
+        const error = new Error("This browser origin is not allowed.");
+        error.code = "ORIGIN_NOT_ALLOWED";
+        callback(error, false);
       }
     },
     methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -124,7 +135,7 @@ const generalLimiter = rateLimit({
   legacyHeaders: false,
   message: { success: false, error: "Too many requests from this IP. Please try again later." },
 });
-const staffPaths = new Set(["/api/gatekeeper/verify", "/api/gatekeeper/checkin"]);
+const staffPaths = new Set(["/api/gatekeeper/login", "/api/gatekeeper/verify", "/api/gatekeeper/checkin"]);
 app.use((req, res, next) => {
   // Liveness probes must stay available when public traffic exhausts its budget.
   const healthProbe = req.path === "/api/health" && (req.method === "GET" || req.method === "HEAD");
@@ -132,7 +143,7 @@ app.use((req, res, next) => {
     ? next() : generalLimiter(req, res, next);
 });
 
-// Strict brute-force limiter applies to staff login, not every entry scan.
+// The same failed-authentication budget protects login and every staff endpoint.
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10, // max 10 attempts per 15 minutes
@@ -140,6 +151,21 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
   message: { success: false, error: "Too many login/verification attempts. Please wait 15 minutes." },
 });
+
+function requireGatekeeperAdmin(req, res, next) {
+  const adminKey = req.route?.path === "/api/gatekeeper/login"
+    ? (isValidAdmin(process.env, req.body?.adminKey, req.body?.adminSecret) ? process.env.ADMIN_KEY : null)
+    : authenticateStaffRequest(process.env, req);
+  if (adminKey) {
+    req.gatekeeperAdminKey = adminKey;
+    return next();
+  }
+  // Valid staff can still sign in and scan on shared Wi-Fi even when someone
+  // else exhausts that address's failed-login budget.
+  return authLimiter(req, res, () => res.status(401).json({
+    success: false, error: "Invalid admin credentials or expired staff session. Sign in again.",
+  }));
+}
 
 // Authenticated gates can share one event Wi-Fi address. A public-form or login
 // limit must not stop that queue after only a handful of verified admissions.
@@ -169,7 +195,7 @@ app.use(
   express.json({
     limit: "64kb",
     verify: (req, _res, buf) => {
-      req.rawBody = Buffer.from(buf);
+      if (req.path.toLowerCase() === "/api/payment-webhook") req.rawBody = Buffer.from(buf);
     },
   })
 );
@@ -210,14 +236,6 @@ function generateTicketId(mode = environment.mode) {
   return `${mode === "test" ? "MM26-TEST-" : "MM26-"}${randomHex}`;
 }
 
-// Timing-safe string comparison to eliminate side-channel timing attacks
-function timingSafeCompare(a, b) {
-  if (typeof a !== "string" || typeof b !== "string") return false;
-  const hashA = crypto.createHash("sha256").update(a).digest();
-  const hashB = crypto.createHash("sha256").update(b).digest();
-  return crypto.timingSafeEqual(hashA, hashB);
-}
-
 // ==========================================
 // 5. PIPELINE — Generate ID Card + Send Email
 // ==========================================
@@ -228,7 +246,7 @@ function timingSafeCompare(a, b) {
 // Payment confirmation tracks this delivery in Firestore. A failed delivery
 // can be retried by a webhook or the student's confirmation request.
 async function generateIdCardAndSendEmail({ ticketId, name, college, rollNo, email, secureToken, paymentMode }) {
-  console.log(`\n🎨 Starting ID card & QR pipeline for ${name} (${ticketId})...`);
+  console.log(`\n🎨 Starting ID card & QR pipeline for ticket ${ticketId}...`);
 
   // Step 1: Generate the ID card image
   const idCardBuffer = await generateIdCard({
@@ -257,7 +275,7 @@ async function generateIdCardAndSendEmail({ ticketId, name, college, rollNo, ema
     paymentMode,
   });
 
-  console.log(`✅ Full pipeline complete for ${name} (${ticketId})\n`);
+  console.log(`✅ Full pipeline complete for ticket ${ticketId}\n`);
   return delivery;
 }
 
@@ -359,36 +377,18 @@ app.get("/api/health", (_req, res) => {
 // GATEKEEPER API ENDPOINTS (ADMIN AUTHENTICATION)
 // ==========================================
 
-// Helper to validate Admin Key-Value Credentials
-function isValidAdmin(adminKey, adminSecret) {
-  const expectedKey = process.env.ADMIN_KEY;
-  const expectedSecret = process.env.ADMIN_SECRET;
-  if (!expectedKey || !expectedSecret) {
-    console.error("❌ ADMIN_KEY / ADMIN_SECRET not configured on server.");
-    return false;
-  }
-  const isKeyValid = timingSafeCompare(adminKey, expectedKey);
-  const isSecretValid = timingSafeCompare(adminSecret, expectedSecret);
-  return isKeyValid && isSecretValid;
-}
-
 // ROUTE: POST /api/gatekeeper/login
-app.post("/api/gatekeeper/login", authLimiter, (req, res) => {
+app.post("/api/gatekeeper/login", requireGatekeeperAdmin, (req, res) => {
   res.set("Cache-Control", "no-store");
-  const { adminKey, adminSecret, paymentMode } = req.body || {};
-  if (!adminKey || !adminSecret || !isValidAdmin(adminKey, adminSecret)) {
-    return res.status(401).json({
-      success: false,
-      error: "Invalid Admin Key or Secret. Access denied.",
-    });
-  }
+  const { paymentMode } = req.body || {};
 
   try {
     const scope = gatekeeperEnvironment(process.env, paymentMode);
     return res.status(200).json({
       success: true,
       message: "Admin authentication successful",
-      adminKey,
+      adminKey: req.gatekeeperAdminKey,
+      ...issueStaffSession(process.env),
       paymentMode: scope.mode,
       availableModes: availableGatekeeperModes(process.env),
     });
@@ -396,14 +396,10 @@ app.post("/api/gatekeeper/login", authLimiter, (req, res) => {
 });
 
 // ROUTE: POST /api/gatekeeper/verify
-app.post("/api/gatekeeper/verify", staffLimiter, async (req, res) => {
+app.post("/api/gatekeeper/verify", requireGatekeeperAdmin, staffLimiter, async (req, res) => {
   try {
     res.set("Cache-Control", "no-store");
-    const { token, ticketId, adminKey, adminSecret, paymentMode } = req.body || {};
-
-    if (!isValidAdmin(adminKey, adminSecret)) {
-      return res.status(401).json({ success: false, error: "Unauthorized admin credentials." });
-    }
+    const { token, ticketId, paymentMode } = req.body || {};
     const scope = gatekeeperEnvironment(process.env, paymentMode);
 
     let targetTicketId = ticketId;
@@ -478,14 +474,11 @@ app.post("/api/gatekeeper/verify", staffLimiter, async (req, res) => {
 });
 
 // ROUTE: POST /api/gatekeeper/checkin
-app.post("/api/gatekeeper/checkin", staffLimiter, async (req, res) => {
+app.post("/api/gatekeeper/checkin", requireGatekeeperAdmin, staffLimiter, async (req, res) => {
   try {
     res.set("Cache-Control", "no-store");
-    const { ticketId, sessionKey = "day1_am", adminKey, adminSecret, paymentMode } = req.body || {};
-
-    if (!isValidAdmin(adminKey, adminSecret)) {
-      return res.status(401).json({ success: false, error: "Unauthorized admin credentials." });
-    }
+    const { ticketId, sessionKey = "day1_am", paymentMode } = req.body || {};
+    const adminKey = req.gatekeeperAdminKey;
     const scope = gatekeeperEnvironment(process.env, paymentMode);
 
     if (typeof ticketId !== "string" || !new RegExp(`^${scope.ticketPrefix}[A-F0-9]{6}$`).test(ticketId)) {
@@ -520,7 +513,7 @@ app.post("/api/gatekeeper/checkin", staffLimiter, async (req, res) => {
       return { name: student.name, nowIso, updatedSessions };
     });
 
-    console.log(`🎟️ Gate Check-in SUCCESS for ${result.name} (${ticketId}) - Session: ${sessionName}`);
+    console.log(`🎟️ Gate Check-in SUCCESS for ticket ${ticketId} - Session: ${sessionName}`);
 
     return res.status(200).json({
       success: true,
@@ -539,6 +532,22 @@ app.post("/api/gatekeeper/checkin", staffLimiter, async (req, res) => {
     console.error("❌ Gatekeeper check-in error:", error.code || error.name);
     return res.status(503).json({ success: false, error: "Check-in is temporarily unavailable. Please try again." });
   }
+});
+
+app.use((_req, res) => res.status(404).json({ success: false, error: "Endpoint not found." }));
+app.use((error, _req, res, next) => {
+  if (res.headersSent) return next(error);
+  if (error.code === "ORIGIN_NOT_ALLOWED") {
+    return res.status(403).json({ success: false, code: "ORIGIN_NOT_ALLOWED", error: "This browser origin is not allowed." });
+  }
+  if (error.type === "entity.too.large") {
+    return res.status(413).json({ success: false, code: "PAYLOAD_TOO_LARGE", error: "The request is too large." });
+  }
+  if (error.status === 415) {
+    return res.status(415).json({ success: false, error: "Unsupported request encoding." });
+  }
+  console.error("Request failed:", error.code || error.name || "UnknownError");
+  return res.status(500).json({ success: false, error: "This request could not be completed." });
 });
 
 // ==========================================

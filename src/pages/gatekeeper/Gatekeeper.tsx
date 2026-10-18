@@ -1,8 +1,18 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import styles from "./Gatekeeper.module.scss";
-import { Html5Qrcode } from "html5-qrcode";
+import type { Html5Qrcode } from "html5-qrcode";
 import { Helmet } from "react-helmet-async";
+import { clearGatekeeperSession, parseGatekeeperSession, readGatekeeperSession, saveGatekeeperSession } from "../../utils/gatekeeperSession";
+
+let scannerLoading: Promise<typeof import("html5-qrcode")> | null = null;
+function loadScanner() {
+  if (!scannerLoading) scannerLoading = import("html5-qrcode").catch(error => {
+    scannerLoading = null;
+    throw error;
+  });
+  return scannerLoading;
+}
 
 const SESSION_KEYS = ["day1_am", "day1_pm", "day2_am", "day2_pm"] as const;
 type SessionKey = typeof SESSION_KEYS[number];
@@ -40,6 +50,8 @@ interface GatekeeperResponse {
   code?: string;
   paymentMode?: PaymentMode;
   availableModes?: PaymentMode[];
+  sessionToken?: string;
+  sessionExpiresAt?: number;
   student?: StudentData;
   ticketId?: string;
   sessionKey?: SessionKey;
@@ -116,20 +128,10 @@ const Gatekeeper: React.FC = () => {
   const linkedPass = location.pathname.startsWith("/gatekeeper/verify/")
     ? location.pathname + location.search : "";
   const [activeSession, setActiveSession] = useState<SessionKey>("day1_am");
-  const [adminKey, setAdminKey] = useState(() => sessionStorage.getItem("mm26_admin_key") || "");
-  const [adminSecret, setAdminSecret] = useState(() => sessionStorage.getItem("mm26_admin_secret") || "");
-  const [isAuthenticated, setIsAuthenticated] = useState(() =>
-    !!sessionStorage.getItem("mm26_admin_key") && !!sessionStorage.getItem("mm26_admin_secret"));
-  const [paymentMode, setPaymentMode] = useState<PaymentMode | null>(() => {
-    const mode = sessionStorage.getItem("mm26_admin_mode");
-    return mode === "test" || mode === "live" ? mode : null;
-  });
-  const [availableModes, setAvailableModes] = useState<PaymentMode[]>(() => {
-    try {
-      const modes: unknown = JSON.parse(sessionStorage.getItem("mm26_admin_modes") || "[]");
-      return Array.isArray(modes) ? modes.filter((mode): mode is PaymentMode => mode === "live" || mode === "test") : [];
-    } catch { return []; }
-  });
+  const [staffSession, setStaffSession] = useState(readGatekeeperSession);
+  const isAuthenticated = staffSession !== null;
+  const paymentMode = staffSession?.paymentMode ?? null;
+  const availableModes = staffSession?.availableModes ?? [];
   const [inputKey, setInputKey] = useState("");
   const [inputSecret, setInputSecret] = useState("");
   const [ticketInput, setTicketInput] = useState("");
@@ -216,16 +218,9 @@ const Gatekeeper: React.FC = () => {
   const clearLogin = useCallback(() => {
     cancelOperations();
     void stopScanner();
-    sessionStorage.removeItem("mm26_admin_key");
-    sessionStorage.removeItem("mm26_admin_secret");
-    sessionStorage.removeItem("mm26_admin_mode");
-    sessionStorage.removeItem("mm26_admin_modes");
-    setAdminKey("");
-    setAdminSecret("");
+    clearGatekeeperSession();
     setInputSecret("");
-    setPaymentMode(null);
-    setAvailableModes([]);
-    setIsAuthenticated(false);
+    setStaffSession(null);
     setTicketInput("");
     setStudent(null);
     setSuccessSession(null);
@@ -236,6 +231,12 @@ const Gatekeeper: React.FC = () => {
     clearLogin();
     setError("Admin session expired. Sign in again to verify this pass.");
   }, [clearLogin]);
+
+  useEffect(() => {
+    if (!staffSession) return;
+    const timer = window.setTimeout(expireLogin, Math.max(0, staffSession.expiresAt - Date.now()));
+    return () => window.clearTimeout(timer);
+  }, [staffSession, expireLogin]);
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -252,18 +253,14 @@ const Gatekeeper: React.FC = () => {
         signal: operation.controller.signal,
       });
       if (!isCurrent(operation)) return;
-      if (data.success && (data.paymentMode === "test" || data.paymentMode === "live")) {
-        const modes = data.availableModes?.filter(mode => mode === "live" || mode === "test") || [data.paymentMode];
-        sessionStorage.setItem("mm26_admin_key", key);
-        sessionStorage.setItem("mm26_admin_secret", secret);
-        sessionStorage.setItem("mm26_admin_mode", data.paymentMode);
-        sessionStorage.setItem("mm26_admin_modes", JSON.stringify(modes));
-        setAdminKey(key);
-        setAdminSecret(secret);
-        setPaymentMode(data.paymentMode);
-        setAvailableModes(modes);
+      const session = parseGatekeeperSession({
+        token: data.sessionToken, expiresAt: data.sessionExpiresAt,
+        paymentMode: data.paymentMode, availableModes: data.availableModes || [data.paymentMode],
+      });
+      if (data.success && session) {
+        saveGatekeeperSession(session);
+        setStaffSession(session);
         setInputSecret("");
-        setIsAuthenticated(true);
       } else {
         setError(data.error || "Sign-in could not be confirmed. Check the admin ID and password.");
       }
@@ -281,8 +278,8 @@ const Gatekeeper: React.FC = () => {
     }
     try {
       const { status, data } = await fetchBackend("/api/gatekeeper/verify", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ adminKey, adminSecret, paymentMode, ...pass }),
+        method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${staffSession?.token}` },
+        body: JSON.stringify({ paymentMode, ...pass }),
         signal: operation.controller.signal,
       });
       if (!isCurrent(operation)) return;
@@ -293,8 +290,6 @@ const Gatekeeper: React.FC = () => {
       if (data.success && verified && correctMode && verified.paymentStatus === "Paid"
         && (!("ticketId" in pass) || pass.ticketId === verified.ticketId)) {
         setStudent(verified);
-        setPaymentMode(verified.paymentMode);
-        sessionStorage.setItem("mm26_admin_mode", verified.paymentMode);
       } else {
         setError(data.error || "Ticket verification could not be confirmed.");
       }
@@ -302,7 +297,7 @@ const Gatekeeper: React.FC = () => {
       if (isCurrent(operation)) setError(operation.controller.signal.aborted
         ? "Ticket verification timed out. Try again." : "Network error while verifying ticket. Try again.");
     }
-  }, [adminKey, adminSecret, paymentMode, expireLogin, isCurrent]);
+  }, [staffSession, paymentMode, expireLogin, isCurrent]);
 
   const verifyTokenOrId = useCallback(async (value: string) => {
     if (!isAuthenticated || cameraWantedRef.current) return;
@@ -331,8 +326,8 @@ const Gatekeeper: React.FC = () => {
     const passMode = student.paymentMode;
     try {
       const { status, data } = await fetchBackend("/api/gatekeeper/checkin", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ticketId, sessionKey, adminKey, adminSecret, paymentMode: passMode }),
+        method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${staffSession?.token}` },
+        body: JSON.stringify({ ticketId, sessionKey, paymentMode: passMode }),
         signal: operation.controller.signal,
       });
       if (!isCurrent(operation)) return;
@@ -375,6 +370,8 @@ const Gatekeeper: React.FC = () => {
       await cameraCleanupRef.current;
       if (!mountedRef.current || !cameraWantedRef.current || cameraEpochRef.current !== epoch) return;
       try {
+        const { Html5Qrcode } = await loadScanner();
+        if (!mountedRef.current || !cameraWantedRef.current || cameraEpochRef.current !== epoch) return;
         const camera: Camera = { scanner: new Html5Qrcode("reader") };
         cameraRef.current = camera;
         camera.start = camera.scanner.start(
@@ -411,6 +408,8 @@ const Gatekeeper: React.FC = () => {
         setError("Choose a QR image smaller than 10 MB.");
         return;
       }
+      const { Html5Qrcode } = await loadScanner();
+      if (!isCurrent(operation)) return;
       scanner = new Html5Qrcode("reader-hidden");
       const decodedText = await scanner.scanFile(file, false);
       if (isCurrent(operation)) await verifyPass(decodedText, operation);
@@ -445,8 +444,10 @@ const Gatekeeper: React.FC = () => {
 
   const changePassMode = (mode: PaymentMode) => {
     if (operationRef.current || cameraWantedRef.current || !availableModes.includes(mode)) return;
-    setPaymentMode(mode);
-    sessionStorage.setItem("mm26_admin_mode", mode);
+    if (!staffSession) return;
+    const nextSession = { ...staffSession, paymentMode: mode };
+    saveGatekeeperSession(nextSession);
+    setStaffSession(nextSession);
     setTicketInput("");
     setStudent(null);
     setSuccessSession(null);

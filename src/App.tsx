@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { useState, useRef, useEffect, createContext } from "react";
+import { useState, useRef, useEffect, lazy, Suspense } from "react";
 import Preloader from "./pages/registration/components/Preloader/Preloader";
 import Homepage from "./Homepage";
 import Registration from "./pages/registration/Registration";
@@ -10,14 +10,11 @@ import Contact from "./pages/contact/ContactPage";
 import assetList from "./assetList";
 import useCanonicalUrl from "./UseCanonicalUrl";
 import { startAssetWarmup } from "./utils/assetWarmup";
+import { navContext } from "./utils/navigationContext";
 
 // import Eventspage from "./pages/events/components/Eventspage";
 
 import Events from "./pages/events/Events";
-
-export const navContext = createContext<{ goToPage?: (page: string) => void }>(
- {}
-);
 
 import ReactGA from "react-ga4";
 import Brochure from "./pages/brochure/Brochure";
@@ -26,11 +23,12 @@ import MediaPatners from "./pages/mediaPartners/MediaPartners";
 import Gallery from "./pages/gallery/Gallery";
 import BackgroundMusic from "./pages/components/backgroundMusic/BackgroundMusic";
 import useOverlayStore from "./utils/store";
-import Gatekeeper from "./pages/gatekeeper/Gatekeeper";
+const Gatekeeper = lazy(() => import("./pages/gatekeeper/Gatekeeper"));
 
 const TRACKING_ID = "G-57YBBH7RXW";
 const isAnalyticsHost = window.location.hostname === "mohanamantra.com"
  || window.location.hostname.endsWith(".mohanamantra.com");
+const pageList = ["home", "register", "events", "aboutus", "contact", "brochure", "sponsors", "mediaPartners", "gallery"];
 
 export default function App() {
  useCanonicalUrl(
@@ -40,6 +38,7 @@ export default function App() {
  );
  const navigate = useNavigate();
  const location = useLocation();
+ const isGatekeeperRoute = location.pathname.startsWith("/gatekeeper");
 
  interface LocationState {
  startAnimation?: boolean;
@@ -72,25 +71,14 @@ export default function App() {
  // low fetch priority, and the whole thing backs off on Save-Data or 2G.
  // Runs once - startAssetWarmup guards against re-entry.
  useEffect(() => {
+ if (location.pathname.startsWith("/gatekeeper") || location.pathname === "/register") return;
  startAssetWarmup();
- }, []);
-
- const pageList = [
- "home",
- "register",
- "events",
- "aboutus",
- "contact",
- "brochure",
- "sponsors",
- "mediaPartners",
- "gallery",
- ];
+ }, [location.pathname]);
 
  const [currentPage, setCurrentPage] = useState<
  (typeof pageList)[number]
  >(
- location.pathname === "/"
+ isGatekeeperRoute ? "gatekeeper" : location.pathname === "/"
  ? "home"
  : pageList.includes(location.pathname.replace("/", ""))
  ? location.pathname.replace("/", "")
@@ -103,7 +91,7 @@ export default function App() {
  const [doorPLPercentageLoaded, setDoorPLPercentageLoaded] =
  useState<number>(0);
 
- const [isPreloading, setIsPreloading] = useState(location.pathname !== "/");
+ const [isPreloading, setIsPreloading] = useState(location.pathname !== "/" && !isGatekeeperRoute);
 
  const nextRoute = useRef<string | null>(null);
 
@@ -193,7 +181,7 @@ export default function App() {
  };
 
  const loadAssets = async (page: keyof typeof assetList) => {
- const handleLoadedAsset = (callback: (param?: any) => void) => {
+ const handleLoadedAsset = (callback: () => void) => {
  setDoorPLPercentageLoaded((prev) => prev + 100 / promises.length);
  callback();
  };
@@ -205,7 +193,7 @@ export default function App() {
  const image = new Image();
  image.src = path;
  image.onload = () => handleLoadedAsset(() => resolve(image));
- image.onerror = () => handleLoadedAsset((error) => reject(error));
+ image.onerror = (error) => handleLoadedAsset(() => reject(error));
  })
  ),
  ...assetList[page].videos.map(
@@ -215,8 +203,8 @@ export default function App() {
  video.src = path;
  video.onloadeddata = () =>
  handleLoadedAsset(() => resolve(video));
- video.onerror = () =>
- handleLoadedAsset((error) => reject(error));
+ video.onerror = (error) =>
+ handleLoadedAsset(() => reject(error));
  })
  ),
  ];
@@ -226,17 +214,17 @@ export default function App() {
 
  return (
  <navContext.Provider value={{ goToPage }}>
- <DoorTransition
+ {!isGatekeeperRoute && <DoorTransition
  phase={doorPhase}
  onClosed={handleDoorsClosed}
  onOpened={handleDoorsOpened}
  percentageLoaded={doorPLPercentageLoaded}
  targetPageRef={nextRoute}
- />
+ />}
  {/* Deliberately outside the conditional page block below. Every page down
  there is unmounted on navigation, and the audio element has to outlive
  that. Suppressed on the gallery, which autoplays its own video. */}
- <BackgroundMusic suppressed={currentPage === "gallery"} />
+ {!isGatekeeperRoute && <BackgroundMusic suppressed={currentPage === "gallery"} />}
 
  <h1 style={{ display: "none" }}>MohanaMantra 2K26 | MBU</h1>
  {isPreloading && (
@@ -266,7 +254,7 @@ export default function App() {
  {!isPreloading && currentPage === "gallery" && <Gallery />}
  {!isPreloading && currentPage === "sponsors" && <Sponsors />}
  {!isPreloading && currentPage === "mediaPartners" && <MediaPatners />}
- {currentPage === "gatekeeper" && <Gatekeeper />}
+ {currentPage === "gatekeeper" && <Suspense fallback={<p role="status">Loading gatekeeper…</p>}><Gatekeeper /></Suspense>}
  </navContext.Provider>
  );
 }

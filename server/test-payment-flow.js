@@ -16,7 +16,7 @@ const webhookSecret = 'isolated_webhook_signing_secret';
 const keySecret = 'isolated_razorpay_key_secret';
 const fakeEnv = {};
 const baseEnv = {
-  PORT: '0', RAZORPAY_KEY_ID: 'rzp_test_isolated', RAZORPAY_KEY_SECRET: keySecret,
+  PORT: '0', RENDER: 'true', RAZORPAY_KEY_ID: 'rzp_test_isolated', RAZORPAY_KEY_SECRET: keySecret,
   RAZORPAY_WEBHOOK_SECRET: webhookSecret,
   JWT_SECRET: 'isolated_ticket_signing_secret_more_than_32_chars',
   GMAIL_USER: 'sender@example.invalid', GMAIL_APP_PASSWORD: 'isolated_mail_secret',
@@ -36,6 +36,7 @@ function resetState() {
     orderRequests: [], orderFetches: [], paymentFetches: [], emailAttempts: [], emails: [],
     failWrites: false, failWebhookWrites: false, failReads: false, failEmail: false, failProvider: false, delayReads: false,
     transactionQueue: Promise.resolve(),
+    clientAddress: `203.0.113.${results.length + 1}`,
     order: { id: 'order_IsolatedTest', amount: 100000, currency: 'INR', status: 'paid', amount_paid: 100000, notes: {} },
     payment: { id: 'pay_IsolatedTest', order_id: 'order_IsolatedTest', amount: 100000, currency: 'INR', status: 'captured', captured: true, amount_refunded: 0 },
   });
@@ -161,7 +162,7 @@ async function run() {
   if (!server.listening) await once(server, 'listening');
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
   async function post(endpoint, body, headers = {}) {
-    const response = await fetch(`${baseUrl}${endpoint}`, { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: typeof body === 'string' ? body : JSON.stringify(body), signal: AbortSignal.timeout(5000) });
+    const response = await fetch(`${baseUrl}${endpoint}`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-forwarded-for': state.clientAddress, ...headers }, body: typeof body === 'string' ? body : JSON.stringify(body), signal: AbortSignal.timeout(5000) });
     return { status: response.status, body: await response.json() };
   }
   async function webhook(event = 'payment.captured', overrides = {}, badSignature = false, eventId) {
@@ -196,6 +197,15 @@ async function run() {
       assert.equal((await post('/api/register', details)).status, 400);
     }
     assert.equal(state.orderRequests.length, 0);
+  });
+  await check('Display-address syntax, multiple recipients, and malformed email domains cannot create an order', async () => {
+    for (const email of ['<student@example.invalid>', 'student@example.invalid,other', 'student..name@example.invalid', 'student@example..invalid', 'student@-example.invalid']) {
+      const response = await post('/api/register', { ...validForm, email });
+      assert.equal(response.status, 400);
+      assert.equal(response.body.code, 'INVALID_EMAIL');
+    }
+    assert.equal(state.orderRequests.length, 0);
+    assert.equal(registrations().size, 0);
   });
   await check('Registration closure blocks new orders before any provider request or write', async () => {
     for (const setting of [{ REGISTRATIONS_OPEN: 'false' }, { NODE_ENV: 'production' }]) {
@@ -607,6 +617,62 @@ async function run() {
     assert.equal((await post('/api/gatekeeper/verify', { ticketId: 'MM26-TEST-C0FFEE' })).status, 401);
     assert.equal((await post('/api/gatekeeper/checkin', { ticketId: 'MM26-TEST-C0FFEE', sessionKey: 'day1_am' })).status, 401);
   });
+  await check('Failed credentials share one strict budget across login, verification, and check-in', async () => {
+    const paid = await verify();
+    const invalid = { adminKey: baseEnv.ADMIN_KEY, adminSecret: 'incorrect-password' };
+    for (let i = 0; i < 10; i++) {
+      const endpoint = ['/api/gatekeeper/login', '/api/gatekeeper/verify', '/api/gatekeeper/checkin'][i % 3];
+      assert.equal((await post(endpoint, invalid)).status, 401);
+    }
+    for (const endpoint of ['/api/gatekeeper/login', '/api/gatekeeper/verify', '/api/gatekeeper/checkin']) {
+      assert.equal((await post(endpoint, invalid)).status, 429);
+    }
+    assert.equal((await staffVerify({ ticketId: paid.body.registration.ticketId })).status, 200);
+    assert.equal((await post('/api/gatekeeper/login', { adminKey: baseEnv.ADMIN_KEY, adminSecret: baseEnv.ADMIN_SECRET })).status, 200);
+  });
+  await check('Prepending spoofed forwarded addresses cannot bypass the nearest trusted proxy budget', async () => {
+    for (let i = 0; i < 11; i++) {
+      const response = await post('/api/gatekeeper/verify', {}, { 'x-forwarded-for': `198.51.100.${i + 1}, ${state.clientAddress}` });
+      assert.equal(response.status, i < 10 ? 401 : 429);
+    }
+    assert.equal(state.paymentFetches.length, 0);
+    assert.equal(registrations().size, 0);
+  });
+  await check('A staff bearer session verifies and checks in all sessions without resending a password', async () => {
+    const paid = await verify();
+    const login = await post('/api/gatekeeper/login', { adminKey: baseEnv.ADMIN_KEY, adminSecret: baseEnv.ADMIN_SECRET });
+    assert.equal(login.status, 200);
+    assert.equal(JSON.stringify(login.body).includes(baseEnv.ADMIN_SECRET), false);
+    assert.equal(JSON.stringify(login.body).includes(baseEnv.JWT_SECRET), false);
+    assert.ok(login.body.sessionExpiresAt > Date.now());
+    const headers = { Authorization: `Bearer ${login.body.sessionToken}` };
+    assert.equal((await post('/api/gatekeeper/verify', { ticketId: paid.body.registration.ticketId }, headers)).status, 200);
+    for (const sessionKey of sessionKeys) {
+      const response = await post('/api/gatekeeper/checkin', { ticketId: paid.body.registration.ticketId, sessionKey, adminKey: 'forged-staff-id' }, headers);
+      assert.equal(response.status, 200);
+      assert.equal(response.body.checkInSessions[sessionKey].gatekeeper, baseEnv.ADMIN_KEY);
+      assert.equal((await post('/api/gatekeeper/checkin', { ticketId: paid.body.registration.ticketId, sessionKey }, headers)).body.code, 'ALREADY_CHECKED_IN');
+    }
+  });
+  await check('Invalid bearer proofs cannot fall back to a supplied staff password', async () => {
+    const paid = await verify();
+    const jwt = nativeRequire('jsonwebtoken');
+    const record = registrations().get(paid.body.registration.ticketId);
+    const ticketToken = jwt.sign({ tid: record.ticketId, mode: 'test', stk: record.secureToken }, baseEnv.JWT_SECRET, { algorithm: 'HS256' });
+    for (const authorization of ['Bearer invalid.token.proof', `Bearer ${ticketToken}`, 'Basic invalid']) {
+      assert.equal((await post('/api/gatekeeper/verify', { adminKey: baseEnv.ADMIN_KEY, adminSecret: baseEnv.ADMIN_SECRET, ticketId: record.ticketId }, { Authorization: authorization })).status, 401);
+    }
+    assert.equal(record.checkInSessions.day1_am.checkedIn, false);
+  });
+  await check('Changing the staff password revokes an existing bearer session', async () => {
+    const login = await post('/api/gatekeeper/login', { adminKey: baseEnv.ADMIN_KEY, adminSecret: baseEnv.ADMIN_SECRET });
+    fakeEnv.ADMIN_SECRET = 'different-isolated-staff-password';
+    assert.equal((await post('/api/gatekeeper/verify', { ticketId: 'MM26-TEST-C0FFEE' }, { Authorization: `Bearer ${login.body.sessionToken}` })).status, 401);
+  });
+  await check('An alternate-case login URL still requires a password to issue a new session', async () => {
+    const login = await post('/api/gatekeeper/login', { adminKey: baseEnv.ADMIN_KEY, adminSecret: baseEnv.ADMIN_SECRET });
+    assert.equal((await post('/API/GATEKEEPER/LOGIN', {}, { Authorization: `Bearer ${login.body.sessionToken}` })).status, 401);
+  });
   await check('Malformed ticket identifiers are rejected before a database lookup', async () => {
     for (const ticketId of ['wrong/id', 'MM26-C0FFEE', 'MM26-TEST-C0FFEE/other/doc', {}, 7]) {
       assert.equal((await staffVerify({ ticketId })).status, 400);
@@ -768,6 +834,41 @@ async function run() {
     assert.equal(order.key_id, 'rzp_live_isolated');
     assert.equal(state.tables.registrationOrders.size, 1);
     assert.deepEqual(state.tables.testRegistrationOrders, testOrdersBefore);
+  });
+  await check('Production CORS allows the festival and denies localhost, lookalike previews, and null origins', async () => {
+    const originalServer = server;
+    fakeEnv.NODE_ENV = 'production';
+    vm.compileFunction(fs.readFileSync(serverPath, 'utf8'), ['require', '__dirname', 'Buffer', 'console', 'process'], { filename: serverPath })(
+      isolatedRequire, __dirname, Buffer, { log() {}, warn() {}, error() {} }, { env: fakeEnv });
+    const productionServer = server;
+    try {
+      if (!productionServer.listening) await once(productionServer, 'listening');
+      const productionBase = `http://127.0.0.1:${productionServer.address().port}`;
+      for (const origin of ['http://localhost:5173', 'https://mm-template-attacker.vercel.app', 'https://www.mohanamantra.com.attacker.invalid', 'null']) {
+        const response = await fetch(`${productionBase}/api/health`, { headers: { Origin: origin } });
+        assert.equal(response.status, 403);
+        assert.equal(response.headers.get('content-type').startsWith('application/json'), true);
+        assert.equal((await response.json()).code, 'ORIGIN_NOT_ALLOWED');
+      }
+      const permitted = await fetch(`${productionBase}/api/health`, { headers: { Origin: 'https://www.mohanamantra.com' } });
+      assert.equal(permitted.status, 200);
+      assert.equal(permitted.headers.get('access-control-allow-origin'), 'https://www.mohanamantra.com');
+      assert.equal(permitted.headers.get('cache-control'), 'no-store');
+      assert.equal(permitted.headers.get('x-powered-by'), null);
+      assert.equal(permitted.headers.get('x-frame-options'), 'DENY');
+      await permitted.json();
+      const preflight = await fetch(`${productionBase}/api/gatekeeper/verify`, { method: 'OPTIONS', headers: { Origin: 'https://www.mohanamantra.com', 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'authorization,content-type' } });
+      assert.equal(preflight.status, 204);
+      assert.ok(preflight.headers.get('access-control-allow-headers').toLowerCase().includes('authorization'));
+      const oversized = await fetch(`${productionBase}/api/register`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: 'x'.repeat(70 * 1024) }) });
+      assert.equal(oversized.status, 413);
+      assert.equal((await oversized.json()).code, 'PAYLOAD_TOO_LARGE');
+      assert.equal(state.orderRequests.length, 0);
+    } finally {
+      productionServer.closeAllConnections();
+      await new Promise(resolve => productionServer.close(resolve));
+      server = originalServer;
+    }
   });
   await check('Health monitors do not consume the public API request budget', async () => {
     const before = await fetch(`${baseUrl}/api/registration-status`);

@@ -16,12 +16,11 @@
 // ==========================================
 
 const nodemailer = require("nodemailer");
-const { isConfiguredSecret } = require("./registration");
+const { isConfiguredSecret, isValidEmailAddress } = require("./registration");
 require("dotenv").config({ path: require("node:path").join(__dirname, "..", ".env"), quiet: true });
 
 function isEmailConfigured(config = process.env) {
-  return typeof config.GMAIL_USER === "string" &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(config.GMAIL_USER) &&
+  return isValidEmailAddress(config.GMAIL_USER) &&
     isConfiguredSecret(config.GMAIL_APP_PASSWORD?.replace(/\s/g, ""));
 }
 
@@ -50,6 +49,11 @@ const transporter = nodemailer.createTransport({
  * @returns {Promise<Object>} Nodemailer send result
  */
 async function sendIdCardEmail({ toEmail, studentName, ticketId, college, idCardBuffer, qrBuffer, paymentMode = "live" }) {
+  if (!isValidEmailAddress(toEmail)) {
+    const error = new Error("The entry pass recipient must be a single valid email address.");
+    error.code = "INVALID_RECIPIENT";
+    throw error;
+  }
   const attachments = [
     {
       filename: `MohanaMantra_EntryPass_${ticketId}.png`,
@@ -80,10 +84,10 @@ async function sendIdCardEmail({ toEmail, studentName, ticketId, college, idCard
     if (!result.accepted?.some(address => String(address).toLowerCase() === toEmail.toLowerCase())) {
       throw new Error("The mail provider did not accept the entry pass recipient.");
     }
-    console.log(`📧 Email sent to ${toEmail} with ${attachments.length} attachments — Message ID: ${result.messageId}`);
+    console.log(`📧 Entry-pass email accepted for ticket ${ticketId} with ${attachments.length} attachments`);
     return result;
   } catch (error) {
-    console.error(`❌ Email send failed for ${toEmail}:`, error.message);
+    console.error(`❌ Entry-pass email failed for ticket ${ticketId}:`, error.code || "DELIVERY_FAILED");
     throw error;
   }
 }

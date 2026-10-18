@@ -227,7 +227,7 @@ export default function MainHam({ goToPage }: MainHamProps) {
 
           <div className={styles.footerAuspicious}>
             <span className={styles.traditionalTagline}>
-              Celebrating Creativity, Culture & Excellence
+              Celebrating Creativity, Culture &amp; Excellence
             </span>
             <span className={styles.mbuTag}>Mohan Babu University, Tirupati</span>
           </div>

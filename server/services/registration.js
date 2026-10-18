@@ -42,6 +42,16 @@ function hasValidRegistrationPaymentAmount(payment) {
   return amount === REGISTRATION_AMOUNT || amount - REGISTRATION_AMOUNT === fee;
 }
 
+function isValidEmailAddress(value) {
+  if (typeof value !== "string" || value.length > 120) return false;
+  const parts = value.split("@");
+  if (parts.length !== 2) return false;
+  const [local, domain] = parts;
+  return local.length > 0 && local.length <= 64 && !local.startsWith(".") && !local.endsWith(".") &&
+    !local.includes("..") && /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+$/.test(local) &&
+    /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/.test(domain);
+}
+
 function cleanStudentDetails(input) {
   const text = (key) => typeof input?.[key] === "string" ? input[key].trim() : "";
   const student = {
@@ -57,7 +67,7 @@ function cleanStudentDetails(input) {
   if (student.name.length > 100 || student.college.length > 150 || student.rollNo.length > 50) {
     throw new RegistrationError(400, "INVALID_DETAILS", "One or more student details are too long.");
   }
-  if (student.email.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(student.email)) {
+  if (!isValidEmailAddress(student.email)) {
     throw new RegistrationError(400, "INVALID_EMAIL", "Please enter a valid email address.");
   }
   if (!/^\+?[0-9]{10,15}$/.test(student.phone)) {
@@ -399,4 +409,4 @@ function createRegistrationService({ db, razorpay, config, serverTimestamp, send
   return { configurationStatus, createOrder, verifyCheckout, processWebhook, deliverQueuedEmail: deliverEmail };
 }
 
-module.exports = { createRegistrationService, RegistrationError, isConfiguredSecret, REGISTRATION_AMOUNT, REGISTRATION_CURRENCY };
+module.exports = { createRegistrationService, RegistrationError, isConfiguredSecret, isValidEmailAddress, REGISTRATION_AMOUNT, REGISTRATION_CURRENCY };
