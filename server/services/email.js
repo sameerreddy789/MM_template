@@ -16,12 +16,28 @@
 // ==========================================
 
 const nodemailer = require("nodemailer");
+const MailComposer = require("nodemailer/lib/mail-composer");
 const { isConfiguredSecret, isValidEmailAddress } = require("./registration");
 require("dotenv").config({ path: require("node:path").join(__dirname, "..", ".env"), quiet: true });
 
-function isEmailConfigured(config = process.env) {
+// Two ways to send through the official mailbox:
+//   - Gmail API over HTTPS (port 443): works on hosts like Render Free that
+//     block the SMTP ports. Used when OAuth credentials are present.
+//   - Gmail SMTP app password: the original local/inline path, used otherwise.
+function hasGmailApiConfig(config = process.env) {
+  return isValidEmailAddress(config.GMAIL_USER) &&
+    isConfiguredSecret(config.GMAIL_OAUTH_CLIENT_ID) &&
+    isConfiguredSecret(config.GMAIL_OAUTH_CLIENT_SECRET) &&
+    isConfiguredSecret(config.GMAIL_OAUTH_REFRESH_TOKEN);
+}
+
+function hasGmailSmtpConfig(config = process.env) {
   return isValidEmailAddress(config.GMAIL_USER) &&
     isConfiguredSecret(config.GMAIL_APP_PASSWORD?.replace(/\s/g, ""));
+}
+
+function isEmailConfigured(config = process.env) {
+  return hasGmailApiConfig(config) || hasGmailSmtpConfig(config);
 }
 
 // Configure Gmail SMTP transport
@@ -80,9 +96,14 @@ async function sendIdCardEmail({ toEmail, studentName, ticketId, college, idCard
   };
 
   try {
-    const result = await transporter.sendMail(mailOptions);
-    if (!result.accepted?.some(address => String(address).toLowerCase() === toEmail.toLowerCase())) {
-      throw new Error("The mail provider did not accept the entry pass recipient.");
+    let result;
+    if (hasGmailApiConfig()) {
+      result = await sendViaGmailApi(mailOptions, toEmail);
+    } else {
+      result = await transporter.sendMail(mailOptions);
+      if (!result.accepted?.some(address => String(address).toLowerCase() === toEmail.toLowerCase())) {
+        throw new Error("The mail provider did not accept the entry pass recipient.");
+      }
     }
     console.log(`📧 Entry-pass email accepted for ticket ${ticketId} with ${attachments.length} attachments`);
     return result;
@@ -90,6 +111,33 @@ async function sendIdCardEmail({ toEmail, studentName, ticketId, college, idCard
     console.error(`❌ Entry-pass email failed for ticket ${ticketId}:`, error.code || "DELIVERY_FAILED");
     throw error;
   }
+}
+
+// --- Gmail API transport (HTTPS, works where SMTP ports are blocked) ---
+let cachedGmailClient = null;
+function getGmailClient() {
+  if (cachedGmailClient) return cachedGmailClient;
+  const { google } = require("googleapis");
+  const oauth2 = new google.auth.OAuth2(
+    process.env.GMAIL_OAUTH_CLIENT_ID,
+    process.env.GMAIL_OAUTH_CLIENT_SECRET,
+  );
+  oauth2.setCredentials({ refresh_token: process.env.GMAIL_OAUTH_REFRESH_TOKEN });
+  cachedGmailClient = google.gmail({ version: "v1", auth: oauth2 });
+  return cachedGmailClient;
+}
+
+// Reuse Nodemailer to build the RFC822 MIME (HTML + both PNG attachments), then
+// hand the base64url-encoded bytes to the Gmail API instead of an SMTP socket.
+async function sendViaGmailApi(mailOptions, toEmail) {
+  const gmail = getGmailClient();
+  const mime = await new MailComposer(mailOptions).compile().build();
+  const raw = mime.toString("base64url");
+  const res = await gmail.users.messages.send({ userId: "me", requestBody: { raw } });
+  if (!res.data?.id) {
+    throw new Error("Gmail API did not confirm the entry pass was queued for delivery.");
+  }
+  return { messageId: res.data.id, accepted: [toEmail], gmailApi: true };
 }
 
 /**
@@ -224,8 +272,23 @@ function buildEmailHtml(studentName, ticketId, college, paymentMode) {
 }
 
 async function verifyEmailTransport() {
-  if (!isEmailConfigured()) throw new Error("The Gmail sender and app password are not configured.");
+  if (hasGmailApiConfig()) {
+    // Validate the OAuth refresh token without needing a Gmail read scope:
+    // exchanging it for an access token proves the credentials are good.
+    const { google } = require("googleapis");
+    const oauth2 = new google.auth.OAuth2(
+      process.env.GMAIL_OAUTH_CLIENT_ID,
+      process.env.GMAIL_OAUTH_CLIENT_SECRET,
+    );
+    oauth2.setCredentials({ refresh_token: process.env.GMAIL_OAUTH_REFRESH_TOKEN });
+    const { token } = await oauth2.getAccessToken();
+    if (!token) throw new Error("Could not obtain a Gmail access token from the refresh token.");
+    return { gmailApi: true };
+  }
+  if (!hasGmailSmtpConfig()) {
+    throw new Error("No Gmail sender configured (need either an app password or OAuth credentials).");
+  }
   return transporter.verify();
 }
 
-module.exports = { sendIdCardEmail, isEmailConfigured, verifyEmailTransport };
+module.exports = { sendIdCardEmail, isEmailConfigured, hasGmailApiConfig, hasGmailSmtpConfig, verifyEmailTransport };
