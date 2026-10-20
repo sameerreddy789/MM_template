@@ -23,7 +23,7 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",
     "firebase-admin": "^14.3.0",
-    "googleapis": "^144.0.0",
+    "googleapis": "^186.0.0",
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "nodemailer": "^10.0.9",
