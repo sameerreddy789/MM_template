@@ -1,9 +1,9 @@
 import { useMemo, useState, type FormEvent } from "react";
 import styles from "./RCheck.module.scss";
 
-// Same-origin: in production this hits the Vercel serverless function at
-// /api/rcheck/registrations; in dev it proxies to the local backend.
-const apiBase = "";
+const apiBase = import.meta.env.DEV
+  ? ""
+  : (import.meta.env.VITE_BACKEND_URL || "https://mohanamantra-backend.onrender.com").replace(/\/$/, "");
 
 interface Registration {
   name: string;
@@ -16,9 +16,9 @@ interface Registration {
 }
 
 function formatDate(iso?: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "â€”";
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "â€”";
   return d.toLocaleString("en-IN", {
     day: "2-digit", month: "short", year: "numeric",
     hour: "2-digit", minute: "2-digit", hour12: true,
@@ -119,7 +119,7 @@ export default function RCheck() {
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
           </label>
           {error && <p className={styles.error} role="alert">{error}</p>}
-          <button type="submit" disabled={loading}>{loading ? "Checking…" : "Sign in"}</button>
+          <button type="submit" disabled={loading}>{loading ? "Checkingâ€¦" : "Sign in"}</button>
         </form>
       </div>
     );
@@ -139,13 +139,13 @@ export default function RCheck() {
             </div>
           </div>
           <div className={styles.actions}>
-            <button onClick={() => void load(id.trim(), password)} disabled={loading}>{loading ? "Refreshing…" : "Refresh"}</button>
+            <button onClick={() => void load(id.trim(), password)} disabled={loading}>{loading ? "Refreshingâ€¦" : "Refresh"}</button>
             <button onClick={logout} className={styles.secondary}>Log out</button>
           </div>
         </header>
 
         <div className={styles.controls}>
-          <input className={styles.search} placeholder="Search name, email, phone, college…" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input className={styles.search} placeholder="Search name, email, phone, collegeâ€¦" value={search} onChange={(e) => setSearch(e.target.value)} />
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             {statuses.map((status) => (
               <option key={status} value={status}>{status === "all" ? "All statuses" : status}</option>
@@ -173,10 +173,10 @@ export default function RCheck() {
               {filtered.map((item, index) => (
                 <tr key={`${item.ticketId || item.email}-${index}`}>
                   <td className={styles.indexCol}>{index + 1}</td>
-                  <td>{item.name || "—"}</td>
-                  <td>{item.email || "—"}</td>
-                  <td>{item.phone || "—"}</td>
-                  <td>{item.college || "—"}</td>
+                  <td>{item.name || "â€”"}</td>
+                  <td>{item.email || "â€”"}</td>
+                  <td>{item.phone || "â€”"}</td>
+                  <td>{item.college || "â€”"}</td>
                   <td><span className={styles.badge} data-status={item.paymentStatus || "Unknown"}>{item.paymentStatus || "Unknown"}</span></td>
                   <td className={styles.created}>{formatDate(item.createdAt)}</td>
                 </tr>
