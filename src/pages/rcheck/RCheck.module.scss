@@ -42,7 +42,6 @@
     color: #e8e8ea;
     font-size: 1rem;
     outline: none;
-
     &:focus { border-color: #d4a843; }
   }
 }
@@ -56,7 +55,6 @@ button {
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
-
   &:disabled { opacity: 0.6; cursor: not-allowed; }
   &.secondary { background: transparent; border-color: #2a2f3a; color: #e8e8ea; }
 }
@@ -65,7 +63,7 @@ button {
 
 .panel {
   width: 100%;
-  max-width: 1000px;
+  max-width: 1200px;
   background: #181b22;
   border: 1px solid #2a2f3a;
   border-radius: 12px;
@@ -77,12 +75,22 @@ button {
 
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+  flex-wrap: wrap;
 
-  h1 { margin: 0; font-size: 1.3rem; }
+  h1 { margin: 0 0 8px; font-size: 1.3rem; }
   .actions { display: flex; gap: 10px; }
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+
+  .total { color: #e8e8ea; font-weight: 600; font-size: 0.9rem; }
 }
 
 .controls {
@@ -92,7 +100,7 @@ button {
   flex-wrap: wrap;
 
   .search {
-    flex: 1 1 240px;
+    flex: 1 1 260px;
     padding: 10px 12px;
     border-radius: 8px;
     border: 1px solid #2a2f3a;
@@ -100,7 +108,6 @@ button {
     color: #e8e8ea;
     font-size: 0.95rem;
     outline: none;
-
     &:focus { border-color: #d4a843; }
   }
 
@@ -120,12 +127,13 @@ button {
   overflow-x: auto;
   border: 1px solid #2a2f3a;
   border-radius: 10px;
+  max-height: 70vh;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
 
   th, td {
     text-align: left;
@@ -140,13 +148,14 @@ button {
     background: #20242d;
     color: #c7ccd5;
     font-weight: 600;
+    z-index: 1;
   }
 
   td { color: #e2e4e8; }
-
   tbody tr:hover { background: #1d212a; }
 
   .indexCol { width: 48px; color: #7f8696; }
+  .created { color: #9aa0ab; font-size: 0.85rem; }
   .empty { text-align: center; color: #9aa0ab; padding: 24px; }
 }
 
@@ -154,10 +163,11 @@ button {
   display: inline-block;
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   background: #2a2f3a;
   color: #cfd3db;
+  text-transform: capitalize;
 
   &[data-status="Paid"] { background: rgba(63, 185, 109, 0.16); color: #4fd08a; }
   &[data-status="Pending"] { background: rgba(212, 168, 67, 0.16); color: #e5c384; }

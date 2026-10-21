@@ -1,5 +1,5 @@
 // ==========================================
-// MohanaMantra 2K26 â€” Backend Server
+// MohanaMantra 2K26 Ã¢â‚¬â€ Backend Server
 // ==========================================
 // This is the main Express server that handles:
 //   1. Razorpay order creation (POST /api/register)
@@ -36,7 +36,7 @@ const environment = paymentEnvironment(process.env);
 // 1. FIREBASE ADMIN INITIALIZATION
 // ==========================================
 // Download your serviceAccountKey.json from:
-//   Firebase Console â†’ Project Settings â†’ Service Accounts â†’ Generate New Private Key
+//   Firebase Console Ã¢â€ â€™ Project Settings Ã¢â€ â€™ Service Accounts Ã¢â€ â€™ Generate New Private Key
 // Place it in the server/ directory.
 
 const { cert } = require("firebase-admin/app");
@@ -52,13 +52,13 @@ if (fs.existsSync(keyPath)) {
   try {
     serviceAccount = JSON.parse(fs.readFileSync(renderSecretPath, "utf8"));
   } catch (err) {
-    console.error("âŒ Render service-account secret file is not valid JSON.");
+    console.error("Ã¢ÂÅ’ Render service-account secret file is not valid JSON.");
   }
 } else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   try {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
   } catch (err) {
-    console.error("âŒ FIREBASE_SERVICE_ACCOUNT is not valid JSON.");
+    console.error("Ã¢ÂÅ’ FIREBASE_SERVICE_ACCOUNT is not valid JSON.");
   }
 }
 
@@ -69,9 +69,9 @@ if (serviceAccount) {
     credential: cert(serviceAccount),
   });
   db = getFirestore();
-  console.log(`âœ… Firebase Admin initialized for Firestore (${serviceAccount.project_id})`);
+  console.log(`Ã¢Å“â€¦ Firebase Admin initialized for Firestore (${serviceAccount.project_id})`);
 } else {
-  console.error("âš ï¸ Firebase Admin NOT initialized â€” service account missing.");
+  console.error("Ã¢Å¡Â Ã¯Â¸Â Firebase Admin NOT initialized Ã¢â‚¬â€ service account missing.");
 }
 
 // ==========================================
@@ -93,7 +93,7 @@ app.use("/api", (_req, res, next) => {
   next();
 });
 
-// CORS â€” allow only verified frontend origins (localhost, project Vercel domains, and festival domain)
+// CORS Ã¢â‚¬â€ allow only verified frontend origins (localhost, project Vercel domains, and festival domain)
 const allowedOrigins = [
   ...(process.env.NODE_ENV === "production" ? [] : ["http://localhost:5173", "http://localhost:3000"]),
   "https://mm-template.vercel.app",
@@ -218,26 +218,26 @@ if (process.env.RAZORPAY_KEY_ID && isConfiguredSecret(process.env.RAZORPAY_KEY_S
       key_id: process.env.RAZORPAY_KEY_ID,
       key_secret: process.env.RAZORPAY_KEY_SECRET,
     });
-    console.log("âœ… Razorpay client initialized");
+    console.log("Ã¢Å“â€¦ Razorpay client initialized");
   } catch (err) {
-    console.warn("âš ï¸ Razorpay client initialization warning:", err.message);
+    console.warn("Ã¢Å¡Â Ã¯Â¸Â Razorpay client initialization warning:", err.message);
   }
 } else {
-  console.log("â„¹ï¸ Razorpay payment credentials are missing or placeholders; checkout is unavailable.");
+  console.log("Ã¢â€žÂ¹Ã¯Â¸Â Razorpay payment credentials are missing or placeholders; checkout is unavailable.");
 }
 
 // ==========================================
-// 4. HELPER â€” Generate Ticket ID
+// 4. HELPER Ã¢â‚¬â€ Generate Ticket ID
 // ==========================================
 // Format: MM26-A3F1B2 (prefix + 6 random hex chars, uppercase)
-// This gives us 16 million unique combinations â€” more than enough for a college fest.
+// This gives us 16 million unique combinations Ã¢â‚¬â€ more than enough for a college fest.
 function generateTicketId(mode = environment.mode) {
   const randomHex = crypto.randomBytes(3).toString("hex").toUpperCase();
   return `${mode === "test" ? "MM26-TEST-" : "MM26-"}${randomHex}`;
 }
 
 // ==========================================
-// 5. PIPELINE â€” Generate ID Card + Send Email
+// 5. PIPELINE Ã¢â‚¬â€ Generate ID Card + Send Email
 // ==========================================
 // This is the full pipeline that runs after a successful payment:
 //   1. Generate the ID card image (with QR code, logo, student details)
@@ -246,7 +246,7 @@ function generateTicketId(mode = environment.mode) {
 // Payment confirmation tracks this delivery in Firestore. A failed delivery
 // can be retried by a webhook or the student's confirmation request.
 async function generateIdCardAndSendEmail({ ticketId, name, college, rollNo, email, secureToken, paymentMode }) {
-  console.log(`\nðŸŽ¨ Starting ID card & QR pipeline for ticket ${ticketId}...`);
+  console.log(`\nÃ°Å¸Å½Â¨ Starting ID card & QR pipeline for ticket ${ticketId}...`);
 
   // Step 1: Generate the ID card image
   const idCardBuffer = await generateIdCard({
@@ -258,11 +258,11 @@ async function generateIdCardAndSendEmail({ ticketId, name, college, rollNo, ema
     paymentMode,
   });
 
-  console.log(`âœ… ID card image generated (${(idCardBuffer.length / 1024).toFixed(1)} KB)`);
+  console.log(`Ã¢Å“â€¦ ID card image generated (${(idCardBuffer.length / 1024).toFixed(1)} KB)`);
 
   // Step 2: Generate standalone QR code image
   const qrBuffer = await generateQRCode(ticketId, name, secureToken);
-  console.log(`âœ… Standalone QR code generated (${(qrBuffer.length / 1024).toFixed(1)} KB)`);
+  console.log(`Ã¢Å“â€¦ Standalone QR code generated (${(qrBuffer.length / 1024).toFixed(1)} KB)`);
 
   // Step 3: Send the email with ID card & QR code attached
   const delivery = await sendIdCardEmail({
@@ -275,7 +275,7 @@ async function generateIdCardAndSendEmail({ ticketId, name, college, rollNo, ema
     paymentMode,
   });
 
-  console.log(`âœ… Full pipeline complete for ticket ${ticketId}\n`);
+  console.log(`Ã¢Å“â€¦ Full pipeline complete for ticket ${ticketId}\n`);
   return delivery;
 }
 
@@ -355,7 +355,7 @@ app.post("/api/payment-webhook", async (req, res) => {
 // ==========================================
 app.get("/", (_req, res) => {
   res.status(200).json({
-    message: "ðŸš€ MohanaMantra 2K26 Backend Server is Live & Healthy!",
+    message: "Ã°Å¸Å¡â‚¬ MohanaMantra 2K26 Backend Server is Live & Healthy!",
     health: "/api/health",
     status: "online",
   });
@@ -411,7 +411,7 @@ app.post("/api/gatekeeper/verify", requireGatekeeperAdmin, staffLimiter, async (
     const jwt = require("jsonwebtoken");
     const jwtSecret = scope.jwtSecret;
     if (!isConfiguredSecret(jwtSecret, 32)) {
-    console.error("âŒ JWT_SECRET not configured on server â€” cannot verify QR token.");
+    console.error("Ã¢ÂÅ’ JWT_SECRET not configured on server Ã¢â‚¬â€ cannot verify QR token.");
     return res.status(500).json({ success: false, error: "QR verification is not configured on this server." });
     }
     const decoded = jwt.verify(token, jwtSecret, { algorithms: ["HS256"] });
@@ -468,7 +468,7 @@ app.post("/api/gatekeeper/verify", requireGatekeeperAdmin, staffLimiter, async (
     });
   } catch (error) {
     if (error instanceof RegistrationError) return registrationFailure(error, res);
-    console.error("âŒ Gatekeeper verify error:", error.code || error.name);
+    console.error("Ã¢ÂÅ’ Gatekeeper verify error:", error.code || error.name);
     return res.status(503).json({ success: false, error: "Ticket verification is temporarily unavailable. Please try again." });
   }
 });
@@ -513,7 +513,7 @@ app.post("/api/gatekeeper/checkin", requireGatekeeperAdmin, staffLimiter, async 
       return { name: student.name, nowIso, updatedSessions };
     });
 
-    console.log(`ðŸŽŸï¸ Gate Check-in SUCCESS for ticket ${ticketId} - Session: ${sessionName}`);
+    console.log(`Ã°Å¸Å½Å¸Ã¯Â¸Â Gate Check-in SUCCESS for ticket ${ticketId} - Session: ${sessionName}`);
 
     return res.status(200).json({
       success: true,
@@ -529,7 +529,7 @@ app.post("/api/gatekeeper/checkin", requireGatekeeperAdmin, staffLimiter, async 
       return res.status(error.status).json({ success: false, code: error.code, error: error.message,
         ...(error.code === "ALREADY_CHECKED_IN" ? { checkedInAt: error.checkedInAt, checkInSessions: error.checkInSessions, sessionKey: error.sessionKey } : {}) });
     }
-    console.error("âŒ Gatekeeper check-in error:", error.code || error.name);
+    console.error("Ã¢ÂÅ’ Gatekeeper check-in error:", error.code || error.name);
     return res.status(503).json({ success: false, error: "Check-in is temporarily unavailable. Please try again." });
   }
 });
@@ -565,23 +565,73 @@ app.post("/api/rcheck/registrations", rcheckLimiter, async (req, res) => {
     return res.status(401).json({ success: false, error: "Invalid ID or password." });
   }
   if (!db) return res.status(503).json({ success: false, error: "Database not connected." });
+
+  function toIso(value) {
+    if (!value) return null;
+    if (typeof value.toDate === "function") { try { return value.toDate().toISOString(); } catch { return null; } }
+    if (value._seconds !== undefined) return new Date(value._seconds * 1000).toISOString();
+    if (value instanceof Date) return value.toISOString();
+    return typeof value === "string" ? value : null;
+  }
+
   try {
-    const snapshot = await db.collection(environment.registrationsCollection).get();
-    const registrations = snapshot.docs
-      .map((doc) => doc.data())
-      .filter((record) => recordMatchesMode(record, environment.mode))
-      .map((record) => ({
-        name: record.name || "",
-        email: record.email || "",
-        paymentStatus: record.paymentStatus || "Unknown",
-      }));
+    // Every order that was ever created lives in the orders collection, with a
+    // nested student object and a paymentStatus (Pending/Paid). Paid tickets also
+    // exist in the registrations collection with flat fields. Merge both so the
+    // viewer shows the full funnel, not only the paid tickets.
+    const [ordersSnap, ticketsSnap] = await Promise.all([
+      db.collection(environment.ordersCollection).get(),
+      db.collection(environment.registrationsCollection).get(),
+    ]);
+
+    const rows = new Map(); // keyed by orderId (fallback: ticketId/email)
+
+    ordersSnap.docs.forEach((doc) => {
+      const order = doc.data();
+      if (order.paymentMode !== undefined && order.paymentMode !== environment.mode) return;
+      const student = order.student || {};
+      rows.set(doc.id, {
+        name: student.name || order.name || "",
+        email: student.email || order.email || "",
+        phone: student.phone || order.phone || "",
+        college: student.college || order.college || "",
+        paymentStatus: order.paymentStatus || "Pending",
+        ticketId: order.ticketId || "",
+        createdAt: toIso(order.createdAt),
+      });
+    });
+
+    // Overlay paid tickets: upgrade status and fill details, add any not in orders.
+    ticketsSnap.docs.forEach((doc) => {
+      const t = doc.data();
+      if (!recordMatchesMode(t, environment.mode)) return;
+      const key = t.orderId || doc.id;
+      const existing = rows.get(key);
+      const merged = {
+        name: t.name || existing?.name || "",
+        email: t.email || existing?.email || "",
+        phone: t.phone || existing?.phone || "",
+        college: t.college || existing?.college || "",
+        paymentStatus: t.paymentStatus || "Paid",
+        ticketId: t.ticketId || doc.id,
+        createdAt: toIso(t.createdAt) || existing?.createdAt || null,
+      };
+      rows.set(key, merged);
+    });
+
+    const registrations = [...rows.values()].sort((a, b) => {
+      if (a.createdAt && b.createdAt) return b.createdAt.localeCompare(a.createdAt);
+      if (a.createdAt) return -1;
+      if (b.createdAt) return 1;
+      return 0;
+    });
+
     return res.status(200).json({ success: true, count: registrations.length, paymentMode: environment.mode, registrations });
   } catch (error) {
     console.error("rcheck registrations error:", error.code || error.name);
     return res.status(503).json({ success: false, error: "Could not read registrations. Please try again." });
   }
 });
-
 app.use((_req, res) => res.status(404).json({ success: false, error: "Endpoint not found." }));
 app.use((error, _req, res, next) => {
   if (res.headersSent) return next(error);
@@ -603,7 +653,7 @@ app.use((error, _req, res, next) => {
 // ==========================================
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, process.env.HOST || "0.0.0.0", () => {
-  console.log(`\nðŸš€ MohanaMantra 2K26 Backend running on port ${PORT}`);
+  console.log(`\nÃ°Å¸Å¡â‚¬ MohanaMantra 2K26 Backend running on port ${PORT}`);
   console.log(`   Health check: http://localhost:${PORT}/api/health`);
   console.log(`   Register:     POST http://localhost:${PORT}/api/register`);
   console.log(`   Webhook:      POST http://localhost:${PORT}/api/payment-webhook\n`);
