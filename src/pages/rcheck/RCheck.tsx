@@ -1,9 +1,9 @@
-﻿import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import styles from "./RCheck.module.scss";
 
-const apiBase = import.meta.env.DEV
-  ? ""
-  : (import.meta.env.VITE_BACKEND_URL || "https://mohanamantra-backend.onrender.com").replace(/\/$/, "");
+// Same-origin: in production this hits the Vercel serverless function at
+// /api/rcheck/registrations; in dev it proxies to the local backend.
+const apiBase = "";
 
 interface Registration {
   name: string;

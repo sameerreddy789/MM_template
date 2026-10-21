@@ -7,12 +7,15 @@
     "dev": "vite --host",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:samarkan:exploration": "node --test testing/deployed-samarkan-font-loading/bug-condition.exploration.test.mjs",
+    "test:samarkan:preservation": "npm run build && node --test testing/deployed-samarkan-font-loading/preservation.property.test.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
     "@hookform/resolvers": "^5.2.1",
     "axios": "^1.11.0",
+    "firebase-admin": "^14.3.0",
     "framer-motion": "^12.23.12",
     "gsap": "^3.13.0",
     "html5-qrcode": "^2.3.8",
@@ -38,7 +41,9 @@
     "eslint": "^9.30.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
+    "fast-check": "4.3.0",
     "globals": "^16.3.0",
+    "playwright": "1.55.0",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.35.1",
     "vite": "^7.1.3"
