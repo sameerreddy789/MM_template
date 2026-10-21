@@ -1,88 +1,49 @@
-﻿{
-    "installCommand":  "npm ci",
-    "headers":  [
-                    {
-                        "source":  "/(.*)",
-                        "headers":  [
-                                        {
-                                            "key":  "X-Content-Type-Options",
-                                            "value":  "nosniff"
-                                        },
-                                        {
-                                            "key":  "X-Frame-Options",
-                                            "value":  "DENY"
-                                        },
-                                        {
-                                            "key":  "Referrer-Policy",
-                                            "value":  "strict-origin-when-cross-origin"
-                                        },
-                                        {
-                                            "key":  "Permissions-Policy",
-                                            "value":  "camera=(self), microphone=(), geolocation=()"
-                                        },
-                                        {
-                                            "key":  "Content-Security-Policy",
-                                            "value":  "default-src \u0027self\u0027; script-src \u0027self\u0027 https://checkout.razorpay.com https://www.googletagmanager.com https://www.google-analytics.com https://www.youtube.com https://s.ytimg.com; script-src-attr \u0027none\u0027; style-src \u0027self\u0027 \u0027unsafe-inline\u0027 https://fonts.googleapis.com https://fonts.cdnfonts.com; img-src \u0027self\u0027 https: data: blob:; font-src \u0027self\u0027 https://fonts.gstatic.com https://d3hw0wgw9j5gvz.cloudfront.net https://fonts.cdnfonts.com data:; media-src \u0027self\u0027 https://d3hw0wgw9j5gvz.cloudfront.net blob:; connect-src \u0027self\u0027 https://mohanamantra-backend.onrender.com https://*.razorpay.com https://d3hw0wgw9j5gvz.cloudfront.net https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; frame-src https://*.razorpay.com https://www.youtube.com https://www.youtube-nocookie.com; worker-src \u0027self\u0027 blob:; object-src \u0027none\u0027; base-uri \u0027self\u0027; form-action \u0027self\u0027 https://*.razorpay.com; frame-ancestors \u0027none\u0027; upgrade-insecure-requests"
-                                        }
-                                    ]
-                    },
-                    {
-                        "source":  "/assets/(.*)",
-                        "headers":  [
-                                        {
-                                            "key":  "Cache-Control",
-                                            "value":  "public, max-age=31536000, immutable"
-                                        }
-                                    ]
-                    },
-                    {
-                        "source":  "/videos/(.*)",
-                        "headers":  [
-                                        {
-                                            "key":  "Cache-Control",
-                                            "value":  "public, max-age=31536000, immutable"
-                                        }
-                                    ]
-                    },
-                    {
-                        "source":  "/gatekeeper(.*)",
-                        "headers":  [
-                                        {
-                                            "key":  "Cache-Control",
-                                            "value":  "private, no-store"
-                                        },
-                                        {
-                                            "key":  "Referrer-Policy",
-                                            "value":  "no-referrer"
-                                        },
-                                        {
-                                            "key":  "X-Robots-Tag",
-                                            "value":  "noindex, nofollow, noarchive, nosnippet"
-                                        }
-                                    ]
-                    },
-                    {
-                        "source":  "/rcheck(.*)",
-                        "headers":  [
-                                        {
-                                            "key":  "Cache-Control",
-                                            "value":  "private, no-store"
-                                        },
-                                        {
-                                            "key":  "Referrer-Policy",
-                                            "value":  "no-referrer"
-                                        },
-                                        {
-                                            "key":  "X-Robots-Tag",
-                                            "value":  "noindex, nofollow, noarchive, nosnippet"
-                                        }
-                                    ]
-                    }
-                ],
-    "rewrites":  [
-                     {
-                         "source":  "/(.*)",
-                         "destination":  "/index.html"
-                     }
-                 ]
+{
+  "installCommand": "npm ci",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(self), microphone=(), geolocation=()" },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' https://checkout.razorpay.com https://www.googletagmanager.com https://www.google-analytics.com https://www.youtube.com https://s.ytimg.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.cdnfonts.com; img-src 'self' https: data: blob:; font-src 'self' https://fonts.gstatic.com https://d3hw0wgw9j5gvz.cloudfront.net https://fonts.cdnfonts.com data:; media-src 'self' https://d3hw0wgw9j5gvz.cloudfront.net blob:; connect-src 'self' https://mohanamantra-backend.onrender.com https://*.razorpay.com https://d3hw0wgw9j5gvz.cloudfront.net https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; frame-src https://*.razorpay.com https://www.youtube.com https://www.youtube-nocookie.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self' https://*.razorpay.com; frame-ancestors 'none'; upgrade-insecure-requests"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/videos/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/gatekeeper(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "private, no-store" },
+        { "key": "Referrer-Policy", "value": "no-referrer" },
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive, nosnippet" }
+      ]
+    },
+    {
+      "source": "/rcheck(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "private, no-store" },
+        { "key": "Referrer-Policy", "value": "no-referrer" },
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive, nosnippet" }
+      ]
+    }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
