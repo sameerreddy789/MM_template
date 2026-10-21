@@ -1,5 +1,5 @@
 // ==========================================
-// MohanaMantra 2K26 — Backend Server
+// MohanaMantra 2K26 â€” Backend Server
 // ==========================================
 // This is the main Express server that handles:
 //   1. Razorpay order creation (POST /api/register)
@@ -36,7 +36,7 @@ const environment = paymentEnvironment(process.env);
 // 1. FIREBASE ADMIN INITIALIZATION
 // ==========================================
 // Download your serviceAccountKey.json from:
-//   Firebase Console → Project Settings → Service Accounts → Generate New Private Key
+//   Firebase Console â†’ Project Settings â†’ Service Accounts â†’ Generate New Private Key
 // Place it in the server/ directory.
 
 const { cert } = require("firebase-admin/app");
@@ -52,13 +52,13 @@ if (fs.existsSync(keyPath)) {
   try {
     serviceAccount = JSON.parse(fs.readFileSync(renderSecretPath, "utf8"));
   } catch (err) {
-    console.error("❌ Render service-account secret file is not valid JSON.");
+    console.error("âŒ Render service-account secret file is not valid JSON.");
   }
 } else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   try {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
   } catch (err) {
-    console.error("❌ FIREBASE_SERVICE_ACCOUNT is not valid JSON.");
+    console.error("âŒ FIREBASE_SERVICE_ACCOUNT is not valid JSON.");
   }
 }
 
@@ -69,9 +69,9 @@ if (serviceAccount) {
     credential: cert(serviceAccount),
   });
   db = getFirestore();
-  console.log(`✅ Firebase Admin initialized for Firestore (${serviceAccount.project_id})`);
+  console.log(`âœ… Firebase Admin initialized for Firestore (${serviceAccount.project_id})`);
 } else {
-  console.error("⚠️ Firebase Admin NOT initialized — service account missing.");
+  console.error("âš ï¸ Firebase Admin NOT initialized â€” service account missing.");
 }
 
 // ==========================================
@@ -93,7 +93,7 @@ app.use("/api", (_req, res, next) => {
   next();
 });
 
-// CORS — allow only verified frontend origins (localhost, project Vercel domains, and festival domain)
+// CORS â€” allow only verified frontend origins (localhost, project Vercel domains, and festival domain)
 const allowedOrigins = [
   ...(process.env.NODE_ENV === "production" ? [] : ["http://localhost:5173", "http://localhost:3000"]),
   "https://mm-template.vercel.app",
@@ -218,26 +218,26 @@ if (process.env.RAZORPAY_KEY_ID && isConfiguredSecret(process.env.RAZORPAY_KEY_S
       key_id: process.env.RAZORPAY_KEY_ID,
       key_secret: process.env.RAZORPAY_KEY_SECRET,
     });
-    console.log("✅ Razorpay client initialized");
+    console.log("âœ… Razorpay client initialized");
   } catch (err) {
-    console.warn("⚠️ Razorpay client initialization warning:", err.message);
+    console.warn("âš ï¸ Razorpay client initialization warning:", err.message);
   }
 } else {
-  console.log("ℹ️ Razorpay payment credentials are missing or placeholders; checkout is unavailable.");
+  console.log("â„¹ï¸ Razorpay payment credentials are missing or placeholders; checkout is unavailable.");
 }
 
 // ==========================================
-// 4. HELPER — Generate Ticket ID
+// 4. HELPER â€” Generate Ticket ID
 // ==========================================
 // Format: MM26-A3F1B2 (prefix + 6 random hex chars, uppercase)
-// This gives us 16 million unique combinations — more than enough for a college fest.
+// This gives us 16 million unique combinations â€” more than enough for a college fest.
 function generateTicketId(mode = environment.mode) {
   const randomHex = crypto.randomBytes(3).toString("hex").toUpperCase();
   return `${mode === "test" ? "MM26-TEST-" : "MM26-"}${randomHex}`;
 }
 
 // ==========================================
-// 5. PIPELINE — Generate ID Card + Send Email
+// 5. PIPELINE â€” Generate ID Card + Send Email
 // ==========================================
 // This is the full pipeline that runs after a successful payment:
 //   1. Generate the ID card image (with QR code, logo, student details)
@@ -246,7 +246,7 @@ function generateTicketId(mode = environment.mode) {
 // Payment confirmation tracks this delivery in Firestore. A failed delivery
 // can be retried by a webhook or the student's confirmation request.
 async function generateIdCardAndSendEmail({ ticketId, name, college, rollNo, email, secureToken, paymentMode }) {
-  console.log(`\n🎨 Starting ID card & QR pipeline for ticket ${ticketId}...`);
+  console.log(`\nðŸŽ¨ Starting ID card & QR pipeline for ticket ${ticketId}...`);
 
   // Step 1: Generate the ID card image
   const idCardBuffer = await generateIdCard({
@@ -258,11 +258,11 @@ async function generateIdCardAndSendEmail({ ticketId, name, college, rollNo, ema
     paymentMode,
   });
 
-  console.log(`✅ ID card image generated (${(idCardBuffer.length / 1024).toFixed(1)} KB)`);
+  console.log(`âœ… ID card image generated (${(idCardBuffer.length / 1024).toFixed(1)} KB)`);
 
   // Step 2: Generate standalone QR code image
   const qrBuffer = await generateQRCode(ticketId, name, secureToken);
-  console.log(`✅ Standalone QR code generated (${(qrBuffer.length / 1024).toFixed(1)} KB)`);
+  console.log(`âœ… Standalone QR code generated (${(qrBuffer.length / 1024).toFixed(1)} KB)`);
 
   // Step 3: Send the email with ID card & QR code attached
   const delivery = await sendIdCardEmail({
@@ -275,7 +275,7 @@ async function generateIdCardAndSendEmail({ ticketId, name, college, rollNo, ema
     paymentMode,
   });
 
-  console.log(`✅ Full pipeline complete for ticket ${ticketId}\n`);
+  console.log(`âœ… Full pipeline complete for ticket ${ticketId}\n`);
   return delivery;
 }
 
@@ -355,7 +355,7 @@ app.post("/api/payment-webhook", async (req, res) => {
 // ==========================================
 app.get("/", (_req, res) => {
   res.status(200).json({
-    message: "🚀 MohanaMantra 2K26 Backend Server is Live & Healthy!",
+    message: "ðŸš€ MohanaMantra 2K26 Backend Server is Live & Healthy!",
     health: "/api/health",
     status: "online",
   });
@@ -411,7 +411,7 @@ app.post("/api/gatekeeper/verify", requireGatekeeperAdmin, staffLimiter, async (
     const jwt = require("jsonwebtoken");
     const jwtSecret = scope.jwtSecret;
     if (!isConfiguredSecret(jwtSecret, 32)) {
-    console.error("❌ JWT_SECRET not configured on server — cannot verify QR token.");
+    console.error("âŒ JWT_SECRET not configured on server â€” cannot verify QR token.");
     return res.status(500).json({ success: false, error: "QR verification is not configured on this server." });
     }
     const decoded = jwt.verify(token, jwtSecret, { algorithms: ["HS256"] });
@@ -468,7 +468,7 @@ app.post("/api/gatekeeper/verify", requireGatekeeperAdmin, staffLimiter, async (
     });
   } catch (error) {
     if (error instanceof RegistrationError) return registrationFailure(error, res);
-    console.error("❌ Gatekeeper verify error:", error.code || error.name);
+    console.error("âŒ Gatekeeper verify error:", error.code || error.name);
     return res.status(503).json({ success: false, error: "Ticket verification is temporarily unavailable. Please try again." });
   }
 });
@@ -513,7 +513,7 @@ app.post("/api/gatekeeper/checkin", requireGatekeeperAdmin, staffLimiter, async 
       return { name: student.name, nowIso, updatedSessions };
     });
 
-    console.log(`🎟️ Gate Check-in SUCCESS for ticket ${ticketId} - Session: ${sessionName}`);
+    console.log(`ðŸŽŸï¸ Gate Check-in SUCCESS for ticket ${ticketId} - Session: ${sessionName}`);
 
     return res.status(200).json({
       success: true,
@@ -529,8 +529,56 @@ app.post("/api/gatekeeper/checkin", requireGatekeeperAdmin, staffLimiter, async 
       return res.status(error.status).json({ success: false, code: error.code, error: error.message,
         ...(error.code === "ALREADY_CHECKED_IN" ? { checkedInAt: error.checkedInAt, checkInSessions: error.checkInSessions, sessionKey: error.sessionKey } : {}) });
     }
-    console.error("❌ Gatekeeper check-in error:", error.code || error.name);
+    console.error("âŒ Gatekeeper check-in error:", error.code || error.name);
     return res.status(503).json({ success: false, error: "Check-in is temporarily unavailable. Please try again." });
+  }
+});
+
+// ==========================================
+// REGISTRATION CHECK (authorized read-only list)
+// ==========================================
+// Exposes only name, email, and payment status for the active payment mode's
+// registrations. Guarded by RCHECK_ID / RCHECK_PASSWORD set in the backend env.
+const rcheckLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: "Too many attempts. Please wait a few minutes." },
+});
+
+function isValidRcheck(config, id, password) {
+  const expectedId = config.RCHECK_ID;
+  const expectedPassword = config.RCHECK_PASSWORD;
+  if (!expectedId || !expectedPassword) {
+    console.error("RCHECK_ID / RCHECK_PASSWORD not configured on server.");
+    return false;
+  }
+  if (typeof id !== "string" || typeof password !== "string") return false;
+  return timingSafeCompare(id, expectedId) && timingSafeCompare(password, expectedPassword);
+}
+
+app.post("/api/rcheck/registrations", rcheckLimiter, async (req, res) => {
+  res.set("Cache-Control", "no-store");
+  const { id, password } = req.body || {};
+  if (!isValidRcheck(process.env, id, password)) {
+    return res.status(401).json({ success: false, error: "Invalid ID or password." });
+  }
+  if (!db) return res.status(503).json({ success: false, error: "Database not connected." });
+  try {
+    const snapshot = await db.collection(environment.registrationsCollection).get();
+    const registrations = snapshot.docs
+      .map((doc) => doc.data())
+      .filter((record) => recordMatchesMode(record, environment.mode))
+      .map((record) => ({
+        name: record.name || "",
+        email: record.email || "",
+        paymentStatus: record.paymentStatus || "Unknown",
+      }));
+    return res.status(200).json({ success: true, count: registrations.length, paymentMode: environment.mode, registrations });
+  } catch (error) {
+    console.error("rcheck registrations error:", error.code || error.name);
+    return res.status(503).json({ success: false, error: "Could not read registrations. Please try again." });
   }
 });
 
@@ -555,7 +603,7 @@ app.use((error, _req, res, next) => {
 // ==========================================
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, process.env.HOST || "0.0.0.0", () => {
-  console.log(`\n🚀 MohanaMantra 2K26 Backend running on port ${PORT}`);
+  console.log(`\nðŸš€ MohanaMantra 2K26 Backend running on port ${PORT}`);
   console.log(`   Health check: http://localhost:${PORT}/api/health`);
   console.log(`   Register:     POST http://localhost:${PORT}/api/register`);
   console.log(`   Webhook:      POST http://localhost:${PORT}/api/payment-webhook\n`);

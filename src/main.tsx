@@ -1,10 +1,14 @@
-import React from "react";
+﻿import React, { lazy, Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CookiesProvider } from "react-cookie";
 import { HelmetProvider } from "react-helmet-async";
 import "./index.css";
+
+// Authorized, read-only registration viewer. Isolated from the landing-page
+// chrome (no preloader, door transition, music, or analytics).
+const RCheck = lazy(() => import("./pages/rcheck/RCheck"));
 
 // Prevent zooming in with cursor (Ctrl + mouse wheel / laptop touchpad pinch zoom)
 if (typeof window !== "undefined") {
@@ -41,7 +45,17 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <CookiesProvider>
         <HelmetProvider>
           <BrowserRouter>
-            <App />
+            <Routes>
+              <Route
+                path="/rcheck"
+                element={
+                  <Suspense fallback={<div style={{ minHeight: "100vh", background: "#0f1115" }} />}>
+                    <RCheck />
+                  </Suspense>
+                }
+              />
+              <Route path="/*" element={<App />} />
+            </Routes>
           </BrowserRouter>
         </HelmetProvider>
     </CookiesProvider>
