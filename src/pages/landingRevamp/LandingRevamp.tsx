@@ -93,6 +93,7 @@ export default function LandingRevamp({
   const setRemoveGif = useOverlayStore((state) => state.setRemoveGif);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const registerButtonRef = useRef<HTMLDivElement>(null);
+  const concludedNoteRef = useRef<HTMLElement>(null);
   const landingRef = useRef<HTMLImageElement>(null);
   const landingMobileRef = useRef<HTMLImageElement>(null);
   const treeContainerRef = useRef<HTMLDivElement>(null);
@@ -257,8 +258,11 @@ export default function LandingRevamp({
       });
     }
 
+    // The register button and the "2K26 has concluded" plaque leave together;
+    // on mobile both are pinned to the viewport, so without this they would
+    // sit over the about and contact sections.
     gsap.fromTo(
-      registerButtonRef.current,
+      [registerButtonRef.current, concludedNoteRef.current],
       { autoAlpha: 1 },
       {
         autoAlpha: 0,
@@ -592,6 +596,19 @@ export default function LandingRevamp({
                 />
                 <div className={styles.registerBtnText}>Register</div>
               </div>
+
+              <aside
+                className={styles.concludedNote}
+                ref={concludedNoteRef}
+                aria-label="Mohana Mantra 2K26 has concluded"
+              >
+                <span className={styles.noteJewelTop} aria-hidden="true" />
+                <p className={styles.noteTitle}>Thanks for the great support!</p>
+                <p className={styles.noteBody}>
+                  Mohana Mantra 2K26 was a Grand Success and it has come to an end!
+                </p>
+                <span className={styles.noteJewelBottom} aria-hidden="true" />
+              </aside>
 
               <div className={styles.foregroundContainer}>
                 <div className={styles.treeContainer} ref={treeContainerRef}>

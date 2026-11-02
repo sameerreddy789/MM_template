@@ -737,6 +737,109 @@ body {
         }
       }
 
+      // "2K26 has concluded" plaque. Bottom centre on desktop, in the dark band
+      // of forest between the logo seal and the dancer, scrolling and fading
+      // with the register button. Same chamfered-octagon silhouette as the
+      // music player above it, in the warm gold of the menu and lamps.
+      .concludedNote {
+        $chamfer: 12px;
+        $edge: 1px;
+        // Where the 1px inner edge meets each 45deg facet: chamfer + edge*(sqrt2 - 1).
+        $inner: calc(#{$chamfer} + 0.414px);
+
+        position: absolute;
+        left: 50%;
+        top: calc(100svh - max(5.5rem, 8.5svh));
+        transform: translate(-50%, -100%);
+        z-index: 1002;
+        box-sizing: border-box;
+        width: min(34rem, 38vw);
+        padding: clamp(0.75rem, 1.1vw, 1.1rem) clamp(1rem, 1.8vw, 1.75rem);
+        text-align: center;
+        pointer-events: none;
+        clip-path: polygon(
+          $chamfer 0, calc(100% - #{$chamfer}) 0, 100% $chamfer,
+          100% calc(100% - #{$chamfer}), calc(100% - #{$chamfer}) 100%,
+          $chamfer 100%, 0 calc(100% - #{$chamfer}), 0 $chamfer
+        );
+        // Warm near-black over a photograph: the blur is what keeps the copy
+        // legible over the bright mist and foliage behind it.
+        background: linear-gradient(
+          160deg,
+          rgba(22, 12, 6, 0.86) 0%,
+          rgba(34, 18, 8, 0.8) 50%,
+          rgba(18, 10, 5, 0.88) 100%
+        );
+        -webkit-backdrop-filter: blur(8px) saturate(1.1);
+        backdrop-filter: blur(8px) saturate(1.1);
+
+        // The gold hairline: an octagonal ring, cut with evenodd so only the
+        // 1px band between the outer and inner octagons is painted.
+        &::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background: linear-gradient(
+            100deg,
+            #b8862b 0%,
+            #f2dd7c 30%,
+            #f59e0b 55%,
+            #f2dd7c 78%,
+            #b8862b 100%
+          );
+          clip-path: polygon(
+            evenodd,
+            $chamfer 0, calc(100% - #{$chamfer}) 0, 100% $chamfer,
+            100% calc(100% - #{$chamfer}), calc(100% - #{$chamfer}) 100%,
+            $chamfer 100%, 0 calc(100% - #{$chamfer}), 0 $chamfer, $chamfer 0,
+            $inner $edge, calc(100% - #{$inner}) $edge, calc(100% - #{$edge}) $inner,
+            calc(100% - #{$edge}) calc(100% - #{$inner}), calc(100% - #{$inner}) calc(100% - #{$edge}),
+            $inner calc(100% - #{$edge}), $edge calc(100% - #{$inner}), $edge $inner, $inner $edge
+          );
+        }
+
+        // Diamond jewels on the top and bottom facets, as on the player.
+        .noteJewelTop,
+        .noteJewelBottom {
+          position: absolute;
+          left: 50%;
+          width: 6px;
+          height: 6px;
+          background: #f59e0b;
+          box-shadow: 0 0 0 1.5px rgba(22, 12, 6, 0.9);
+          transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .noteJewelTop {
+          top: 5px;
+        }
+
+        .noteJewelBottom {
+          top: calc(100% - 5px);
+        }
+
+        .noteTitle {
+          margin: 0;
+          font-family: $primaryFont;
+          font-size: clamp(1.1rem, 1.55vw, 1.7rem);
+          font-weight: 400;
+          line-height: 1.2;
+          color: #f2dd7c;
+          text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+        }
+
+        .noteBody {
+          margin: 0.3rem 0 0;
+          font-family: $regFont;
+          font-size: clamp(0.875rem, 0.98vw, 1.08rem);
+          font-weight: 500;
+          line-height: 1.45;
+          color: #fff6dd;
+          text-wrap: balance;
+        }
+      }
+
       .foregroundContainer {
         grid-column: 1/2;
         grid-row: 1/2;
@@ -1040,6 +1143,37 @@ body {
 
           &:active {
             filter: brightness(0.8);
+          }
+        }
+
+        // Stacked directly above the pinned register button and sharing its
+        // left edge, so the two read as one corner. Pinned the same way and for
+        // the same reason (see .registerBtnContainer above). Kept clear of the
+        // gopuram at the top of the frame and of the tree on the right.
+        .concludedNote {
+          position: fixed;
+          left: 15px;
+          top: auto;
+          bottom: calc(110px + 60px + 0.5rem);
+          transform: none;
+          z-index: 5000;
+          width: min(16.5rem, calc(100vw - 30px));
+          padding: 0.8rem 1rem;
+          text-align: left;
+
+          .noteJewelTop,
+          .noteJewelBottom {
+            left: 2.25rem;
+          }
+
+          // Sized so the whole line fits the 16.5rem plaque without orphaning
+          // "support!" onto a line of its own.
+          .noteTitle {
+            font-size: 1.05rem;
+          }
+
+          .noteBody {
+            font-size: 0.875rem;
           }
         }
       }
