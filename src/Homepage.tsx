@@ -35,7 +35,7 @@ export default function Homepage({
     <div>
       <SEO
         title="MohanaMantra 2K26 | MBU National Techno-Cultural Fest"
-        description="Official website of MohanaMantra 2K26 at Mohan Babu University (MBU). Join India's premier national level techno-cultural fest celebrating art, music, dance, code, and innovation."
+        description="Thanks for the great support! MohanaMantra 2K26, the national level techno-cultural fest at Mohan Babu University (MBU), was a Grand Success and has come to an end. See you at MohanaMantra 2K27."
         canonicalUrl="https://mm-template.vercel.app/"
       />
       <BreadCrumb data={breadcrumbJsonLd} />
