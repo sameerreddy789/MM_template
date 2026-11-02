@@ -3,8 +3,7 @@ import { cdn } from "../../utils/cdn";
 import SEO from "../../components/SEO";
 import BackButton from "../components/backButton/BackButton";
 import BreadCrumb from "../components/breadCrumb/BreadCrumb";
-import Countdown from "../components/countdown/Countdown";
-import Register from "./components/Register/Register";
+import FestConcluded from "./components/FestConcluded/FestConcluded";
 import styles from "./Registration.module.scss";
 
 const bgExtend = cdn("/images/registration/bg-extended.webp");
@@ -17,6 +16,10 @@ interface RegistrationProps {
   goToPage: (path: string) => void;
 }
 
+// MohanaMantra 2K26 is over, so this route now shows the closing note instead of
+// the registration form and countdown. The form (components/Register) is left in
+// place untouched for the next edition: swap <FestConcluded /> back for
+// <Register /> to reopen registrations.
 const Registration = ({ goToPage }: RegistrationProps) => {
   const [isMobileBg, setIsMobileBg] = useState(
     () => window.matchMedia(mobileBackgroundQuery).matches
@@ -56,7 +59,7 @@ const Registration = ({ goToPage }: RegistrationProps) => {
     <div className={styles.instrback}>
       <SEO
         title="Registration | MohanaMantra 2K26 | MBU"
-        description="Check MohanaMantra 2K26 registration availability. Entry passes are issued after payment verification."
+        description="Thank you for the great support. MohanaMantra 2K26 was a Grand Success and has come to an end. See you at MohanaMantra 2K27!"
         canonicalUrl="https://www.mohanamantra.com/register"
       />
       <BreadCrumb data={breadcrumbJsonLd} />
@@ -69,9 +72,8 @@ const Registration = ({ goToPage }: RegistrationProps) => {
       <div className={styles.birds}>
         <img src={banner} alt="MohanaMantra registration" className={styles.bannerImage} />
       </div>
-      <Countdown className={styles.regCountdown} />
       <BackButton onClick={() => goToPage("/")} />
-      <Register />
+      <FestConcluded goToPage={goToPage} />
     </div>
   );
 };
