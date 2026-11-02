@@ -2,17 +2,14 @@ import { cdn } from "./utils/cdn";
 const assetList = {
     "register": {
         "images": [
+            // Only what the "2K26 has concluded" page draws. The form-only
+            // assets (arrows, dropdown, scroll bar, info panels) were dropped
+            // with the form; restore them if the form comes back.
             cdn("/images/registration/bg-extended.webp"),
-            cdn("/svgs/registration/reg-banner.svg"),
+            cdn("/images/registration/reg-banner.webp"),
             cdn("/svgs/registration/bg-mobile.svg"),
-            cdn("/svgs/registration/leftarr.svg"),
-            cdn("/svgs/registration/rightarr.svg"),
-            cdn("/svgs/registration/dropdown.svg"),
-            cdn("/svgs/registration/scrollThumb.svg"),
-            cdn("/svgs/registration/scroll-bar.svg"),
             cdn('/svgs/registration/back.svg'),
-            cdn("/images/registration/information.webp"),
-            cdn("/images/registration/info3.webp"),
+            cdn("/svgs/registration/button-banner.svg"),
         ],
         "videos": []
     },
